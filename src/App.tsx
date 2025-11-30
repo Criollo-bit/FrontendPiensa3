@@ -1,10 +1,15 @@
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import Login from './pages/Login';
-import Home from './pages/Home';
-import Subjects from './pages/Subjects';      
-import AssignPoints from './pages/AssignPoints'; 
+
+// --- IMPORTS DE PÁGINAS ORGANIZADAS ---
+import Login from './pages/auth/Login';
+import Home from './pages/dashboard/Home';
+import Subjects from './pages/academic/Subjects';
+import AssignPoints from './pages/gamification/AssignPoints';
+
+// --- IMPORT DEL NAVBAR ---
+import BottomNav from './components/BottomNav';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -27,37 +32,48 @@ import './theme/variables.css';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        {/* Ruta por defecto: Login */}
-        <Route exact path="/login">
-          <Login />
-        </Route>
+const App: React.FC = () => {
+
+  // Función simple para obtener el rol del usuario actual
+  // Esto es necesario para que el NavBar sepa si mostrar opciones de Profe o Alumno
+  const getUserRole = (): 'TEACHER' | 'STUDENT' => {
+    // Intentamos leer el rol guardado en localStorage (si lo guardaste en Login)
+    // Si no hay nada, asumimos TEACHER por defecto para que no falle la UI
+    const savedRole = localStorage.getItem('userRole');
+    return (savedRole === 'STUDENT') ? 'STUDENT' : 'TEACHER';
+  };
+
+  return (
+    <IonApp>
+      <IonReactRouter>
         
-        {/* Ruta protegida: Home */}
-        <Route exact path="/home">
-          <Home />
-        </Route>
+        {/* El Outlet maneja el cambio de pantallas */}
+        <IonRouterOutlet>
+          
+          {/* Ruta pública (Login) */}
+          <Route exact path="/login" component={Login} />
+          
+          {/* Rutas principales del sistema */}
+          <Route exact path="/home" component={Home} />
+          <Route exact path="/subjects" component={Subjects} />
+          <Route exact path="/assign-points" component={AssignPoints} />
 
-        {/* --- NUEVAS RUTAS --- */}
-        <Route exact path="/subjects">
-          <Subjects />
-        </Route>
+          {/* Redirección inicial */}
+          <Route exact path="/">
+            <Redirect to="/login" />
+          </Route>
 
-        <Route exact path="/assign-points">
-          <AssignPoints />
-        </Route>
-        {/* -------------------- */}
+        </IonRouterOutlet>
 
-        {/* Redirección inicial */}
-        <Route exact path="/">
-          <Redirect to="/login" />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+        {/* El NavBar se coloca AQUÍ, fuera del Outlet pero dentro del Router.
+          Así es visible en todas las páginas (el componente BottomNav ya tiene
+          lógica interna para ocultarse si estás en /login).
+        */}
+        <BottomNav role={getUserRole()} />
+
+      </IonReactRouter>
+    </IonApp>
+  );
+};
 
 export default App;

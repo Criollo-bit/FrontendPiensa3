@@ -4,13 +4,12 @@ import {
 } from '@ionic/react';
 import { copyOutline } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
-import { api } from '../api/axios';
+import { api } from '../../api/axios'; // <--- CAMBIO
 
 const Subjects: React.FC = () => {
   const [subjects, setSubjects] = useState<any[]>([]);
 
   useEffect(() => {
-    // Consultamos las materias al cargar la pantalla
     const fetchSubjects = async () => {
       try {
         const { data } = await api.get('/subjects');

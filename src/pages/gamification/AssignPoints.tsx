@@ -4,7 +4,7 @@ import {
 } from '@ionic/react';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { api } from '../api/axios';
+import { api } from '../../api/axios'; // <--- CAMBIO
 
 const AssignPoints: React.FC = () => {
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -12,12 +12,10 @@ const AssignPoints: React.FC = () => {
   const [studentId, setStudentId] = useState('');
   const [points, setPoints] = useState<number>(100);
   const [reason, setReason] = useState('');
-  
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const history = useHistory();
 
-  // Cargar las materias para el Dropdown
   useEffect(() => {
     api.get('/subjects').then(res => setSubjects(res.data)).catch(console.error);
   }, []);
@@ -27,7 +25,6 @@ const AssignPoints: React.FC = () => {
       setMessage('Falta materia o ID del estudiante');
       return;
     }
-
     setLoading(true);
     try {
       await api.post('/points/assign', {
@@ -37,7 +34,7 @@ const AssignPoints: React.FC = () => {
         reason: reason || 'Participación en clase'
       });
       setMessage('¡Puntos asignados con éxito!');
-      setTimeout(() => history.goBack(), 1500); // Volver atrás después de 1.5s
+      setTimeout(() => history.goBack(), 1500);
     } catch (error: any) {
       setMessage(error.response?.data?.message || 'Error al asignar puntos');
     } finally {
@@ -45,6 +42,7 @@ const AssignPoints: React.FC = () => {
     }
   };
 
+  // ... (El return del componente es igual al anterior)
   return (
     <IonPage>
       <IonHeader>
@@ -56,8 +54,6 @@ const AssignPoints: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
-        
-        {/* Paso 1: Seleccionar Materia */}
         <IonItem className="ion-margin-bottom">
           <IonLabel position="stacked">1. Selecciona la Materia</IonLabel>
           <IonSelect value={selectedSubject} placeholder="Elige una materia" onIonChange={e => setSelectedSubject(e.detail.value)}>
@@ -66,32 +62,19 @@ const AssignPoints: React.FC = () => {
             ))}
           </IonSelect>
         </IonItem>
-
-        {/* Paso 2: ID del Estudiante (Manual por ahora) */}
         <IonItem className="ion-margin-bottom">
           <IonLabel position="stacked">2. ID del Estudiante</IonLabel>
-          <IonInput 
-            placeholder="Pega el ID aquí (ej. fc05...)" 
-            value={studentId} 
-            onIonChange={e => setStudentId(e.detail.value!)} 
-          />
+          <IonInput placeholder="Pega el ID aquí" value={studentId} onIonChange={e => setStudentId(e.detail.value!)} />
         </IonItem>
-
-        {/* Paso 3: Cantidad y Razón */}
         <IonItem className="ion-margin-bottom">
           <IonLabel position="stacked">3. Cantidad de Puntos</IonLabel>
           <IonInput type="number" value={points} onIonChange={e => setPoints(parseInt(e.detail.value!, 10))} />
         </IonItem>
-
         <IonItem className="ion-margin-bottom">
           <IonLabel position="stacked">4. Motivo (Opcional)</IonLabel>
           <IonInput placeholder="Ej. Buen trabajo" value={reason} onIonChange={e => setReason(e.detail.value!)} />
         </IonItem>
-
-        <IonButton expand="block" onClick={handleAssign} className="ion-margin-top">
-          Enviar Puntos
-        </IonButton>
-
+        <IonButton expand="block" onClick={handleAssign} className="ion-margin-top">Enviar Puntos</IonButton>
         <IonLoading isOpen={loading} message="Asignando..." />
         <IonToast isOpen={!!message} message={message || ''} duration={2000} onDidDismiss={() => setMessage(null)} />
       </IonContent>

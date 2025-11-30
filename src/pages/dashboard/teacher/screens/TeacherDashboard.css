@@ -1,0 +1,21 @@
+/* Contenedor Principal (h-full flex flex-col bg-slate-50) */
+.teacher-dashboard-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc; /* Slate-50 */
+}
+
+/* Área de Contenido (flex-1 overflow-y-auto p-4 md:p-6) */
+.teacher-content-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem; /* p-4 */
+}
+
+/* Ajuste para pantallas más grandes (md:p-6) */
+@media (min-width: 768px) {
+  .teacher-content-area {
+    padding: 1.5rem; /* p-6 */
+  }
+}
