@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { 
   IonButton 
 } from '@ionic/react';
-
-// CORRECCIÓN: Usamos TeacherScreen que es lo que tienes definido en tus tipos
+ 
 import { TeacherScreen, User, AppScreen, CustomModule } from '../../../../AppTypes';
 
 // Estilos CSS
@@ -13,34 +12,14 @@ import './TeacherDashboard.css';
 import TeacherBottomNav from './TeacherBottomNav';
 import DashboardScreen from './DashboardScreen';
 
-// --- COMPONENTES INTERNOS (Placeholders) ---
+// --- IMPORTACIÓN DE PANTALLAS REALES (Desde la carpeta screens) ---
+// Nota: Hemos estandarizado la ruta a './screens/' para mantener el orden
+import AllForAllControlScreen from './AllForAllControlScreen';
+import TeacherProfileScreen from './TeacherProfileScreen';
+import BattleManagerScreen from './BattleManagerScreen';
+import StudentListScreen from './StudentListScreen'; // <--- NUEVO IMPORT
 
-const BattleManagerScreen: React.FC<any> = ({ onBack }) => (
-  <div className="ion-padding">
-    <h2>Gestor de Batallas</h2>
-    <p>Aquí crearás los torneos 1v1 y por equipos.</p>
-    <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px' }}>Volver</button>
-  </div>
-);
-
-const StudentListScreen: React.FC<any> = ({ onBack }) => (
-  <div className="ion-padding">
-    <h2>Lista de Estudiantes</h2>
-    <p>Gestión de alumnos inscritos.</p>
-    <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px' }}>Volver</button>
-  </div>
-);
-
-const TeacherProfileScreen: React.FC<any> = ({ user, onLogout }) => (
-  <div className="ion-padding">
-    <h2>Perfil del Docente</h2>
-    <h3>{user.name}</h3>
-    <p>Email: {user.email}</p>
-    <button onClick={onLogout} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: 'red', color: 'white', border: 'none', borderRadius: '5px' }}>
-      Cerrar Sesión
-    </button>
-  </div>
-);
+// --- COMPONENTES INTERNOS (Placeholders restantes) ---
 
 const RewardsManagementScreen: React.FC<any> = ({ onBack }) => (
   <div className="ion-padding">
@@ -48,11 +27,7 @@ const RewardsManagementScreen: React.FC<any> = ({ onBack }) => (
     <p>Crea recompensas para tus alumnos.</p>
     <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px' }}>Volver</button>
   </div>
-);
-
-const AllForAllControlScreen: React.FC<any> = () => (
-  <div className="ion-padding"><h2>Control "Todos contra Todos"</h2></div>
-);
+); 
 
 const BattleLobbyScreen: React.FC<any> = ({ onBack }) => (
   <div className="ion-padding">
@@ -66,7 +41,7 @@ const BattleLobbyScreen: React.FC<any> = ({ onBack }) => (
 interface TeacherDashboardProps {
   user: User;
   onLogout: () => void;
-  enabledModules?: Set<AppScreen | TeacherScreen | string>; // Usamos TeacherScreen
+  enabledModules?: Set<AppScreen | TeacherScreen | string>;
   customModules?: CustomModule[];
   students?: User[];
   onInviteStudents?: (studentIds: string[], roomCode: string, battleName: string) => void;
@@ -80,27 +55,35 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   students = [], 
   onInviteStudents = () => {} 
 }) => {
-  // Usamos TeacherScreen en el estado inicial
+  
   const [activeScreen, setActiveScreen] = useState<TeacherScreen | string>(TeacherScreen.Dashboard);
   
   const navigateTo = (screen: TeacherScreen) => setActiveScreen(screen);
 
   const renderContent = () => {
+    // Función para volver al dashboard principal
     const handleBack = () => setActiveScreen(TeacherScreen.Dashboard);
     
     switch (activeScreen) {
       case TeacherScreen.Dashboard:
         return <DashboardScreen navigateTo={navigateTo}/>;
+        
       case TeacherScreen.BattleManager:
         return <BattleManagerScreen students={students} teacherId={user.id} onBack={handleBack} />;
+        
       case TeacherScreen.StudentList:
+        // Ahora renderiza el componente real importado de ./screens/StudentListScreen
         return <StudentListScreen onBack={handleBack} />;
+        
       case TeacherScreen.Profile:
         return <TeacherProfileScreen user={user} onLogout={onLogout} />;
+        
       case TeacherScreen.AllForAll:
-        return <AllForAllControlScreen />;
+        return <AllForAllControlScreen onBack={handleBack} />;
+        
       case 'rewards':
         return <RewardsManagementScreen teacherId={user.id} onBack={handleBack} />;
+        
       default:
         const customModule = customModules.find(m => m.id === activeScreen);
         if (customModule) {

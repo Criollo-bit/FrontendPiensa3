@@ -7,10 +7,7 @@ import Login from './pages/auth/Login';
 import Home from './pages/dashboard/Home';
 import Subjects from './pages/academic/Subjects';
 import AssignPoints from './pages/gamification/AssignPoints';
-
-// --- IMPORT DEL NAVBAR ---
-import BottomNav from './components/BottomNav';
-
+ 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -34,14 +31,8 @@ setupIonicReact();
 
 const App: React.FC = () => {
 
-  // Función simple para obtener el rol del usuario actual
-  // Esto es necesario para que el NavBar sepa si mostrar opciones de Profe o Alumno
-  const getUserRole = (): 'TEACHER' | 'STUDENT' => {
-    // Intentamos leer el rol guardado en localStorage (si lo guardaste en Login)
-    // Si no hay nada, asumimos TEACHER por defecto para que no falle la UI
-    const savedRole = localStorage.getItem('userRole');
-    return (savedRole === 'STUDENT') ? 'STUDENT' : 'TEACHER';
-  };
+  // Eliminamos la lógica de roles aquí porque ya la maneja el Home.tsx
+  // y cada Dashboard tiene su propio NavBar interno.
 
   return (
     <IonApp>
@@ -53,8 +44,10 @@ const App: React.FC = () => {
           {/* Ruta pública (Login) */}
           <Route exact path="/login" component={Login} />
           
-          {/* Rutas principales del sistema */}
+          {/* Ruta Home (El Portero que decide qué Dashboard mostrar) */}
           <Route exact path="/home" component={Home} />
+
+          {/* Rutas específicas (Accesibles desde los Dashboards) */}
           <Route exact path="/subjects" component={Subjects} />
           <Route exact path="/assign-points" component={AssignPoints} />
 
@@ -65,12 +58,10 @@ const App: React.FC = () => {
 
         </IonRouterOutlet>
 
-        {/* El NavBar se coloca AQUÍ, fuera del Outlet pero dentro del Router.
-          Así es visible en todas las páginas (el componente BottomNav ya tiene
-          lógica interna para ocultarse si estás en /login).
+        {/* ¡NavBar ELIMINADO! 
+            Ahora cada Dashboard (Student/Teacher) renderiza su propia barra. 
         */}
-        <BottomNav role={getUserRole()} />
-
+ 
       </IonReactRouter>
     </IonApp>
   );

@@ -1,0 +1,106 @@
+/* Contenedor principal de la barra */
+.bottom-nav-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  height: auto; /* Permite que el botón flotante sobresalga */
+  pointer-events: none; /* Permite clicks a través de las áreas vacías */
+}
+
+/* El SVG del fondo curvo */
+.nav-background-svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  pointer-events: auto; /* El SVG sí captura clicks */
+  filter: drop-shadow(0px -2px 4px rgba(0,0,0,0.1));
+}
+
+.nav-path {
+  transition: d 0.7s ease-in-out;
+}
+
+/* Botón Flotante Activo (El círculo negro) */
+.floating-active-btn {
+  position: absolute;
+  bottom: 32px; /* Eleva el botón sobre la barra */
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  transition: left 0.7s ease-in-out; /* Animación suave al moverse */
+  pointer-events: none;
+}
+
+.floating-inner-circle {
+  width: 52px;
+  height: 52px;
+  background-color: black;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-icon {
+  font-size: 24px;
+  color: white;
+}
+
+/* Contenedor de los ítems de navegación */
+.nav-items-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+/* Estilo de cada botón individual */
+.nav-item-btn {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 60px; /* Ancho mínimo para touch target */
+  cursor: pointer;
+  padding: 10px 0;
+}
+
+/* Icono inactivo */
+.nav-item-icon {
+  font-size: 24px;
+  color: #4b5563; /* Gray-600 */
+}
+
+/* Texto */
+.nav-item-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4b5563; /* Gray-600 */
+  white-space: nowrap;
+}
+
+/* Ocultar elementos cuando están activos (porque el botón flotante los muestra) */
+.nav-item-btn.active .nav-item-icon,
+.nav-item-btn.active .nav-item-label {
+  visibility: hidden;
+}

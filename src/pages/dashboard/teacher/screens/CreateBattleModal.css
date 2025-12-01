@@ -1,0 +1,87 @@
+/* Estilos del Modal */
+.battle-modal-content {
+  --background: #f8fafc; /* Slate 50 */
+}
+
+.modal-form-container {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Inputs Numéricos en Grid */
+.number-inputs-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.input-item {
+  --background: white;
+  --border-radius: 0.5rem;
+  --padding-start: 0;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Lista de Sets de Preguntas */
+.sets-selection-container {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.set-item-card {
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #f1f5f9; /* Slate 100 */
+}
+
+.set-item-card.selected {
+  border-color: #3b82f6; /* Sky 500 */
+  background-color: #eff6ff; /* Sky 50 */
+}
+
+.set-title {
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.set-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0;
+}
+
+.set-meta {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Estado Vacío */
+.empty-sets-state {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+/* Botones del Footer */
+.modal-footer-buttons {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+}

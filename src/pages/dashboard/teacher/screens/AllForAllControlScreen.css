@@ -1,0 +1,250 @@
+.all-for-all-container {
+  height: 100%;
+  overflow-y: auto;
+  background-color: #f8fafc; /* bg-slate-50 */
+  padding: 1.5rem;
+}
+
+.game-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.game-title {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  color: #1e293b; /* text-slate-800 */
+  margin: 0;
+}
+
+.game-subtitle {
+  color: #64748b; /* text-slate-500 */
+  margin-top: 0.25rem;
+}
+
+/* Tarjeta de Configuración */
+.config-card {
+  background-color: white;
+  border-radius: 1.5rem; /* rounded-3xl */
+  padding: 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+  animation: scaleIn 0.3s ease-out;
+}
+
+.config-title {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Inputs y Selects */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem; /* rounded-xl */
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+  font-weight: 600;
+  outline: none;
+  background-color: white;
+}
+
+.form-select:focus {
+  border-color: #a855f7; /* purple-500 */
+  box-shadow: 0 0 0 2px #e9d5ff; /* ring-purple-200 */
+}
+
+/* Botones de Colores */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.color-btn {
+  position: relative;
+  padding: 1rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-btn.selected {
+  box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px white; /* ring effect */
+}
+
+/* Opciones de Respuesta Correcta */
+.answer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.answer-btn {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.answer-btn.active {
+  background-color: #1e293b; /* slate-800 */
+  color: white;
+}
+
+.answer-btn.inactive {
+  background-color: #f1f5f9; /* slate-100 */
+  color: #334155;
+}
+
+/* Vista Previa del Juego */
+.preview-box {
+  background-color: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+  margin-top: 1.5rem;
+}
+
+.word-display {
+  background-color: #0f172a; /* slate-900 */
+  border-radius: 0.75rem;
+  padding: 2rem;
+  margin-bottom: 1rem;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.word-text {
+  font-size: 3rem;
+  font-weight: 900;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Botón Iniciar Juego */
+.start-game-btn {
+  width: 100%;
+  background-color: #22c55e; /* green-500 */
+  color: white;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  transition: background-color 0.2s;
+}
+
+.start-game-btn:hover {
+  background-color: #16a34a; /* green-600 */
+}
+
+/* --- Estilos para Juego Activo --- */
+.active-game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pulse-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: #22c55e;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.stop-game-btn {
+  background-color: #ef4444; /* red-500 */
+  color: white;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Ranking */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background-color: white;
+}
+
+.ranking-item.correct {
+  background-color: #f0fdf4; /* green-50 */
+  border-color: #bbf7d0;
+}
+
+.ranking-item.incorrect {
+  background-color: #fef2f2; /* red-50 */
+  border-color: #fecaca;
+}
+
+.rank-position {
+  font-size: 1.5rem;
+  font-weight: 700;
+  width: 2rem;
+  text-align: center;
+}
+
+/* Animaciones */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }

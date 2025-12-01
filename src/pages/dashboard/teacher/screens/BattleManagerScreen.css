@@ -1,0 +1,131 @@
+.battle-manager-container {
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+  background-color: #f8fafc; /* Slate 50 */
+}
+
+/* Encabezado */
+.bm-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-top: 1rem;
+}
+
+.bm-back-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  --padding-start: 0;
+}
+
+.bm-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.bm-subtitle {
+  color: #64748b;
+  margin-top: 0.5rem;
+}
+
+/* Botones de Acción (Grid) */
+.bm-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.action-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.1s;
+  border: none;
+}
+
+.action-card-btn:active {
+  transform: scale(0.98);
+}
+
+.btn-green { background-color: #22c55e; }
+.btn-sky { background-color: #0ea5e9; }
+
+/* Lista de Batallas */
+.battles-list-section h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+.battle-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.battle-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.battle-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.battle-info {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.25rem 0 0 0;
+}
+
+.battle-code-box {
+  background: linear-gradient(to right, #fffbeb, #fff7ed); /* Amber/Orange fade */
+  border: 2px solid #fbbf24;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.code-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.battle-code {
+  font-family: monospace;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #d97706; /* Amber 600 */
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #94a3b8;
+}
