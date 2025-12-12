@@ -1,19 +1,19 @@
 import React from 'react';
 import { IonIcon } from '@ionic/react';
-import { flashOutline, peopleOutline, schoolOutline, trophyOutline } from 'ionicons/icons';
+// Quitamos schoolOutline de los imports ya que no se usará
+import { flashOutline, peopleOutline, trophyOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
 
-// CORRECCIÓN: Importamos TeacherScreen (así se llama en tu AppTypes.ts)
 import { TeacherScreen } from '../../../../AppTypes';
 
-// Importamos los estilos CSS (asegúrate de que este archivo exista en la misma carpeta)
+// Asegúrate de tener tu archivo CSS en la misma carpeta
 import './DashboardScreen.css';
 
 interface DashboardScreenProps {
   navigateTo: (screen: TeacherScreen) => void;
 }
 
-// Componente ActionCard reutilizable (Estilo Tarjeta Blanca)
+// Componente ActionCard reutilizable
 const ActionCard: React.FC<{ 
   title: string; 
   description: string; 
@@ -48,10 +48,10 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
         <p className="dashboard-subtitle">Gestiona tus clases y actividades.</p>
       </div>
 
-      {/* Lista de Acciones */}
+      {/* Lista de Acciones Simplificada */}
       <div className="cards-container">
         
-        {/* Botón: Crear Batalla (Navegación Interna) */}
+        {/* 1. Crear Batalla (Principal) */}
         <ActionCard
           title="Crear Batalla"
           description="Inicia una nueva competencia para tus estudiantes."
@@ -60,7 +60,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
           delay="100ms"
         />
         
-        {/* Botón: Ver Estudiantes (Navegación Interna) */}
+        {/* 2. Ver Estudiantes (Reemplaza la función de Mis Clases) */}
         <ActionCard
           title="Ver Estudiantes"
           description="Revisa el progreso y los logros de tu clase."
@@ -69,22 +69,13 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
           delay="200ms"
         />
 
-        {/* Botón: Mis Clases (Navegación Externa) */}
-        <ActionCard
-          title="Mis Clases"
-          description="Administra tus materias y códigos de acceso."
-          icon={schoolOutline}
-          onClick={() => history.push('/subjects')}
-          delay="300ms"
-        />
-
-        {/* Botón: Asignar Puntos (Navegación Externa) */}
+        {/* 3. Asignar Puntos */}
         <ActionCard
           title="Asignar Puntos"
           description="Otorga puntos a los alumnos manualmente."
           icon={trophyOutline}
           onClick={() => history.push('/assign-points')}
-          delay="400ms"
+          delay="300ms"
         />
 
       </div>

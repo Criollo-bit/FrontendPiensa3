@@ -7,7 +7,7 @@ import { api } from '../../api/axios';
 
 // Importamos los dashboards separados
 import TeacherDashboard from './teacher/screens/TeacherDashboard';
-import StudentDashboard from './student/StudentDashboard';
+import StudentDashboard from './student/screens/StudentDashboard';
 import { User } from '../../AppTypes'; 
 
 const Home: React.FC = () => {

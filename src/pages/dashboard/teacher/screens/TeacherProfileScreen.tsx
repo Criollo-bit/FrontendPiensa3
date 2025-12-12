@@ -193,7 +193,7 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
           <div className="glass-card-modern">
             <h3 className="section-title">
               <IonIcon icon={book} style={{ color: '#3b82f6' }} />
-              Clases que imparte
+              Mis Clases
             </h3>
             <div className="tags-container">
               {profileData.subjects?.map((subject, index) => (

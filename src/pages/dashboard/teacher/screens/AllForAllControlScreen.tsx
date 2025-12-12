@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { IonIcon, IonButton } from '@ionic/react'; // <--- Agregamos IonButton
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  IonIcon, IonButton, IonToast, IonCard, IonCardContent, IonChip, IonLabel, IonBadge 
+} from '@ionic/react';
 import { 
   playCircle, stopCircle, timeOutline, checkmarkCircle, 
   closeCircle, chatboxEllipsesOutline, colorFillOutline, checkmark,
-  arrowBack // <--- Agregamos icono de flecha atrás
+  arrowBack, people
 } from 'ionicons/icons';
+import { socketService } from '../../../../api/socket'; // <--- Importamos el servicio
 import './AllForAllControlScreen.css';
 
 // --- TIPOS ---
@@ -16,8 +19,10 @@ interface Response {
   pointsAwarded: number;
 }
 
-// DEFINICIÓN DE PROPS PARA NAVEGACIÓN
+// DEFINICIÓN DE PROPS (Actualizada para recibir datos del Dashboard)
 interface AllForAllControlScreenProps {
+  subjectId: number;
+  teacherName: string;
   onBack: () => void;
 }
 
@@ -28,30 +33,88 @@ const COLOR_OPTIONS = [
   { name: 'AMARILLO', value: 'yellow', colorCode: '#eab308' } 
 ];
 
-// AÑADIMOS DESTRUCTURING DE PROPS
-const AllForAllControlScreen: React.FC<AllForAllControlScreenProps> = ({ onBack }) => {
-  // Estados del Juego
+const AllForAllControlScreen: React.FC<AllForAllControlScreenProps> = ({ subjectId, teacherName, onBack }) => {
+  // --- LÓGICA DE SOCKETS Y SALA ---
+  const [connectedStudents, setConnectedStudents] = useState<any[]>([]);
+  const [showToast, setShowToast] = useState(false);
+  const roomId = `subject_${subjectId}`;
+  const socketRef = useRef<any>(null);
+
+  // Estados del Juego Visual
   const [isActive, setIsActive] = useState(false);
   const [wordText, setWordText] = useState('ROJO');
   const [wordColor, setWordColor] = useState('blue');
   const [correctAnswer, setCorrectAnswer] = useState<'text' | 'color'>('color');
   
-  // Estado de Respuestas (Simulado por ahora)
+  // Estado de Respuestas
   const [responses, setResponses] = useState<Response[]>([]);
 
-  // Función para iniciar el juego (Simulada)
+  // 1. EFECTO DE CONEXIÓN AL MONTAR
+  useEffect(() => {
+    const socket = socketService.connect();
+    socketRef.current = socket;
+
+    // Unirse a la sala como Maestro
+    socket.emit('joinGame', {
+        roomId: roomId,
+        studentId: 'TEACHER_ID',
+        playerName: teacherName,
+        isMaster: true 
+    });
+
+    // Escuchar actualizaciones de la sala (quién entra/sale)
+    socket.on('playersUpdate', (data: { players: any[] }) => {
+        // Filtramos para contar solo estudiantes
+        const students = data.players.filter(p => !p.isMaster);
+        setConnectedStudents(students);
+    });
+
+    // Escuchar respuestas de los alumnos (Cuando terminemos la pantalla del alumno)
+    // socket.on('student_response', (data) => { ... });
+
+    return () => {
+        socket.off('playersUpdate');
+    };
+  }, [subjectId, roomId, teacherName]);
+
+
+  // 2. FUNCIÓN INICIAR JUEGO (Conectada al Backend)
   const startGame = () => {
-    setIsActive(true);
-    setResponses([]); // Limpiar respuestas anteriores
-    // Aquí iría la llamada al WebSocket: socket.emit('startGame', { ... })
+    if (!socketRef.current) return;
+
+    const payload = {
+      roomId: roomId,
+      gameType: 'ALL_FOR_ALL',
+      config: {
+        wordText,      // Palabra seleccionada (ej: "ROJO")
+        wordColor,     // Color seleccionado (ej: "blue")
+        correctTarget: correctAnswer, // Qué deben adivinar ('text' o 'color')
+        duration: 30   // Duración por defecto (puedes hacerla dinámica luego)
+      }
+    };
+
+    console.log("🚀 Enviando configuración al servidor:", payload);
+    
+    // Emitir evento al Gateway
+    socketRef.current.emit('create_game', payload, (response: any) => {
+      if (response?.success) {
+        setIsActive(true);
+        setResponses([]); 
+        setShowToast(true);
+      }
+    });
   };
 
-  // Función para terminar el juego
+  // 3. FUNCIÓN TERMINAR JUEGO
   const endGame = () => {
+    if (!socketRef.current) return;
+    
+    // Emitimos reset para que los alumnos vuelvan a espera
+    socketRef.current.emit('resetGame', { roomId });
     setIsActive(false);
-    // Aquí iría la llamada al WebSocket: socket.emit('endGame')
   };
 
+  // --- HELPERS VISUALES ---
   const getRankEmoji = (index: number) => {
     switch (index) {
       case 0: return '🥇';
@@ -75,13 +138,36 @@ const AllForAllControlScreen: React.FC<AllForAllControlScreenProps> = ({ onBack 
         </IonButton>
         <div>
             <h1 className="game-title" style={{ margin: 0 }}>All for All</h1>
-            <p className="game-subtitle" style={{ margin: 0 }}>Panel de Control</p>
+            <p className="game-subtitle" style={{ margin: 0 }}>Sala: {roomId}</p>
         </div>
       </div>
 
       {!isActive ? (
         // --- VISTA DE CONFIGURACIÓN ---
         <div className="config-card">
+          
+          {/* INDICADOR DE ALUMNOS CONECTADOS (NUEVO) */}
+          <IonCard style={{ margin: '0 0 20px 0', background: '#f8fafc', boxShadow: 'none', border: '1px solid #e2e8f0' }}>
+            <IonCardContent style={{ padding: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <IonIcon icon={people} size="large" color="primary" />
+                        <div>
+                            <h2 style={{ margin: 0, fontWeight: 'bold', fontSize: '1.2rem' }}>{connectedStudents.length}</h2>
+                            <small>Alumnos Listos</small>
+                        </div>
+                    </div>
+                    {/* Pequeña lista de nombres */}
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                        {connectedStudents.slice(0, 3).map((s, i) => (
+                             <IonBadge key={i} color="medium">{s.name}</IonBadge>
+                        ))}
+                        {connectedStudents.length > 3 && <IonBadge color="light">+{connectedStudents.length - 3}</IonBadge>}
+                    </div>
+                </div>
+            </IonCardContent>
+          </IonCard>
+
           <h2 className="config-title">Configurar Nueva Ronda</h2>
 
           {/* Selector de Palabra */}
@@ -169,9 +255,14 @@ const AllForAllControlScreen: React.FC<AllForAllControlScreenProps> = ({ onBack 
             </div>
           </div>
 
-          <button className="start-game-btn" onClick={startGame}>
+          <button 
+            className="start-game-btn" 
+            onClick={startGame}
+            disabled={connectedStudents.length === 0} // Deshabilitar si no hay alumnos
+            style={{ opacity: connectedStudents.length === 0 ? 0.6 : 1 }}
+          >
             <IonIcon icon={playCircle} style={{ fontSize: '24px' }} />
-            Iniciar Juego
+            {connectedStudents.length === 0 ? "Esperando Alumnos..." : "Iniciar Juego"}
           </button>
         </div>
       ) : (
@@ -239,6 +330,15 @@ const AllForAllControlScreen: React.FC<AllForAllControlScreenProps> = ({ onBack 
           )}
         </div>
       )}
+
+      <IonToast
+        isOpen={showToast}
+        onDidDismiss={() => setShowToast(false)}
+        message="¡Juego iniciado! Enviado a dispositivos."
+        duration={2000}
+        color="success"
+        position="top"
+      />
     </div>
   );
 };

@@ -10,16 +10,15 @@ import './TeacherDashboard.css';
 
 // Componentes de Navegación
 import TeacherBottomNav from './TeacherBottomNav';
-import DashboardScreen from './DashboardScreen';
+import DashboardScreen from './DashboardScreen'; // Asegúrate que la ruta sea correcta
 
-// --- IMPORTACIÓN DE PANTALLAS REALES (Desde la carpeta screens) ---
-// Nota: Hemos estandarizado la ruta a './screens/' para mantener el orden
+// --- IMPORTACIÓN DE PANTALLAS REALES ---
 import AllForAllControlScreen from './AllForAllControlScreen';
 import TeacherProfileScreen from './TeacherProfileScreen';
 import BattleManagerScreen from './BattleManagerScreen';
-import StudentListScreen from './StudentListScreen'; // <--- NUEVO IMPORT
+import StudentListScreen from './StudentListScreen';
 
-// --- COMPONENTES INTERNOS (Placeholders restantes) ---
+// --- COMPONENTES INTERNOS (Placeholders) ---
 
 const RewardsManagementScreen: React.FC<any> = ({ onBack }) => (
   <div className="ion-padding">
@@ -72,14 +71,17 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         return <BattleManagerScreen students={students} teacherId={user.id} onBack={handleBack} />;
         
       case TeacherScreen.StudentList:
-        // Ahora renderiza el componente real importado de ./screens/StudentListScreen
+        // Renderiza la lista de estudiantes
         return <StudentListScreen onBack={handleBack} />;
         
       case TeacherScreen.Profile:
         return <TeacherProfileScreen user={user} onLogout={onLogout} />;
         
       case TeacherScreen.AllForAll:
-        return <AllForAllControlScreen onBack={handleBack} />;
+        // Aquí pasamos subjectId hardcodeado o dinámico según tu lógica futura. 
+        // Por ahora asumimos que el componente lo maneja o que TeacherDashboard sabe el subject actual.
+        // Nota: Ajusta las props si AllForAllControlScreen requiere subjectId explícito aquí.
+        return <AllForAllControlScreen subjectId={1} teacherName={user.name} onBack={handleBack} />;
         
       case 'rewards':
         return <RewardsManagementScreen teacherId={user.id} onBack={handleBack} />;
