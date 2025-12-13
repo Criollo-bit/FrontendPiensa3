@@ -1,104 +1,105 @@
-.student-nav-container {
-  position: fixed; /* Fijo abajo */
+/* Contenedor principal (fixed bottom) */
+.student-nav-wrapper {
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  height: 80px;
-  pointer-events: none; /* Permite clicks pasen a través del área vacía superior */
+  height: 80px; /* Altura para el botón flotante */
+  pointer-events: none; /* Permite clicks pasen por arriba */
 }
 
-/* El círculo flotante que se mueve */
-.floating-notch-wrapper {
+/* --- BOTÓN FLOTANTE (El círculo activo) --- */
+.floating-active-container {
   position: absolute;
-  bottom: 40px; /* Ajusta la altura del flote */
+  bottom: 32px; /* Ajuste exacto según tu referencia */
   z-index: 1002;
-  transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Movimiento suave */
-  pointer-events: none;
+  transition: left 0.7s ease-in-out; /* Duración suave */
   width: 60px;
   height: 60px;
-  margin-left: -30px; /* Centrar basado en el left calculado */
+  margin-left: -30px; /* Centrar (mitad del ancho) */
+  pointer-events: none;
 }
 
-.floating-circle {
-  width: 56px;
-  height: 56px;
-  background-color: var(--ion-color-primary); /* Color Azul Ionic */
+.floating-outer-circle {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(56, 128, 255, 0.4);
+}
+
+.floating-inner-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: black; /* El diseño original usa negro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: white;
 }
 
-/* El fondo SVG curvado */
-.nav-svg-bg {
+/* --- FONDO SVG (La barra blanca curvada) --- */
+.nav-svg-layer {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 80px;
-  z-index: 1000;
-  filter: drop-shadow(0 -5px 10px rgba(0,0,0,0.05));
-  pointer-events: auto; /* Reactivar clicks en la barra */
+  height: 70px;
+  pointer-events: auto; /* Reactivar clicks */
 }
 
-.nav-path {
-  fill: white;
-  transition: d 0.5s ease; /* Transición suave de la forma SVG */
+.nav-svg-path {
+  transition: d 0.7s ease-in-out; /* Anima la curva */
 }
 
-/* Contenedor de los items (iconos) */
-.nav-items-container {
+/* --- ITEMS DE NAVEGACIÓN --- */
+.nav-items-layer {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 80px;
+  height: 70px;
   z-index: 1001;
   display: flex;
   justify-content: space-around;
-  align-items: flex-end;
-  padding-bottom: 15px;
-  pointer-events: none; /* Los botones dentro tendrán pointer-events: auto */
+  align-items: center;
+  padding: 0 10px;
+  pointer-events: none;
 }
 
-.nav-item-btn {
+.nav-btn {
+  pointer-events: auto;
   background: transparent;
   border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  pointer-events: auto;
-  transition: transform 0.2s;
-}
-
-.nav-item-btn:active {
-  transform: scale(0.9);
-}
-
-.nav-label {
-  font-size: 10px;
-  color: #64748b;
-  margin-top: 4px;
-  font-weight: 600;
-  opacity: 1;
-  transition: opacity 0.3s;
-}
-
-.nav-label.hidden {
-  opacity: 0;
+  gap: 4px;
+  min-width: 60px;
+  padding-top: 10px;
+  cursor: pointer;
 }
 
 .nav-icon {
   font-size: 24px;
-  color: #64748b;
-  transition: opacity 0.3s;
+  color: #4b5563; /* text-gray-600 */
 }
 
-.nav-icon.hidden {
-  opacity: 0; /* Ocultar icono cuando está activo (porque sube al círculo) */
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4b5563; /* text-gray-600 */
+  white-space: nowrap;
 }
+
+/* Utilidad para ocultar elementos cuando están activos */
+.hidden-element {
+  visibility: hidden;
+  opacity: 0;
+} 

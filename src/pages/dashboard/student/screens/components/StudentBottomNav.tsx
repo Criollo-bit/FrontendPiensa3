@@ -1,102 +1,134 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IonIcon } from '@ionic/react';
 import { 
-  homeOutline, 
-  giftOutline, 
-  personOutline,
-  bookOutline 
+  homeOutline,       // Inicio
+  personOutline,     // Perfil
+  flashOutline,      // Batalla
+  trophyOutline,     // Logros
+  colorPaletteOutline // All for All (Si lo usas)
 } from 'ionicons/icons';
 import './StudentBottomNav.css';
 
 interface StudentBottomNavProps {
   activeScreen: string;
-  setActiveScreen: (screen: any) => void;
+  setActiveScreen: (screen: string) => void;
 }
 
 const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setActiveScreen }) => {
   
-  // Definimos las pantallas disponibles en la barra
-  const navItems = [
-    { id: 'HOME', label: 'Inicio', icon: homeOutline },
-    { id: 'SUBJECTS', label: 'Clases', icon: bookOutline }, // Nueva pantalla futura
-    { id: 'REWARDS', label: 'Premios', icon: giftOutline },
-    { id: 'PROFILE', label: 'Perfil', icon: personOutline },
-  ];
+  // 1. CONFIGURACIÓN DE SECCIONES (Orden: Home -> Batalla -> Logros -> Perfil)
+  const navItems = useMemo(() => [
+    { 
+      id: 'HOME', 
+      label: 'Inicio', 
+      icon: homeOutline 
+    },
+    { 
+      id: 'BATTLE', 
+      label: 'Batalla', 
+      icon: flashOutline 
+    },
+    { 
+      id: 'REWARDS', 
+      label: 'Insignias', 
+      icon: trophyOutline 
+    },
+    { 
+      id: 'PROFILE', 
+      label: 'Perfil', 
+      icon: personOutline 
+    },
+  ], []);
 
-  // Encontrar índice activo para cálculos matemáticos
+  // 2. CÁLCULOS (Lógica copiada de tu referencia)
   const activeIndex = navItems.findIndex(item => item.id === activeScreen);
+  const safeIndex = activeIndex === -1 ? 0 : activeIndex; // Default a 0 si no encuentra
 
-  // --- LÓGICA MATEMÁTICA DEL SVG (Portado del original) ---
-  // Calcula el porcentaje exacto (X) donde debe estar la curva
   const totalItems = navItems.length;
-  // Si no hay activo (ej: pantalla Waiting), ponemos la muesca fuera o en medio
-  const safeIndex = activeIndex === -1 ? 0 : activeIndex; 
   
-  // Fórmula: (Index / Total) * 100 + (Mitad del ancho de cada segmento)
+  // Cálculo del centro de la muesca en porcentaje (0-100)
   const notchCenterX = (safeIndex / totalItems) * 100 + (50 / totalItems);
 
-  // Si estamos en una pantalla que no está en el menú (ej: WAITING), ocultamos la barra flotante?
-  // Por ahora la dejaremos visible en el último conocido o primero.
-  
+  // El SVG tiene un viewBox de width=400. Convertimos % a unidades SVG.
+  const nX = notchCenterX * 4;
+
   return (
-    <div className="student-nav-container">
+    <div className="student-nav-wrapper">
       
-      {/* 1. Botón Flotante (El círculo azul que se mueve) */}
+      {/* A. Botón Flotante Activo (Estilo copiado: Círculo negro en blanco) */}
       {activeIndex !== -1 && (
         <div 
-          className="floating-notch-wrapper"
+          className="floating-active-container"
           style={{ left: `${notchCenterX}%` }}
         >
-          <div className="floating-circle">
-            <IonIcon icon={navItems[activeIndex].icon} style={{ fontSize: '24px' }} />
+          <div className="floating-outer-circle">
+            <div className="floating-inner-circle">
+              <IonIcon 
+                icon={navItems[activeIndex].icon} 
+                style={{ fontSize: '24px', color: 'white' }} 
+              />
+            </div>
           </div>
         </div>
       )}
 
-      {/* 2. El Fondo SVG Curvado */}
-      <svg
-        className="nav-svg-bg"
-        viewBox="0 0 400 80"
-        preserveAspectRatio="none"
-      >
-        <path
-          d={`
-            M 0,20
-            L ${notchCenterX * 4 - 50},20
-            Q ${notchCenterX * 4 - 42},20 ${notchCenterX * 4 - 38},18
-            Q ${notchCenterX * 4 - 32},14 ${notchCenterX * 4 - 28},10
-            Q ${notchCenterX * 4 - 20},0 ${notchCenterX * 4},0
-            Q ${notchCenterX * 4 + 20},0 ${notchCenterX * 4 + 28},10
-            Q ${notchCenterX * 4 + 32},14 ${notchCenterX * 4 + 38},18
-            Q ${notchCenterX * 4 + 42},20 ${notchCenterX * 4 + 50},20
-            L 400,20
-            L 400,80
-            L 0,80
-            Z
-          `}
-          fill="white"
-          className="nav-path"
-        />
-      </svg>
+      {/* B. Barra SVG con Curva (Estilo copiado) */}
+      <div className="nav-svg-layer">
+        <svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 400 70"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#f8f9fa" />
+            </linearGradient>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="-2" stdDeviation="4" floodOpacity="0.1"/>
+            </filter>
+          </defs>
 
-      {/* 3. Iconos y Textos */}
-      <div className="nav-items-container">
+          <path
+            d={`
+              M 0,18
+              L ${nX - 50},18
+              Q ${nX - 42},18 ${nX - 38},16
+              Q ${nX - 32},12 ${nX - 28},9
+              Q ${nX - 20},3 ${nX},0
+              Q ${nX + 20},3 ${nX + 28},9
+              Q ${nX + 32},12 ${nX + 38},16
+              Q ${nX + 42},18 ${nX + 50},18
+              L 400,18
+              L 400,70
+              L 0,70
+              Z
+            `}
+            fill="url(#barGradient)"
+            filter="url(#shadow)"
+            className="nav-svg-path"
+          />
+        </svg>
+      </div>
+
+      {/* C. Items de Navegación */}
+      <div className="nav-items-layer">
         {navItems.map((item) => {
           const isActive = activeScreen === item.id;
           return (
             <button
               key={item.id}
-              className="nav-item-btn"
+              className="nav-btn"
               onClick={() => setActiveScreen(item.id)}
             >
-              {/* El icono desaparece si está activo (porque sube al círculo flotante) */}
-              <IonIcon 
-                icon={item.icon} 
-                className={`nav-icon ${isActive ? 'hidden' : ''}`} 
-              />
+              {/* Contenedor del icono (Oculto si activo) */}
+              <div className={isActive ? 'hidden-element' : ''}>
+                <IonIcon icon={item.icon} className="nav-icon" />
+              </div>
               
-              {/* El texto desaparece si está activo */}
-              <span className={`nav-label ${isActive ? 'hidden' : ''}`}>
+              {/* Etiqueta (Oculta si activo) */}
+              <span className={`nav-label ${isActive ? 'hidden-element' : ''}`}>
                 {item.label}
               </span>
             </button>

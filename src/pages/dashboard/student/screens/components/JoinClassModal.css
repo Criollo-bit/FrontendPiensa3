@@ -1,0 +1,110 @@
+/* Hacemos que el modal parezca una tarjeta flotante centrada */
+ion-modal.join-class-modal {
+  --width: 90%;
+  --max-width: 400px;
+  --height: auto;
+  --border-radius: 24px;
+  --box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  align-items: center;
+  justify-content: center;
+}
+
+/* El contenido interno */
+.join-modal-content {
+  background: white;
+  padding: 30px 20px;
+  text-align: center;
+  position: relative;
+  border-radius: 24px;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-modal-btn:active {
+  transform: scale(0.9);
+  background: #e2e8f0;
+}
+
+.modal-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7); /* Sky Blue */
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: white;
+  font-size: 32px;
+  box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.4);
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px;
+}
+
+.modal-subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 25px;
+  line-height: 1.4;
+}
+
+/* Input Personalizado */
+.custom-input-container {
+  margin-bottom: 20px;
+}
+
+.custom-code-input {
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 2px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  outline: none;
+  color: #1e293b;
+  transition: border-color 0.3s;
+  background: #f8fafc;
+  text-transform: uppercase;
+}
+
+.custom-code-input:focus {
+  border-color: #0ea5e9;
+  background: white;
+}
+
+.custom-code-input::placeholder {
+  color: #cbd5e1;
+  letter-spacing: normal;
+  font-weight: 500;
+}
+
+/* Botón Submit */
+.join-submit-btn {
+  --background: #111827; /* Dark Slate */
+  --border-radius: 14px;
+  --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-weight: 700;
+  height: 50px;
+}

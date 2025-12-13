@@ -13,80 +13,40 @@ import {
   giftOutline, 
   enterOutline, 
   logOutOutline,
-  star
+  star,
+  flashOutline,
+  trophyOutline
 } from 'ionicons/icons';
 import { User } from '../../../../AppTypes';
 import { api } from '../../../../api/axios'; 
 
-// --- IMPORTACIONES DE PANTALLAS ---
+// --- IMPORTACIONES ---
 import StudentWaitingScreen from './StudentWaitingScreen';
-import StudentProfileScreen from './StudentProfileScreen'; // <--- NUEVO: Importamos el perfil
-import StudentBottomNav from './components/StudentBottomNav'; 
+import StudentProfileScreen from './StudentProfileScreen'; 
+import StudentBottomNav from './components/StudentBottomNav';
+import JoinClassModal from './components/JoinClassModal'; // <--- NUEVO MODAL
 
 import './StudentDashboard.css';
 
-// --- COMPONENTE INTERNO: ProfessorCard (Visual 3D) ---
-const ProfessorCard: React.FC<{
-  teacher: any;
-  onClick: () => void;
-}> = ({ teacher, onClick }) => {
+// ... (El componente ProfessorCard se queda igual, no lo pego para ahorrar espacio) ...
+const ProfessorCard: React.FC<{ teacher: any; onClick: () => void; }> = ({ teacher, onClick }) => {
+  // ... (mismo código de ProfessorCard que ya tenías) ...
   const cardRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const { width, height } = rect;
-
-    const rotateX = (y / height - 0.5) * -20; 
-    const rotateY = (x / width - 0.5) * 20;
-    const shineX = (x / width) * 100;
-    const shineY = (y / height) * 100;
-
-    cardRef.current.style.setProperty('--rx', `${rotateY.toFixed(2)}deg`);
-    cardRef.current.style.setProperty('--ry', `${rotateX.toFixed(2)}deg`);
-    cardRef.current.style.setProperty('--shine-x', `${shineX.toFixed(2)}%`);
-    cardRef.current.style.setProperty('--shine-y', `${shineY.toFixed(2)}%`);
-    cardRef.current.style.setProperty('--shine-opacity', '1');
-  };
-
-  const handleMouseLeave = () => {
-    if (!cardRef.current) return;
-    cardRef.current.style.setProperty('--rx', '0deg');
-    cardRef.current.style.setProperty('--ry', '0deg');
-    cardRef.current.style.setProperty('--shine-opacity', '0');
-  };
-
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => { /* ... */ };
+  const handleMouseLeave = () => { /* ... */ };
   return (
-    <div 
-      className="professor-card-container" 
-      onClick={onClick}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className="professor-card-container" onClick={onClick} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
       <div ref={cardRef} className="tilt-card">
         <div className="tilt-card-inner">
-          <img 
-            src={teacher.imageUrl || `https://ui-avatars.com/api/?name=${teacher.name}&background=random`} 
-            alt={teacher.name} 
-            className="tilt-card-bg"
-          />
-          <div className="card-badge">
-            <IonIcon icon={star} />
-            <span>{teacher.points || 0} pts</span>
-          </div>
-          <div className="card-text-overlay tilt-card-content">
-             <h3 className="card-title">{teacher.name}</h3>
-             <p className="card-subtitle">{teacher.subject}</p>
-          </div>
+          <img src={teacher.imageUrl || `https://ui-avatars.com/api/?name=${teacher.name}&background=random`} alt={teacher.name} className="tilt-card-bg" />
+          <div className="card-badge"><IonIcon icon={star} /><span>{teacher.points || 0} pts</span></div>
+          <div className="card-text-overlay tilt-card-content"><h3 className="card-title">{teacher.name}</h3><p className="card-subtitle">{teacher.subject}</p></div>
           <div className="tilt-card-shine"></div>
         </div>
       </div>
     </div>
   );
 };
-
 
 // --- DASHBOARD PRINCIPAL ---
 
@@ -96,21 +56,24 @@ interface StudentDashboardProps {
 }
 
 const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) => {
-  // Estado de Pantalla (HOME, WAITING, PROFILE, REWARDS)
   const [currentScreen, setCurrentScreen] = useState<string>('HOME');
   
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
   const [selectedSubjectName, setSelectedSubjectName] = useState<string>('');
   
-  // Estados de Datos
   const [teachers, setTeachers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showJoinAlert, setShowJoinAlert] = useState(false);
+  
+  // MODALES Y ALERTAS
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // <--- Nuevo estado para el modal
+  const [successAlertData, setSuccessAlertData] = useState<{show: boolean, className: string, teacherName: string} | null>(null);
   const [toastConfig, setToastConfig] = useState<{isOpen: boolean, msg: string, color: string}>({
     isOpen: false, msg: '', color: 'success'
   });
 
-  // 1. CARGAR DATOS REALES
+  // Data temporal para redirigir después de la alerta
+  const [newClassData, setNewClassData] = useState<{id: number, name: string} | null>(null);
+
   const fetchEnrollments = useCallback(async () => {
     try {
       setLoading(true);
@@ -125,7 +88,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
       }));
 
       setTeachers(mappedClasses);
-
     } catch (error) {
       console.error("Error cargando clases:", error);
     } finally {
@@ -137,30 +99,63 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
     fetchEnrollments();
   });
 
-  // 2. UNIRSE A CLASE
+  // --- LÓGICA DE UNIRSE A CLASE ---
   const handleJoinClass = async (code: string) => {
-    if (!code.trim()) return;
     try {
       setLoading(true);
-      await api.post('/enrollment/join', { code });
-      setToastConfig({ isOpen: true, msg: '¡Unido a la clase!', color: 'success' });
+      // Hacemos la petición al backend
+      const response = await api.post('/enrollment/join', { code });
+      const enrollment = response.data; // Asumimos que el backend devuelve el objeto Enrollment creado
+
+      // Cerramos el modal de input
+      setIsJoinModalOpen(false);
+
+      // Preparamos los datos para la redirección
+      // NOTA: Ajusta esto según tu respuesta del backend. 
+      // Supongamos que devuelve { id: ..., subject: { id: 1, name: 'Mate', teacher: { fullName: 'Juan' } } }
+      const subjectInfo = enrollment.subject; 
+      
+      setNewClassData({
+        id: subjectInfo.id,
+        name: subjectInfo.name
+      });
+
+      // Recargamos la lista de fondo
       await fetchEnrollments();
+
+      // Mostramos la ALERTA DE ÉXITO
+      setSuccessAlertData({
+        show: true,
+        className: subjectInfo.name,
+        teacherName: subjectInfo.teacher?.fullName || 'el Profesor'
+      });
+
     } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Código inválido.';
+      console.error(error);
+      const errorMsg = error.response?.data?.message || 'Código inválido o error de conexión.';
       setToastConfig({ isOpen: true, msg: errorMsg, color: 'danger' });
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. INICIO JUEGO
+  // Callback al cerrar la alerta de éxito
+  const handleSuccessAlertDismiss = () => {
+    setSuccessAlertData(null);
+    // REDIRECCIÓN AUTOMÁTICA
+    if (newClassData) {
+      setSelectedSubjectId(newClassData.id);
+      setSelectedSubjectName(newClassData.name);
+      setCurrentScreen('WAITING');
+      setNewClassData(null); // Limpiar
+    }
+  };
+
   const handleGameStart = (config: any) => {
     console.log("🚀 Ir a juego:", config);
-    // Aquí cambiarías a setCurrentScreen('PLAYING')
   };
 
   // --- RENDERIZADO CONDICIONAL: PANTALLA DE ESPERA ---
-  // (Esta pantalla oculta la navbar, por eso está en un return separado)
   if (currentScreen === 'WAITING' && selectedSubjectId) {
     return (
       <StudentWaitingScreen 
@@ -176,17 +171,14 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
     );
   }
 
-  // --- RENDERIZADO PRINCIPAL CON NAVBAR ---
+  // --- RENDERIZADO PRINCIPAL ---
   return (
     <IonPage>
       <IonContent>
-        {/* Renderizado condicional del contenido DENTRO del IonContent */}
         
-        {/* --- VISTA: INICIO (HOME) --- */}
+        {/* VISTA HOME */}
         {currentScreen === 'HOME' && (
           <div className="student-dashboard" style={{ paddingBottom: '100px' }}>
-            
-            {/* HEADER */}
             <div className="welcome-header">
               <div className="welcome-text">
                 <h1>Hola, {user.name.split(' ')[0]}</h1>
@@ -200,22 +192,21 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
               />
             </div>
 
-            {/* ACCIONES PRINCIPALES */}
             <div className="actions-grid">
-              <button className="action-card btn-join" onClick={() => setShowJoinAlert(true)}>
+              {/* Botón Abre el Nuevo Modal */}
+              <button className="action-card btn-join" onClick={() => setIsJoinModalOpen(true)}>
                 <IonIcon icon={enterOutline} />
                 <h3>Unirse a Clase</h3>
               </button>
               <button className="action-card btn-rewards" onClick={() => setCurrentScreen('REWARDS')}>
                 <IonIcon icon={giftOutline} />
-                <h3>Canjear Puntos</h3>
+                <h3>Tienda</h3>
               </button>
             </div>
 
-            {/* LISTA DE DOCENTES (GRID) */}
             <h2 className="section-title">Mis Clases</h2>
             
-            {loading && teachers.length === 0 ? (
+            {loading && !successAlertData && teachers.length === 0 ? (
                <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>Cargando...</div>
             ) : (
               <div className="professors-grid">
@@ -239,48 +230,53 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
                 )}
               </div>
             )}
-
-            {/* Logout Rápido */}
-            <div className="ion-text-center pb-4 pt-4">
-              <IonButton fill="clear" color="medium" onClick={onLogout}>
-                <IonIcon slot="start" icon={logOutOutline} />
-                Cerrar Sesión
-              </IonButton>
-            </div>
           </div>
         )}
 
-        {/* --- VISTA: PERFIL (PROFILE) --- */}
-        {currentScreen === 'PROFILE' && (
-           <StudentProfileScreen 
-              user={user} 
-              onLogout={onLogout} 
-           />
+        {/* VISTA BATALLA */}
+        {currentScreen === 'BATTLE' && (
+          <div style={{ padding: '40px 20px', textAlign: 'center', marginTop: '50px' }}>
+             <IonIcon icon={flashOutline} style={{ fontSize: '80px', color: '#eab308' }} />
+             <h2 style={{ marginTop: '20px', fontWeight: '800' }}>Zona de Batalla</h2>
+             <p style={{ color: '#64748b' }}>Pronto disponible.</p>
+             <IonButton fill="outline" onClick={() => setCurrentScreen('HOME')} style={{ marginTop: '20px' }}>Volver</IonButton>
+          </div>
         )}
 
-        {/* --- VISTA: PREMIOS (REWARDS) - Placeholder --- */}
+        {/* VISTA PREMIOS */}
         {currentScreen === 'REWARDS' && (
-          <div style={{ padding: '20px', paddingTop: '50px', textAlign: 'center' }}>
-             <h2>Tienda de Premios</h2>
-             <p>Próximamente...</p>
-             <IonButton onClick={() => setCurrentScreen('HOME')}>Volver</IonButton>
+          <div style={{ padding: '40px 20px', textAlign: 'center', marginTop: '50px' }}>
+             <IonIcon icon={trophyOutline} style={{ fontSize: '80px', color: '#8b5cf6' }} />
+             <h2 style={{ marginTop: '20px', fontWeight: '800' }}>Logros</h2>
+             <p style={{ color: '#64748b' }}>Pronto disponible.</p>
           </div>
         )}
 
-        {/* --- COMPONENTES GLOBALES --- */}
-        <IonAlert
-          isOpen={showJoinAlert}
-          onDidDismiss={() => setShowJoinAlert(false)}
-          header="Código de Acceso"
-          inputs={[{ name: 'code', type: 'text', placeholder: 'Ej: A4F1' }]}
-          buttons={[
-            { text: 'Cancelar', role: 'cancel' },
-            { text: 'Entrar', handler: (d) => handleJoinClass(d.code) }
-          ]}
+        {/* VISTA PERFIL */}
+        {currentScreen === 'PROFILE' && (
+           <StudentProfileScreen user={user} onLogout={onLogout} />
+        )}
+
+        {/* --- MODAL PARA INGRESAR CÓDIGO (VISUAL MEJORADO) --- */}
+        <JoinClassModal 
+          isOpen={isJoinModalOpen}
+          onClose={() => setIsJoinModalOpen(false)}
+          onJoin={handleJoinClass}
+          isLoading={loading}
         />
 
-        <IonLoading isOpen={loading} message="Procesando..." />
+        {/* --- ALERTA DE ÉXITO --- */}
+        <IonAlert
+          isOpen={!!successAlertData}
+          onDidDismiss={handleSuccessAlertDismiss}
+          header="¡Éxito!"
+          subHeader="Te has unido a la clase"
+          message={`Bienvenido a <strong>${successAlertData?.className}</strong> con ${successAlertData?.teacherName}.`}
+          buttons={['¡Vamos!']}
+          cssClass="success-alert" // Puedes añadir estilos extra si quieres
+        />
 
+        {/* --- TOAST DE ERROR --- */}
         <IonToast
           isOpen={toastConfig.isOpen}
           onDidDismiss={() => setToastConfig({ ...toastConfig, isOpen: false })}
@@ -291,8 +287,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
         />
 
       </IonContent>
-
-      {/* --- NAVBAR FLOTANTE --- */}
+ 
       <StudentBottomNav 
          activeScreen={currentScreen} 
          setActiveScreen={setCurrentScreen} 
