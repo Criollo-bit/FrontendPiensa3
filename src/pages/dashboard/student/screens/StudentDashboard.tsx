@@ -12,10 +12,8 @@ import {
 import { 
   giftOutline, 
   enterOutline, 
-  logOutOutline,
-  star,
-  flashOutline,
-  trophyOutline
+  flashOutline, 
+  schoolOutline
 } from 'ionicons/icons';
 import { User } from '../../../../AppTypes';
 import { api } from '../../../../api/axios'; 
@@ -23,30 +21,15 @@ import { api } from '../../../../api/axios';
 // --- IMPORTACIONES ---
 import StudentWaitingScreen from './StudentWaitingScreen';
 import StudentProfileScreen from './StudentProfileScreen'; 
+import AchievementsScreen from './AchievementsScreen'; 
 import StudentBottomNav from './components/StudentBottomNav';
-import JoinClassModal from './components/JoinClassModal'; // <--- NUEVO MODAL
+import JoinClassModal from './components/JoinClassModal'; 
+
+// 👇 CORRECCIÓN DE RUTAS: Apuntamos a la carpeta shared
+import ProfessorCard from './ProfessorCard'; 
+import ProfessorCardDetailModal from './ProfessorCardDetailModal';
 
 import './StudentDashboard.css';
-
-// ... (El componente ProfessorCard se queda igual, no lo pego para ahorrar espacio) ...
-const ProfessorCard: React.FC<{ teacher: any; onClick: () => void; }> = ({ teacher, onClick }) => {
-  // ... (mismo código de ProfessorCard que ya tenías) ...
-  const cardRef = useRef<HTMLDivElement>(null);
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => { /* ... */ };
-  const handleMouseLeave = () => { /* ... */ };
-  return (
-    <div className="professor-card-container" onClick={onClick} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-      <div ref={cardRef} className="tilt-card">
-        <div className="tilt-card-inner">
-          <img src={teacher.imageUrl || `https://ui-avatars.com/api/?name=${teacher.name}&background=random`} alt={teacher.name} className="tilt-card-bg" />
-          <div className="card-badge"><IonIcon icon={star} /><span>{teacher.points || 0} pts</span></div>
-          <div className="card-text-overlay tilt-card-content"><h3 className="card-title">{teacher.name}</h3><p className="card-subtitle">{teacher.subject}</p></div>
-          <div className="tilt-card-shine"></div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // --- DASHBOARD PRINCIPAL ---
 
@@ -65,14 +48,28 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
   const [loading, setLoading] = useState(false);
   
   // MODALES Y ALERTAS
-  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // <--- Nuevo estado para el modal
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); 
   const [successAlertData, setSuccessAlertData] = useState<{show: boolean, className: string, teacherName: string} | null>(null);
   const [toastConfig, setToastConfig] = useState<{isOpen: boolean, msg: string, color: string}>({
     isOpen: false, msg: '', color: 'success'
-  });
-
-  // Data temporal para redirigir después de la alerta
+  }); 
   const [newClassData, setNewClassData] = useState<{id: number, name: string} | null>(null);
+
+  // ESTADO PARA EL MODAL DE DETALLE/CANJE
+  const [selectedCardForRedemption, setSelectedCardForRedemption] = useState<any>(null);
+
+  // --- ESTADOS PARA EL CARRUSEL 3D ---
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+  const [dragState, setDragState] = useState<{
+    isDragging: boolean;
+    startX: number;
+    currentX: number;
+  }>({
+    isDragging: false,
+    startX: 0,
+    currentX: 0,
+  });
 
   const fetchEnrollments = useCallback(async () => {
     try {
@@ -80,11 +77,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
       const { data } = await api.get('/enrollment/student');
       
       const mappedClasses = data.map((enrollment: any) => ({
-        id: enrollment.subject.id,
+        id: enrollment.subject.teacher?.id || 'unknown',
+        cardId: enrollment.subject.id,
         name: enrollment.subject.teacher?.fullName || "Profesor", 
         subject: enrollment.subject.name,
+        title: enrollment.subject.name,
         imageUrl: enrollment.subject.teacher?.avatarUrl || null,
-        points: enrollment.accumulatedPoints || 0
+        points: enrollment.accumulatedPoints || 0,
+        locked: false,
+        unlockPoints: 0
       }));
 
       setTeachers(mappedClasses);
@@ -99,74 +100,132 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
     fetchEnrollments();
   });
 
-  // --- LÓGICA DE UNIRSE A CLASE ---
+  // --- LÓGICA DE ARRASTRE (DRAG) ---
+  const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragState({ isDragging: true, startX: clientX, currentX: 0 });
+  };
+
+  const handleDragMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!dragState.isDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragState(prev => ({ ...prev, currentX: clientX - prev.startX }));
+  };
+
+  const handleDragEnd = () => {
+    if (!dragState.isDragging) return;
+    const threshold = 50; 
+    
+    if (Math.abs(dragState.currentX) > threshold) {
+      if (dragState.currentX > 0 && activeCardIndex > 0) {
+        setActiveCardIndex(prev => prev - 1);
+      } else if (dragState.currentX < 0 && activeCardIndex < teachers.length - 1) {
+        setActiveCardIndex(prev => prev + 1);
+      }
+    }
+
+    setDragState({ isDragging: false, startX: 0, currentX: 0 });
+  };
+
+  // --- CÁLCULO DE ESTILO 3D ---
+  const getCardStyle = (index: number): React.CSSProperties => {
+    const offset = index - activeCardIndex;
+    const isActive = index === activeCardIndex;
+    
+    if (Math.abs(offset) > 2) return { display: 'none' };
+
+    let baseTranslateX = offset * 55;
+    let baseScale = isActive ? 1 : 0.85;
+    let baseRotate = offset * -5;
+    let opacity = isActive ? 1 : 0.6;
+    let zIndex = 100 - Math.abs(offset);
+
+    if (dragState.isDragging) {
+       if (isActive) {
+          return {
+             transform: `translateX(calc(${baseTranslateX}% + ${dragState.currentX}px)) scale(${baseScale}) rotate(${dragState.currentX * 0.05}deg)`,
+             zIndex, opacity, cursor: 'grabbing', transition: 'none',
+             position: 'absolute', width: '100%', height: '100%', top: 0, left: 0
+          };
+       }
+    }
+
+    return {
+      transform: `translateX(${baseTranslateX}%) scale(${baseScale}) rotate(${baseRotate}deg)`,
+      zIndex,
+      opacity,
+      cursor: isActive ? 'pointer' : 'default',
+      transition: 'transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease',
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      top: 0,
+      left: 0
+    };
+  };
+
+  // --- MANEJO DEL CLICK EN CARTA ---
+  const handleCardClick = (index: number) => {
+     if (Math.abs(dragState.currentX) > 10) return; 
+
+     if (index === activeCardIndex) {
+        const prof = teachers[index];
+        setSelectedCardForRedemption({
+           teacherId: prof.id,
+           professorName: prof.name,
+           currentPoints: prof.points,
+           imageUrl: prof.imageUrl
+        });
+     } else {
+        setActiveCardIndex(index);
+     }
+  };
+
   const handleJoinClass = async (code: string) => {
     try {
-      setLoading(true);
-      // Hacemos la petición al backend
-      const response = await api.post('/enrollment/join', { code });
-      const enrollment = response.data; // Asumimos que el backend devuelve el objeto Enrollment creado
-
-      // Cerramos el modal de input
-      setIsJoinModalOpen(false);
-
-      // Preparamos los datos para la redirección
-      // NOTA: Ajusta esto según tu respuesta del backend. 
-      // Supongamos que devuelve { id: ..., subject: { id: 1, name: 'Mate', teacher: { fullName: 'Juan' } } }
-      const subjectInfo = enrollment.subject; 
+      setLoading(true); 
       
-      setNewClassData({
-        id: subjectInfo.id,
-        name: subjectInfo.name
-      });
-
-      // Recargamos la lista de fondo
+      // 👇 CORRECCIÓN CRÍTICA AQUÍ 👇
+      // Cambiamos { code } por { joinCode: code }
+      const response = await api.post('/enrollment/join', { joinCode: code });
+      
+      const enrollment = response.data; 
+      setIsJoinModalOpen(false); 
+      const subjectInfo = enrollment.subject; 
+      setNewClassData({ id: subjectInfo.id, name: subjectInfo.name });
       await fetchEnrollments();
-
-      // Mostramos la ALERTA DE ÉXITO
-      setSuccessAlertData({
-        show: true,
-        className: subjectInfo.name,
-        teacherName: subjectInfo.teacher?.fullName || 'el Profesor'
-      });
-
+      setSuccessAlertData({ 
+        show: true, 
+        className: subjectInfo.name, 
+        teacherName: subjectInfo.teacher?.fullName || 'el Profesor' 
+      }); 
     } catch (error: any) {
       console.error(error);
-      const errorMsg = error.response?.data?.message || 'Código inválido o error de conexión.';
+      const errorMsg = error.response?.data?.message || 'Código inválido.';
       setToastConfig({ isOpen: true, msg: errorMsg, color: 'danger' });
     } finally {
       setLoading(false);
     }
   };
-
-  // Callback al cerrar la alerta de éxito
+ 
   const handleSuccessAlertDismiss = () => {
     setSuccessAlertData(null);
-    // REDIRECCIÓN AUTOMÁTICA
-    if (newClassData) {
+    if (newClassData) { 
       setSelectedSubjectId(newClassData.id);
       setSelectedSubjectName(newClassData.name);
       setCurrentScreen('WAITING');
-      setNewClassData(null); // Limpiar
+      setNewClassData(null); 
     }
-  };
-
-  const handleGameStart = (config: any) => {
-    console.log("🚀 Ir a juego:", config);
-  };
-
-  // --- RENDERIZADO CONDICIONAL: PANTALLA DE ESPERA ---
+  }; 
+ 
   if (currentScreen === 'WAITING' && selectedSubjectId) {
     return (
       <StudentWaitingScreen 
         user={user}
         subjectId={selectedSubjectId}
         subjectName={selectedSubjectName}
-        onGameStart={handleGameStart}
-        onBack={() => {
-            fetchEnrollments();
-            setCurrentScreen('HOME');
-        }}
+        onGameStart={(c) => console.log(c)}
+        onBack={() => { fetchEnrollments(); setCurrentScreen('HOME'); }}
       />
     );
   }
@@ -174,11 +233,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
   // --- RENDERIZADO PRINCIPAL ---
   return (
     <IonPage>
-      <IonContent>
-        
-        {/* VISTA HOME */}
+      <IonContent className="dashboard-content">
+          
         {currentScreen === 'HOME' && (
-          <div className="student-dashboard" style={{ paddingBottom: '100px' }}>
+          <div className="student-dashboard" style={{ paddingBottom: '100px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            
             <div className="welcome-header">
               <div className="welcome-text">
                 <h1>Hola, {user.name.split(' ')[0]}</h1>
@@ -192,72 +251,108 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
               />
             </div>
 
-            <div className="actions-grid">
-              {/* Botón Abre el Nuevo Modal */}
+            <div className="actions-grid"> 
               <button className="action-card btn-join" onClick={() => setIsJoinModalOpen(true)}>
                 <IonIcon icon={enterOutline} />
                 <h3>Unirse a Clase</h3>
               </button>
-              <button className="action-card btn-rewards" onClick={() => setCurrentScreen('REWARDS')}>
+              <button className="action-card btn-rewards" onClick={() => setCurrentScreen('ACHIEVEMENTS')}>
                 <IonIcon icon={giftOutline} />
-                <h3>Tienda</h3>
+                <h3>Logros</h3>
               </button>
             </div>
 
             <h2 className="section-title">Mis Clases</h2>
             
-            {loading && !successAlertData && teachers.length === 0 ? (
-               <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>Cargando...</div>
-            ) : (
-              <div className="professors-grid">
-                {teachers.length > 0 ? (
-                  teachers.map((teacher) => (
-                    <ProfessorCard 
-                      key={teacher.id} 
-                      teacher={teacher} 
-                      onClick={() => {
-                        setSelectedSubjectId(teacher.id);
-                        setSelectedSubjectName(teacher.subject);
-                        setCurrentScreen('WAITING');
-                      }}
-                    />
-                  ))
-                ) : (
-                  <div style={{ gridColumn: 'span 2', textAlign: 'center', padding: '30px', color: '#64748b' }}>
-                     <p>No tienes clases aún.</p>
-                     <small>Usa el botón "Unirse a Clase".</small>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '400px' }}>
+              {loading && teachers.length === 0 ? (
+                 <div style={{ textAlign: 'center', color: '#999' }}>
+                    <IonLoading isOpen={true} message="Cargando cartas..." duration={1000}/>
+                 </div>
+              ) : teachers.length === 0 ? (
+                 <div style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>
+                    <IonIcon icon={schoolOutline} style={{fontSize: '4rem', opacity: 0.5}} />
+                    <p>No tienes clases aún.</p>
+                    <small>Usa el botón "Unirse a Clase".</small>
+                 </div>
+              ) : (
+                <>
+                  {/* CONTENEDOR 3D */}
+                  <div 
+                    ref={cardContainerRef}
+                    style={{ 
+                       perspective: '1200px', 
+                       height: '420px', 
+                       width: '100%', 
+                       display: 'flex', 
+                       alignItems: 'center', 
+                       justifyContent: 'center',
+                       position: 'relative',
+                       overflow: 'hidden',
+                       touchAction: 'pan-y'
+                    }}
+                    onMouseDown={handleDragStart}
+                    onMouseMove={handleDragMove}
+                    onMouseUp={handleDragEnd}
+                    onMouseLeave={handleDragEnd}
+                    onTouchStart={handleDragStart}
+                    onTouchMove={handleDragMove}
+                    onTouchEnd={handleDragEnd}
+                  >
+                    <div style={{ position: 'relative', width: '280px', height: '380px', transformStyle: 'preserve-3d' }}>
+                      {teachers.map((teacher, index) => (
+                        <div key={index} style={getCardStyle(index)} onClick={() => handleCardClick(index)}>
+                          <ProfessorCard 
+                             professor={teacher} 
+                             isActive={index === activeCardIndex}
+                             points={teacher.points}
+                             requiredPoints={teacher.unlockPoints || 100}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* INDICADORES (PUNTITOS) */}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px' }}>
+                    {teachers.map((_, index) => (
+                      <div 
+                        key={index} 
+                        style={{ 
+                          width: index === activeCardIndex ? '20px' : '8px', 
+                          height: '8px', 
+                          borderRadius: '4px', 
+                          background: index === activeCardIndex ? '#0ea5e9' : '#cbd5e1',
+                          transition: 'all 0.3s'
+                        }} 
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
           </div>
         )}
 
-        {/* VISTA BATALLA */}
+        {/* OTRAS PANTALLAS */}
         {currentScreen === 'BATTLE' && (
-          <div style={{ padding: '40px 20px', textAlign: 'center', marginTop: '50px' }}>
+           <div style={{ padding: '40px', textAlign: 'center' }}>
              <IonIcon icon={flashOutline} style={{ fontSize: '80px', color: '#eab308' }} />
-             <h2 style={{ marginTop: '20px', fontWeight: '800' }}>Zona de Batalla</h2>
-             <p style={{ color: '#64748b' }}>Pronto disponible.</p>
-             <IonButton fill="outline" onClick={() => setCurrentScreen('HOME')} style={{ marginTop: '20px' }}>Volver</IonButton>
-          </div>
+             <h2>Batalla</h2>
+             <IonButton fill="outline" onClick={() => setCurrentScreen('HOME')}>Volver</IonButton>
+           </div>
         )}
 
-        {/* VISTA PREMIOS */}
-        {currentScreen === 'REWARDS' && (
-          <div style={{ padding: '40px 20px', textAlign: 'center', marginTop: '50px' }}>
-             <IonIcon icon={trophyOutline} style={{ fontSize: '80px', color: '#8b5cf6' }} />
-             <h2 style={{ marginTop: '20px', fontWeight: '800' }}>Logros</h2>
-             <p style={{ color: '#64748b' }}>Pronto disponible.</p>
-          </div>
+        {(currentScreen === 'REWARDS' || currentScreen === 'ACHIEVEMENTS') && (
+           <AchievementsScreen user={user} onBack={() => setCurrentScreen('HOME')} />
         )}
-
-        {/* VISTA PERFIL */}
+ 
         {currentScreen === 'PROFILE' && (
            <StudentProfileScreen user={user} onLogout={onLogout} />
         )}
 
-        {/* --- MODAL PARA INGRESAR CÓDIGO (VISUAL MEJORADO) --- */}
+        {/* MODAL UNIRSE A CLASE */}
         <JoinClassModal 
           isOpen={isJoinModalOpen}
           onClose={() => setIsJoinModalOpen(false)}
@@ -265,34 +360,37 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
           isLoading={loading}
         />
 
-        {/* --- ALERTA DE ÉXITO --- */}
-        <IonAlert
+        {/* MODAL DETALLE DE CARTA / CANJE */}
+        {selectedCardForRedemption && (
+           <ProfessorCardDetailModal 
+              teacherId={selectedCardForRedemption.teacherId}
+              professorName={selectedCardForRedemption.professorName}
+              currentPoints={selectedCardForRedemption.currentPoints}
+              professorImageUrl={selectedCardForRedemption.imageUrl}
+              onClose={() => setSelectedCardForRedemption(null)}
+              onRedeem={() => {
+                 fetchEnrollments(); 
+              }}
+           />
+        )}
+
+        <IonAlert 
           isOpen={!!successAlertData}
           onDidDismiss={handleSuccessAlertDismiss}
           header="¡Éxito!"
-          subHeader="Te has unido a la clase"
-          message={`Bienvenido a <strong>${successAlertData?.className}</strong> con ${successAlertData?.teacherName}.`}
+          message={`Bienvenido a <strong>${successAlertData?.className}</strong>.`}
           buttons={['¡Vamos!']}
-          cssClass="success-alert" // Puedes añadir estilos extra si quieres
-        />
-
-        {/* --- TOAST DE ERROR --- */}
+        /> 
         <IonToast
           isOpen={toastConfig.isOpen}
           onDidDismiss={() => setToastConfig({ ...toastConfig, isOpen: false })}
-          message={toastConfig.msg}
-          duration={3000}
+          message={toastConfig.msg} 
           color={toastConfig.color}
-          position="top"
-        />
-
+          duration={2000}
+        /> 
       </IonContent>
  
-      <StudentBottomNav 
-         activeScreen={currentScreen} 
-         setActiveScreen={setCurrentScreen} 
-      />
-
+      <StudentBottomNav activeScreen={currentScreen} setActiveScreen={setCurrentScreen} />
     </IonPage>
   );
 };

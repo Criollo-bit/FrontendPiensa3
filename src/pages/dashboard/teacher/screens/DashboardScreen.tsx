@@ -1,19 +1,21 @@
-import React from 'react';
-import { IonIcon } from '@ionic/react';
-// Quitamos schoolOutline de los imports ya que no se usará
-import { flashOutline, peopleOutline, trophyOutline } from 'ionicons/icons';
+import React, { useState } from 'react'; // <--- 1. Importamos useState
+import { IonIcon, IonAlert } from '@ionic/react'; // <--- 2. Importamos IonAlert
+// Agregamos addCircleOutline para el nuevo botón
+import { flashOutline, peopleOutline, trophyOutline, addCircleOutline } from 'ionicons/icons'; 
 import { useHistory } from 'react-router-dom';
 
 import { TeacherScreen } from '../../../../AppTypes';
 
-// Asegúrate de tener tu archivo CSS en la misma carpeta
+// Importamos el Modal (Asegúrate de que la ruta sea correcta donde guardaste el archivo)
+import CreateSubjectModal from './CreateSubjectModal'; 
+
 import './DashboardScreen.css';
 
 interface DashboardScreenProps {
   navigateTo: (screen: TeacherScreen) => void;
 }
 
-// Componente ActionCard reutilizable
+// Componente ActionCard reutilizable (Sin cambios)
 const ActionCard: React.FC<{ 
   title: string; 
   description: string; 
@@ -39,6 +41,10 @@ const ActionCard: React.FC<{
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
   const history = useHistory();
 
+  // --- 3. ESTADOS PARA EL MODAL ---
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+
   return (
     <div className="dashboard-screen">
       
@@ -48,10 +54,10 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
         <p className="dashboard-subtitle">Gestiona tus clases y actividades.</p>
       </div>
 
-      {/* Lista de Acciones Simplificada */}
+      {/* Lista de Acciones */}
       <div className="cards-container">
         
-        {/* 1. Crear Batalla (Principal) */}
+        {/* 1. Crear Batalla */}
         <ActionCard
           title="Crear Batalla"
           description="Inicia una nueva competencia para tus estudiantes."
@@ -60,7 +66,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
           delay="100ms"
         />
         
-        {/* 2. Ver Estudiantes (Reemplaza la función de Mis Clases) */}
+        {/* 2. Ver Estudiantes */}
         <ActionCard
           title="Ver Estudiantes"
           description="Revisa el progreso y los logros de tu clase."
@@ -78,7 +84,33 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
           delay="300ms"
         />
 
+        {/* --- 4. NUEVO BOTÓN: CREAR MATERIA --- */}
+        <ActionCard
+          title="Crear Materia"
+          description="Genera una nueva asignatura y obtén el código de acceso."
+          icon={addCircleOutline}
+          onClick={() => setIsCreateModalOpen(true)}
+          delay="400ms"
+        />
+
       </div>
+
+      {/* --- 5. RENDERIZADO DEL MODAL Y ALERTA --- */}
+      <CreateSubjectModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => setShowSuccessAlert(true)}
+      />
+
+      <IonAlert
+        isOpen={showSuccessAlert}
+        onDidDismiss={() => setShowSuccessAlert(false)}
+        header="¡Materia Creada!"
+        subHeader="Código Generado"
+        message="La materia se ha creado correctamente. Comparte el código con tus alumnos para que se unan."
+        buttons={['Entendido']}
+      />
+
     </div>
   );
 };
