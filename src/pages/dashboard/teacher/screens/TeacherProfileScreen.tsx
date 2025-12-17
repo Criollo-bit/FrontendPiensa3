@@ -1,270 +1,159 @@
 import React, { useState, useEffect } from 'react';
-import { IonIcon, IonSpinner, IonToast } from '@ionic/react';
-import { 
-  schoolOutline, book, bulb, calendar, card, informationCircle 
-} from 'ionicons/icons';
+import { IonIcon, IonToast } from '@ionic/react';
+import { locationOutline } from 'ionicons/icons';
 
 // Tipos e Importaciones
 import { User } from '../../../../AppTypes';
-// Importamos la API configurada
-import { api } from '../../../../api/axios'; 
+import { api } from '../../../../api/axios';
 import EditTeacherProfileModal, { EditableUser } from './EditTeacherProfileModal';
 import './TeacherProfileScreen.css';
 
 interface TeacherProfileScreenProps {
-  user: User; // Usuario base que viene del login
+  user: User;
   onLogout: () => void;
 }
 
 const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLogout }) => {
-  
+
   // --- ESTADOS ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [scrollY, setScrollY] = useState(0);
-
-  // Estado del perfil completo (extendido)
+ 
+  // Estado del perfil completo
   const [profileData, setProfileData] = useState<EditableUser>({
     ...user,
-    // Valores por defecto visuales (Mock UI)
-    subjects: ['Matemáticas', 'Física'], 
+    // Valores estáticos de ejemplo
+    subjects: ['Matemáticas', 'Física'],
     skills: ['Gamificación', 'Liderazgo'],
     cycles: ['2025-A'],
-    bio: '',
-    avatarUrl: ''
+    bio: (user as any).bio || '', 
+    // 👇 CORRECCIÓN AQUÍ: Usamos (user as any) para evitar el error de TypeScript
+    avatarUrl: (user as any).avatarUrl || user.avatar || '',
+    name: user.name || (user as any).fullName || '' 
   });
 
-  const [unlockPoints, setUnlockPoints] = useState(100);
-  const [isEditingPoints, setIsEditingPoints] = useState(false);
-
   // --- EFECTOS ---
-
-  // Cargar perfil real al montar
-  useEffect(() => {
+  useEffect(() => { 
     loadUserProfile();
   }, []);
-
-  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-    setScrollY(e.currentTarget.scrollTop);
-  };
-
+ 
   // --- FUNCIONES API ---
-
-  const loadUserProfile = async () => {
-    try {
-      // GET /users/me
+  const loadUserProfile = async () => { 
+    setIsLoading(true);
+    try { 
       const response = await api.get('/users/me');
       const backendUser = response.data;
-
-      // Actualizamos el estado mezclando los datos reales con los visuales
+ 
       setProfileData(prev => ({
         ...prev,
-        name: backendUser.fullName, // Mapeamos fullName (DB) a name (UI)
-        email: backendUser.email,
-        bio: backendUser.bio,
-        avatarUrl: backendUser.avatarUrl,
-        id: backendUser.id
+        name: backendUser.fullName || prev.name,
+        email: backendUser.email || prev.email,
+        bio: backendUser.bio || prev.bio,
+        avatarUrl: backendUser.avatarUrl || prev.avatarUrl,
+        id: backendUser.id || prev.id,
       }));
-
+      
+      setErrorMsg(null); 
     } catch (error) {
       console.error('Error cargando perfil:', error);
-      // No mostramos error invasivo aquí, solo en consola, para no bloquear la UI
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSaveProfile = async (updatedData: { fullName: string; bio: string; avatarUrl: string }) => {
     setIsLoading(true);
-    try {
-      // PATCH /users/me
+    try { 
       const response = await api.patch('/users/me', updatedData);
       const updatedUser = response.data;
-
-      // Actualizamos UI
+ 
       setProfileData(prev => ({
         ...prev,
         name: updatedUser.fullName,
         bio: updatedUser.bio,
         avatarUrl: updatedUser.avatarUrl
       }));
-      
-      setIsEditModalOpen(false);
-      setErrorMsg(null); // Limpiar errores si hubo
 
+      setIsEditModalOpen(false);
+      setErrorMsg(null);
     } catch (error) {
       console.error('Error guardando perfil:', error);
-      setErrorMsg('Error al guardar los cambios.');
+      setErrorMsg('Error al guardar los cambios. Inténtalo de nuevo.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSaveUnlockPoints = () => {
-    // TODO: Conectar esto cuando tengamos una tabla de configuración de docente
-    setIsEditingPoints(false);
-  };
+  }; 
 
   // --- RENDER ---
-
-  // Usamos una imagen por defecto si no hay avatarUrl
-  const displayImage = profileData.avatarUrl || profileData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${profileData.name}`;
+  
+  // Lógica de imagen: Si hay URL úsala, sino genera un avatar con las iniciales
+  const displayImage = profileData.avatarUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${profileData.name}`;
 
   return (
     <div className="profile-screen-container">
-      {/* Contenido Principal con Scroll */}
-      <main
-        className="profile-content"
-        onScroll={handleScroll}
-      >
-        {/* --- HERO SECTION --- */}
-        <div style={{ marginBottom: '1rem' }}>
-          <div className="hero-image-container">
+      <main className="profile-content">
+
+        {/* Card de Perfil */}
+        <div className="profile-card">
+
+          {/* Header con Gradiente */}
+          <div className="profile-header">
+            <div className="header-pattern"></div>
+          </div>
+
+          {/* Avatar Circular Centrado */}
+          <div className="avatar-container">
             <img
               src={displayImage}
               alt={profileData.name}
-              className="hero-image"
-              style={{
-                transform: `translateY(${Math.min(scrollY * 0.5, 100)}px) scale(${1 + Math.min(scrollY * 0.001, 0.3)})`
-              }}
-              // 🔥 AQUÍ ESTÁ EL CAMBIO IMPORTANTE 🔥
+              className="profile-avatar"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                // Si la imagen falla (link roto), ponemos una por defecto
-                if (!target.src.includes('dicebear.com')) {
-                   target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${profileData.name}`;
-                }
+                target.src = `https://api.dicebear.com/7.x/initials/svg?seed=${profileData.name}`;
+                target.onerror = null; 
               }}
             />
           </div>
 
-          {/* --- TARJETA PRINCIPAL --- */}
-          <div className="profile-main-card">
+          {/* Información del Perfil */}
+          <div className="profile-info">
             <h1 className="profile-name">{profileData.name}</h1>
-            <p className="profile-role">
-              <IonIcon icon={schoolOutline} />
-              Docente
-            </p>
+            <p className="profile-title">Profesor Certificado</p>
             
-            {/* Mostrar Bio si existe */}
-            {profileData.bio && (
-                <p style={{fontSize: '0.9rem', color: '#475569', margin: '10px 0', fontStyle: 'italic'}}>
-                    "{profileData.bio}"
-                </p>
-            )}
+            <p className="profile-location">
+              <IonIcon icon={locationOutline} />
+              Instituto Sudamericano
+            </p>
 
-            {/* Estadísticas (Visuales por ahora) */}
-            <div className="stats-row">
-              <div>
-                <div className="stat-number">{profileData.subjects?.length || 0}</div>
-                <div className="stat-label">Clases</div>
-              </div>
-              <div>
-                <div className="stat-number">{profileData.skills?.length || 0}</div>
-                <div className="stat-label">Habilidades</div>
-              </div>
-              <div>
-                <div className="stat-number">{profileData.cycles?.length || 0}</div>
-                <div className="stat-label">Ciclos</div>
-              </div>
-            </div>
+            {/* Botón EDITAR */}
+            <button 
+              className="btn-follow" 
+              onClick={() => setIsEditModalOpen(true)}
+              disabled={isLoading}
+            >
+              {isLoading ? 'GUARDANDO...' : 'EDITAR PERFIL'}
+            </button>
 
-            {/* Botones */}
-            <div className="action-buttons-row">
-              <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="btn-edit-profile"
-              >
-                Editar Perfil
-              </button>
-              <button
-                onClick={onLogout}
-                className="btn-logout"
-              >
-                Salir
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* --- SECCIONES DE INFO --- */}
-        <div className="info-section">
-          
-          {/* Materias (Mock visual) */}
-          <div className="glass-card-modern">
-            <h3 className="section-title">
-              <IonIcon icon={book} style={{ color: '#3b82f6' }} />
-              Mis Clases
-            </h3>
-            <div className="tags-container">
-              {profileData.subjects?.map((subject, index) => (
-                <span key={index} className="tag-chip tag-blue">
-                  {subject}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Configuración de Tarjeta (Mock visual funcional localmente) */}
-          <div className="glass-card-modern">
-            <h3 className="section-title">
-              <IonIcon icon={card} style={{ color: '#f59e0b' }} />
-              Configuración de Tarjeta
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#475569', margin: 0 }}>
-                Puntos necesarios para desbloquear tu tarjeta
+            {/* About Section */}
+            <div className="about-section">
+              <h3 className="about-title">Acerca de {profileData.name.split(' ')[0]}</h3>
+              <p className="about-text">
+                {profileData.bio || 'Aún no has escrito tu biografía. ¡Toca "Editar Perfil" para añadir una descripción sobre ti!'}
               </p>
-
-              <div className="config-input-group">
-                <input
-                  type="number"
-                  min="10"
-                  max="10000"
-                  value={unlockPoints}
-                  onChange={(e) => setUnlockPoints(Number(e.target.value))}
-                  disabled={!isEditingPoints}
-                  className="points-input"
-                  style={{ opacity: isEditingPoints ? 1 : 0.7, background: isEditingPoints ? 'white' : '#f8fafc' }}
-                />
-
-                <div className="action-buttons-row">
-                  {isEditingPoints ? (
-                    <>
-                      <button 
-                        onClick={handleSaveUnlockPoints}
-                        className="btn-edit-profile" style={{ background: '#22c55e' }}>
-                        Guardar
-                      </button>
-                      <button 
-                        onClick={() => { setIsEditingPoints(false); }}
-                        className="btn-logout" style={{ border: 'none', background: '#e2e8f0' }}>
-                        Cancelar
-                      </button>
-                    </>
-                  ) : (
-                    <button 
-                      onClick={() => setIsEditingPoints(true)}
-                      className="btn-edit-profile">
-                      Cambiar Puntos
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="info-box">
-                <IonIcon icon={informationCircle} style={{ fontSize: '1.5rem', color: '#d97706' }} />
-                <p>
-                  Los estudiantes necesitarán <strong>{unlockPoints} puntos</strong> para desbloquear tu carta especial.
-                </p>
-              </div>
             </div>
+
+            {/* Botón Logout */}
+            <button className="btn-logout-bottom" onClick={onLogout}>
+              Cerrar Sesión
+            </button>
           </div>
 
         </div>
+
       </main>
 
-      {/* MODAL */}
+      {/* MODAL DE EDICIÓN */}
       <EditTeacherProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -272,7 +161,7 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
         onSave={handleSaveProfile}
         isLoading={isLoading}
       />
-      
+
       {/* Toast Error */}
       <IonToast
         isOpen={!!errorMsg}

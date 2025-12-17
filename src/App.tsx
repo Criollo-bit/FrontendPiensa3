@@ -7,7 +7,7 @@ import Login from './pages/auth/Login';
 import Home from './pages/dashboard/Home';
 import Subjects from './pages/academic/Subjects';
 import AssignPoints from './pages/gamification/AssignPoints';
- 
+
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -30,9 +30,6 @@ import './theme/variables.css';
 setupIonicReact();
 
 const App: React.FC = () => {
-
-  // Eliminamos la lógica de roles aquí porque ya la maneja el Home.tsx
-  // y cada Dashboard tiene su propio NavBar interno.
 
   return (
     <IonApp>
@@ -58,10 +55,6 @@ const App: React.FC = () => {
 
         </IonRouterOutlet>
 
-        {/* ¡NavBar ELIMINADO! 
-            Ahora cada Dashboard (Student/Teacher) renderiza su propia barra. 
-        */}
- 
       </IonReactRouter>
     </IonApp>
   );

@@ -2,14 +2,14 @@ import {
   IonContent, IonPage, IonToast, IonLoading 
 } from '@ionic/react';
 import { useState } from 'react';
-import { useHistory } from 'react-router-dom';
+// import { useHistory } from 'react-router-dom'; // <-- YA NO ES NECESARIO
 import { api } from '../../api/axios'; 
 import RobotMascot from '../../components/RobotMascot'; 
 import FloatingInput from '../../components/FloatingInput'; 
 import './Login.css';
 
 const Login: React.FC = () => {
-  const history = useHistory();
+  // const history = useHistory(); // <-- ELIMINADO
   
   // Estado de la vista: 'login' o 'register'
   const [view, setView] = useState<'login' | 'register'>('login');
@@ -17,12 +17,12 @@ const Login: React.FC = () => {
   // Campos del formulario
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState(''); // Solo para registro
+  const [fullName, setFullName] = useState(''); 
 
   // Estados de UI
   const [focus, setFocus] = useState<'idle' | 'email' | 'password'>('idle'); 
   const [message, setMessage] = useState<string | null>(null);
-  const [isError, setIsError] = useState(false); // Para color del toast
+  const [isError, setIsError] = useState(false); 
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,7 +49,6 @@ const Login: React.FC = () => {
         response = await api.post('/auth/signin', { email, password });
       } else {
         // --- REGISTRO ---
-        // Ya no enviamos el rol, el backend asignará 'STUDENT' por defecto
         response = await api.post('/auth/signup', { 
           email, 
           password, 
@@ -63,8 +62,13 @@ const Login: React.FC = () => {
       
       showToast(`¡Bienvenido ${view === 'register' ? fullName : ''}!`, false);
       
-      // Redirigir al Home
-      history.push('/home'); 
+      // 👇 SOLUCIÓN DEL ERROR 👇
+      // Usamos window.location.replace en lugar de history.push.
+      // Esto fuerza una carga limpia de /home, asegurando que el componente
+      // Home detecte el token inmediatamente sin necesidad de recargar (F5).
+      setTimeout(() => {
+         window.location.replace('/home'); 
+      }, 500); // Pequeño delay para que el usuario vea el Toast de éxito
 
     } catch (error: any) {
       console.error(error);
@@ -107,10 +111,6 @@ const Login: React.FC = () => {
               {view === 'login' ? 'Ingresa para continuar.' : 'Únete a la aventura educativa.'}
             </p>
           </div>
-
-          {/* HE ELIMINADO EL SELECTOR DE ROL AQUÍ.
-             Ahora pasa directo a los inputs.
-          */}
 
           <form onSubmit={handleSubmit} style={{ maxWidth: '24rem', margin: '0 auto', width: '100%' }}>
             

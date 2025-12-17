@@ -15,7 +15,7 @@ interface Subject {
   name: string;
   cycle: string;
   year: number;
-  joinCode: string; // <--- 1. AGREGADO: Campo del código
+  joinCode: string; 
 }
 
 interface Student {
@@ -65,8 +65,8 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
     setIsLoading(true);
 
     try {
-      // NUEVO Endpoint en EnrollmentController
-      const response = await api.get(`/enrollments/subject/${subject.id}`);
+      // 👇 CORRECCIÓN AQUÍ: 'enrollment' en singular para coincidir con el backend
+      const response = await api.get(`/enrollment/subject/${subject.id}`);
       setStudents(response.data);
     } catch (error) {
       console.error('Error cargando estudiantes:', error);
@@ -142,7 +142,7 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
                         <IonIcon icon={peopleOutline} style={{ fontSize: '2.5rem', color: '#6366f1' }} />
                         <h3 className="subject-name">{subj.name}</h3>
                         
-                        {/* 2. AGREGADO: VISUALIZACIÓN DEL CÓDIGO */}
+                        {/* VISUALIZACIÓN DEL CÓDIGO */}
                         <p style={{
                             margin: '5px 0', 
                             fontSize: '1.2rem', 

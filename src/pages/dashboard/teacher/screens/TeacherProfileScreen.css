@@ -1,198 +1,167 @@
-/* Contenedor Principal con Gradiente */
+/* ========================================= */
+/* --- GENERALES / CONTENEDOR PRINCIPAL --- */
+/* ========================================= */
 .profile-screen-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%); /* teal-50 to emerald-50 */
-  overflow: hidden;
-  position: relative;
+    padding: 0; /* 💥 AJUSTE 1: Eliminado el padding lateral y superior del contenedor base */
+    background-color: #f4f5f8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 40px; 
 }
 
 .profile-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 80px; /* Espacio para el navbar */
-  scrollbar-width: none; /* Firefox */
-}
-.profile-content::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+    width: 100%;
+    /* 💥 AJUSTE 2: Disminuye el padding lateral para que la tarjeta sea más ancha */
+    max-width: 450px; 
+    padding: 0 10px; /* Reducido a 10px de padding lateral */
 }
 
-/* Sección Hero (Imagen) */
-.hero-image-container {
-  position: relative;
-  height: 250px; /* h-64 aprox */
-  background: linear-gradient(135deg, #374151 0%, #111827 100%);
-  overflow: hidden;
+/* ========================================= */
+/* --- TARJETA DE PERFIL (CARD) --- */
+/* ========================================= */
+.profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    /* 💥 AJUSTE 3: Disminuye el margen superior. De 50px a 20px. */
+    margin-top: 20px; 
 }
 
-.hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  transition: transform 0.1s ease-out;
+/* --- Encabezado y Patrón (Gradiente) --- */
+.profile-header {
+    height: 120px;
+    background: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
-/* Tarjeta Principal de Perfil (Flotante) */
-.profile-main-card {
-  position: relative;
-  background: white;
-  margin-top: -40px; /* -mt-10 */
-  border-top-left-radius: 3rem;
-  border-top-right-radius: 3rem;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
-  z-index: 10;
+/* --- AVATAR Y SOLUCIÓN DE RECORTE --- */
+.avatar-container {
+    position: relative;
+    z-index: 10;
+    /* Ajusta el margen superior del avatar para que se superponga */
+    margin-top: 50px; 
+    display: flex;
+    justify-content: center;
+}
+
+.profile-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 6px solid #ffffff; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+    object-fit: cover; 
+    object-position: center top; 
+}
+
+/* ========================================= */
+/* --- INFORMACIÓN DEL PERFIL --- */
+/* ========================================= */
+.profile-info {
+    padding: 20px;
+    padding-top: 15px; 
 }
 
 .profile-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b; /* slate-800 */
-  margin-bottom: 0.25rem;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
 }
 
-.profile-role {
-  font-size: 0.875rem;
-  color: #64748b; /* slate-500 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
+.profile-title {
+    color: #6c5ce7;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 15px;
 }
 
-/* Estadísticas */
-.stats-row {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
+.profile-location {
+    font-size: 0.9rem;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
 }
 
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
+.profile-location ion-icon {
+    margin-right: 5px;
+    font-size: 1.1rem;
+    color: #a29bfe;
 }
 
-.stat-label {
-  font-size: 0.75rem;
-  color: #64748b;
+/* --- Botón de Edición (EDITAR PERFIL) --- */
+.btn-follow {
+    background: #00cec9;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0, 206, 201, 0.4);
 }
 
-/* Botones de Acción */
-.action-buttons-row {
-  display: flex;
-  gap: 0.75rem;
+.btn-follow:hover {
+    background: #00b894;
+    transform: translateY(-1px);
 }
 
-.btn-edit-profile {
-  flex: 1;
-  background-color: #111827; /* gray-900 */
-  color: white;
-  font-weight: 600;
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  border: none;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s;
+.btn-follow:active {
+    transform: translateY(1px);
 }
 
-.btn-logout {
-  flex: 1;
-  background-color: white;
-  border: 2px solid #cbd5e1;
-  color: #334155;
-  font-weight: 600;
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
+/* --- Sección About / Biografía --- */
+.about-section {
+    text-align: left;
+    margin-top: 20px;
+    padding-top: 25px;
+    border-top: 1px solid #eeeeee;
 }
 
-/* Tarjetas de Información (Glass Card) */
-.info-section {
-  max-width: 42rem; /* max-w-2xl */
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.about-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
 }
 
-.glass-card-modern {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+.about-text {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
 }
 
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+/* --- Botón Logout --- */
+.btn-logout-bottom {
+    margin-top: 20px;
+    background: none;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 250px;
+    text-transform: uppercase;
 }
 
-/* Chips / Tags */
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+.btn-logout-bottom:hover {
+    background: #e74c3c;
+    color: white;
 }
-
-.tag-chip {
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-}
-
-/* Variantes de Tags */
-.tag-blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-.tag-green { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
-.tag-purple { background: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
-
-/* Inputs de configuración */
-.config-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.points-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.75rem;
-  text-align: center;
-  font-size: 1.125rem;
-  font-weight: 700;
-  outline: none;
-}
-.points-input:focus { border-color: #111827; }
-
-/* Mensaje Info */
-.info-box {
-  display: flex;
-  align-items: start;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #fffbeb; /* amber-50 */
-  border: 2px solid #fde68a;
-  border-radius: 1rem;
-}
-.info-box p { font-size: 0.875rem; color: #92400e; margin: 0; }
