@@ -1,18 +1,16 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { 
   IonContent, 
   IonPage, 
   IonIcon, 
-  IonButton,
-  IonAlert,
   IonLoading,
+  IonAlert,
   IonToast,
   useIonViewWillEnter
 } from '@ionic/react';
 import { 
   giftOutline, 
   enterOutline, 
-  flashOutline, 
   schoolOutline
 } from 'ionicons/icons';
 import { User } from '../../../../AppTypes';
@@ -25,7 +23,10 @@ import AchievementsScreen from './AchievementsScreen';
 import StudentBottomNav from './components/StudentBottomNav';
 import JoinClassModal from './components/JoinClassModal'; 
 
-// 👇 CORRECCIÓN DE RUTAS: Apuntamos a la carpeta shared
+// 👇 IMPORTACIÓN NUEVA: Pantalla de Unirse a Batalla
+import JoinBattleScreen from '../../student/screens/JoinBattleScreen'; 
+
+// Importaciones Shared
 import ProfessorCard from './ProfessorCard'; 
 import ProfessorCardDetailModal from './ProfessorCardDetailModal';
 
@@ -185,8 +186,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
     try {
       setLoading(true); 
       
-      // 👇 CORRECCIÓN CRÍTICA AQUÍ 👇
-      // Cambiamos { code } por { joinCode: code }
       const response = await api.post('/enrollment/join', { joinCode: code });
       
       const enrollment = response.data; 
@@ -281,15 +280,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
                   <div 
                     ref={cardContainerRef}
                     style={{ 
-                       perspective: '1200px', 
-                       height: '420px', 
-                       width: '100%', 
-                       display: 'flex', 
-                       alignItems: 'center', 
-                       justifyContent: 'center',
-                       position: 'relative',
-                       overflow: 'hidden',
-                       touchAction: 'pan-y'
+                        perspective: '1200px', 
+                        height: '420px', 
+                        width: '100%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        touchAction: 'pan-y'
                     }}
                     onMouseDown={handleDragStart}
                     onMouseMove={handleDragMove}
@@ -335,14 +334,15 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
           </div>
         )}
 
-        {/* OTRAS PANTALLAS */}
+        {/* 👇👇👇 SECCIÓN DE BATALLA ACTUALIZADA 👇👇👇 */}
         {currentScreen === 'BATTLE' && (
-           <div style={{ padding: '40px', textAlign: 'center' }}>
-             <IonIcon icon={flashOutline} style={{ fontSize: '80px', color: '#eab308' }} />
-             <h2>Batalla</h2>
-             <IonButton fill="outline" onClick={() => setCurrentScreen('HOME')}>Volver</IonButton>
-           </div>
+           <JoinBattleScreen 
+             onBack={() => setCurrentScreen('HOME')} 
+             studentId={user.id} 
+             studentName={user.name} 
+           />
         )}
+        {/* 👆👆👆 FIN SECCIÓN BATALLA 👆👆👆 */}
 
         {(currentScreen === 'REWARDS' || currentScreen === 'ACHIEVEMENTS') && (
            <AchievementsScreen user={user} onBack={() => setCurrentScreen('HOME')} />

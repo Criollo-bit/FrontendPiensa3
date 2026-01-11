@@ -1,131 +1,200 @@
-.battle-manager-container {
-  padding: 1rem;
-  height: 100%;
-  overflow-y: auto;
-  background-color: #f8fafc; /* Slate 50 */
-}
-
-/* Encabezado */
-.bm-header {
+.bm-screen {
   position: relative;
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-top: 1rem;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 20px;
+  padding-top: 60px; /* Espacio para el botón de atrás */
 }
 
 .bm-back-btn {
   position: absolute;
-  top: 0;
-  left: 0;
-  --padding-start: 0;
-}
-
-.bm-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-}
-
-.bm-subtitle {
-  color: #64748b;
-  margin-top: 0.5rem;
-}
-
-/* Botones de Acción (Grid) */
-.bm-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.action-card-btn {
+  top: 15px;
+  left: 15px;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #475569;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 700;
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  font-size: 1.5rem;
   cursor: pointer;
-  transition: transform 0.1s;
-  border: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+  z-index: 10;
 }
 
-.action-card-btn:active {
-  transform: scale(0.98);
+.bm-back-btn:hover {
+  background: #f1f5f9;
+  transform: scale(1.05);
 }
 
-.btn-green { background-color: #22c55e; }
-.btn-sky { background-color: #0ea5e9; }
+.bm-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
 
-/* Lista de Batallas */
-.battles-list-section h2 {
-  font-size: 1.25rem;
+.bm-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.bm-header h1 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 5px;
   font-weight: 700;
+}
+
+.bm-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+/* --- Botones Grandes --- */
+.bm-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.bm-action-btn {
+  border: none;
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.bm-action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-green { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+.btn-blue { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+
+.bm-icon {
+  font-size: 2rem;
+}
+
+/* --- Lista de Cartas --- */
+.bm-list-section h2 {
+  font-size: 1.2rem;
   color: #334155;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
+  font-weight: 600;
 }
 
-.battle-card {
+.bm-empty-state {
+  text-align: center;
+  padding: 40px;
   background: white;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+  color: #94a3b8;
 }
 
-.battle-card-header {
+.bm-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bm-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.bm-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
 }
 
-.battle-name {
-  font-size: 1.125rem;
+.bm-room-name {
+  font-size: 1.1rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
 
-.battle-info {
-  font-size: 0.875rem;
+.bm-room-info {
+  font-size: 0.85rem;
   color: #64748b;
-  margin: 0.25rem 0 0 0;
+  margin: 5px 0 0 0;
 }
 
-.battle-code-box {
-  background: linear-gradient(to right, #fffbeb, #fff7ed); /* Amber/Orange fade */
-  border: 2px solid #fbbf24;
-  border-radius: 0.5rem;
-  padding: 1rem;
+.bm-control-btn {
+  background: #0ea5e9;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bm-code-box {
+  background: #fff7ed; /* Orange light */
+  border: 2px solid #fdba74;
+  border-radius: 10px;
+  padding: 15px;
   text-align: center;
 }
 
-.code-label {
-  font-size: 0.75rem;
+.bm-code-label {
+  font-size: 0.8rem;
+  color: #9a3412;
   font-weight: 600;
-  color: #334155;
-  margin-bottom: 0.5rem;
-  display: block;
+  margin: 0;
+  text-transform: uppercase;
 }
 
-.battle-code {
+.bm-code-text {
   font-family: monospace;
   font-size: 2rem;
   font-weight: 800;
-  color: #d97706; /* Amber 600 */
-  letter-spacing: 0.1em;
-  margin: 0;
+  color: #c2410c;
+  margin: 5px 0;
+  letter-spacing: 3px;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: #94a3b8;
+.bm-code-hint {
+  font-size: 0.8rem;
+  color: #9a3412;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Animaciones simples */
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+  opacity: 0;
+}
+.delay-100 { animation-delay: 0.1s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

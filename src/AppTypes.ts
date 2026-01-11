@@ -47,3 +47,19 @@ export interface AuthData {
   skills?: string[];
   cycles?: string[];
 }
+
+// 🔥 NUEVOS TIPOS PARA BATALLA 🔥
+export interface BattlePlayer {
+  id: string;      // Socket ID o User ID
+  name: string;
+  avatar?: string;
+  score: number;
+  isReady?: boolean;
+}
+
+export interface BattleRoomState {
+  roomId: string;
+  players: BattlePlayer[];
+  status: 'waiting' | 'active' | 'finished';
+  currentQuestion?: any;
+}
