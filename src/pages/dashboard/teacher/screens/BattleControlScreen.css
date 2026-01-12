@@ -346,3 +346,30 @@
 .mb-separated {
     margin-bottom: 30px; /* Más espacio */
 }
+
+.btn-finish-red {
+    width: 100%;
+    background: #ef4444; /* Rojo */
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4);
+    transition: all 0.2s;
+}
+.btn-finish-red:active { transform: scale(0.98); }
+.progress-badge {
+    background: rgba(0,0,0,0.05);
+    color: #64748b;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
