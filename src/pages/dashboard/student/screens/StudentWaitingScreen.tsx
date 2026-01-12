@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { IonIcon } from '@ionic/react';
-import { arrowBack } from 'ionicons/icons';
-import { socketService } from '../../../../api/socket';
-import { BattlePlayer } from '../../../../AppTypes';
-import './StudentWaitingScreen.css'; // <--- EL CSS ES CLAVE
+import { 
+  IonIcon, 
+  IonSpinner, 
+  IonPage, 
+  IonContent 
+} from '@ionic/react';
+import { 
+  arrowBackOutline, 
+  peopleOutline, 
+  gameControllerOutline,
+  checkmarkCircle
+} from 'ionicons/icons';
+import { socketService } from '../../../../api/socket'; 
+import './StudentWaitingScreen.css';
+
+interface Player {
+  id: string;
+  name: string;
+  avatar?: string;
+  isMe?: boolean;
+}
 
 interface StudentWaitingScreenProps {
   joinCode: string;
@@ -12,105 +28,133 @@ interface StudentWaitingScreenProps {
 }
 
 const StudentWaitingScreen: React.FC<StudentWaitingScreenProps> = ({ joinCode, studentName, onBack }) => {
-  const [players, setPlayers] = useState<BattlePlayer[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [statusText, setStatusText] = useState('Conectando a la sala...');
 
   useEffect(() => {
-    // 1. Conectar al namespace /battle
+    // 1. Conexión al Socket
     const socket = socketService.connectToBattle();
 
-    // 2. Unirse a la sala con el código
+    // 2. Unirse a la sala (IMPORTANTE: roomId es el código)
+    // Nota: Asegúrate que el backend espera 'roomId' y 'studentName' en este evento
     socket.emit('join-room', { 
-        code: joinCode,
-        name: studentName 
+        roomId: joinCode, 
+        studentName: studentName 
     });
 
     // 3. Listeners
     socket.on('connect', () => {
         setIsConnected(true);
+        setStatusText('Esperando al profesor...');
     });
 
-    socket.on('room-update', (data: { players: BattlePlayer[] }) => {
-        console.log('Actualización de sala:', data);
-        setPlayers(data.players || []);
+    socket.on('room-update', (data: any) => {
+        console.log('Room Update:', data);
+        if (data.students) {
+            // Mapeamos los estudiantes que vienen del server
+            const mappedPlayers = data.students.map((s: any) => ({
+                id: s.id || s.socketId,
+                name: s.name,
+                // Generamos avatar con iniciales si no tiene foto
+                avatar: s.avatar || `https://ui-avatars.com/api/?name=${s.name}&background=random&color=fff&size=128`,
+                isMe: s.name === studentName
+            }));
+            setPlayers(mappedPlayers);
+        }
+        
+        // Si el estado cambia a 'active', el juego empezó (aquí podrías redirigir a la pantalla de juego)
+        if (data.status === 'active') {
+            setStatusText('¡La batalla ha comenzado!');
+            // TODO: Redirigir a StudentGameScreen
+        }
     });
 
-    socket.on('game-started', () => {
-        console.log('¡El juego ha comenzado!');
-        // Aquí iría la lógica para cambiar a pantalla de preguntas
-    });
-
-    socket.on('error', (err) => {
-        alert(err.message || 'Error al unirse');
+    socket.on('error', (msg: string) => {
+        alert(msg);
         onBack();
     });
 
+    // Cleanup
     return () => {
-        socketService.disconnectBattle();
+        socket.off('connect');
+        socket.off('room-update');
+        socket.off('error');
+        // Opcional: socket.disconnect() si quieres desconectar al salir
     };
   }, [joinCode, studentName, onBack]);
 
-  const getAvatar = (name: string, url?: string) => {
-      if (url) return url;
-      return `https://ui-avatars.com/api/?name=${name}&background=random&size=128`;
-  };
-
   return (
-    <div className="sw-screen">
-        {/* Header con Botón Atrás */}
-        <div className="sw-header-nav">
-            <button onClick={onBack} className="sw-back-btn">
-                <IonIcon icon={arrowBack} />
-            </button>
-        </div>
-
-      <div className="sw-content animate-in">
-        <div className="sw-info-box">
-            <h1>Sala de Batalla</h1>
-            <p className="sw-code-label">Código de Sala:</p>
-            <div className="sw-code-display">{joinCode}</div>
-            <p className="sw-status-text">
-                {isConnected ? 'Esperando al profesor...' : 'Conectando...'}
-            </p>
-        </div>
-        
-        <div className="sw-players-section animate-in delay-100">
-            <h2>Jugadores Conectados ({players.length})</h2>
+    <IonPage>
+      <IonContent fullscreen className="sw-bg">
+        <div className="sw-container">
             
-            {players.length === 0 && isConnected ? (
-                 <div className="sw-empty-list">
-                    Esperando a que se unan compañeros...
-                 </div>
-            ) : (
-                <div className="sw-players-grid">
-                {players.map((player, index) => (
-                    <div key={player.id || index} className="sw-player-card">
-                        <img 
-                            src={getAvatar(player.name, player.avatar)} 
-                            alt={player.name} 
-                            className="sw-avatar" 
-                        />
-                        <p className="sw-player-name">{player.name}</p>
-                        {player.name === studentName && <span className="sw-you-badge">Tú</span>}
-                    </div>
-                ))}
-                </div>
-            )}
-        </div>
+            {/* Header con botón atrás */}
+            <button onClick={onBack} className="sw-back-button">
+                <IonIcon icon={arrowBackOutline} />
+            </button>
 
-        {/* Loading Spinner Footer */}
-        <div className="sw-footer">
-            {!isConnected ? (
-                <div className="sw-spinner"></div>
-            ) : (
-                <div className="sw-ready-indicator">
-                    <div className="sw-pulse"></div>
-                    <span>Conectado y listo</span>
+            <div className="sw-main-content">
+                
+                {/* Título y Código */}
+                <div className="sw-header-section animate-slide-down">
+                    <div className="sw-icon-wrapper">
+                        <IonIcon icon={gameControllerOutline} />
+                    </div>
+                    <h1 className="sw-title">Sala de Batalla</h1>
+                    <div className="sw-code-pill">
+                        <span className="sw-code-label">CÓDIGO:</span>
+                        <span className="sw-code-value">{joinCode}</span>
+                    </div>
+                    <p className="sw-status">
+                        {isConnected ? (
+                            <>
+                                <IonSpinner name="dots" className="sw-spinner-small"/> {statusText}
+                            </>
+                        ) : (
+                            'Conectando...'
+                        )}
+                    </p>
                 </div>
-            )}
+
+                {/* Lista de Jugadores (Grid) */}
+                <div className="sw-players-section animate-fade-in delay-100">
+                    <div className="sw-players-header">
+                        <IonIcon icon={peopleOutline} />
+                        <span>Jugadores ({players.length})</span>
+                    </div>
+
+                    {players.length === 0 ? (
+                        <div className="sw-empty-state">
+                            <IonSpinner name="crescent" />
+                            <p>Esperando compañeros...</p>
+                        </div>
+                    ) : (
+                        <div className="sw-players-grid">
+                            {players.map((player, index) => (
+                                <div key={index} className={`sw-player-card ${player.isMe ? 'is-me' : ''}`}>
+                                    <div className="sw-avatar-container">
+                                        <img src={player.avatar} alt={player.name} className="sw-avatar-img"/>
+                                        {player.isMe && <div className="sw-me-badge"><IonIcon icon={checkmarkCircle}/></div>}
+                                    </div>
+                                    <p className="sw-player-name">{player.name}</p>
+                                    {player.isMe && <p className="sw-me-text">(Tú)</p>}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+            </div>
+
+            {/* Footer Decorativo */}
+            <div className="sw-footer">
+                <p>Prepárate, la batalla comenzará pronto.</p>
+            </div>
+
         </div>
-      </div>
-    </div>
+      </IonContent>
+    </IonPage>
   );
 };
 
