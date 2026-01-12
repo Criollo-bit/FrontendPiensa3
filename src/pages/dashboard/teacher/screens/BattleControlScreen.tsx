@@ -23,9 +23,12 @@ import {
   trashOutline,
   addOutline,
   stopCircleOutline,
-  homeOutline // Nuevo icono para volver al menú
+  homeOutline 
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
+// Asegúrate de que esta ruta sea correcta
+import PodiumScreen from '../../student/screens/PodiumScreen'; 
+
 import './BattleControlScreen.css';
 
 const getTeacherId = (): string | null => {
@@ -50,12 +53,15 @@ interface QuestionDraft {
   correct_answer_index: number;
 }
 
+// 1. Tipo definido fuera para evitar errores de TypeScript
+type BattlePhase = 'INIT' | 'LOBBY' | 'QUESTION' | 'RESULTS' | 'PODIUM_ANIMATION' | 'SUMMARY';
+
 const BattleControlScreen: React.FC = () => {
-  const history = useHistory();
+  // const history = useHistory(); // Ya no usamos history para salir, usamos window.location
   const TEACHER_ID = getTeacherId();
 
-  // Estados
-  const [phase, setPhase] = useState<'INIT' | 'LOBBY' | 'QUESTION' | 'RESULTS' | 'PODIUM'>('INIT');
+  const [phase, setPhase] = useState<BattlePhase>('INIT');
+  
   const [roomId, setRoomId] = useState<string>('');
   const [code, setCode] = useState<string>('...'); 
   
@@ -74,6 +80,8 @@ const BattleControlScreen: React.FC = () => {
   const [totalAnswers, setTotalAnswers] = useState(0);
   const [timeLeft, setTimeLeft] = useState(20);
   const [roundStats, setRoundStats] = useState({ correct: 0, incorrect: 0, ranking: [] });
+  
+  const [finalWinners, setFinalWinners] = useState<any[]>([]);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -92,16 +100,15 @@ const BattleControlScreen: React.FC = () => {
   useEffect(() => {
     if (!TEACHER_ID) {
       showNiceAlert("Error", "No se identificó al profesor.");
-      setTimeout(() => history.push('/login'), 2000);
+      setTimeout(() => window.location.href = '/login', 2000);
       return;
     }
 
     const socket = socketService.connectToBattle();
     
-    // 1. RECUPERAR NOMBRE 
     const storedName = localStorage.getItem('tempBattleName');
+    localStorage.removeItem('currentBattleId');
 
-    // 2. SIEMPRE CREAR SALA NUEVA (Desactivamos reconexión como pediste)
     socket.emit('create-room', { 
         teacherId: TEACHER_ID,
         name: storedName 
@@ -150,7 +157,19 @@ const BattleControlScreen: React.FC = () => {
       setRoundStats({ correct: data.correctCount, incorrect: data.incorrectCount, ranking: data.ranking });
     });
 
-    socket.on('game-over', () => setPhase('PODIUM'));
+    socket.on('game-over', (data: { winners: any[] }) => {
+        const winners = data.winners || [];
+        const podiumWinners = winners.slice(0, 3).map((w: any, index: number) => ({
+            position: index + 1,
+            name: w.name,
+            score: w.score,
+            color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
+        }));
+        
+        setFinalWinners(podiumWinners);
+        setPhase('PODIUM_ANIMATION');
+    });
+
     socket.on('error', (msg: string) => { setIsSubmitting(false); showNiceAlert("Error", msg); });
 
     return () => {
@@ -182,19 +201,38 @@ const BattleControlScreen: React.FC = () => {
   
   const handleEndGame = () => socketService.getBattleSocket()?.emit('end-battle', { roomId });
   
-  // NUEVO: Handler para salir al menú final
+  // 🔥 CORRECCIÓN CRÍTICA DE NAVEGACIÓN 🔥
   const handleExitToMenu = () => {
-      localStorage.removeItem('tempBattleName');
-      localStorage.removeItem('currentBattleId');
-      if (history.length > 1) {
-          history.goBack();
-      } else {
-          // Ajusta esta ruta si es diferente
-          history.replace('/teacher/dashboard'); 
+      try {
+        // 1. Limpieza de datos temporales
+        localStorage.removeItem('tempBattleName');
+        localStorage.removeItem('currentBattleId');
+        
+        // 2. Destruir sala en servidor
+        if (roomId && socketService.getBattleSocket()?.connected) {
+            socketService.getBattleSocket()?.emit('end-battle', { roomId });
+        }
+
+        // 3. Limpiar la sala de la lista local (para que no salga el botón reconectar en Dashboard)
+        const listKey = `battles_${TEACHER_ID}`;
+        const savedBattles = localStorage.getItem(listKey);
+        if (savedBattles) {
+            const parsedBattles = JSON.parse(savedBattles);
+            if (Array.isArray(parsedBattles)) {
+                const updatedBattles = parsedBattles.filter((b: any) => b.id !== roomId);
+                localStorage.setItem(listKey, JSON.stringify(updatedBattles));
+            }
+        }
+      } catch (e) {
+        console.error("Error limpiando:", e);
       }
+
+      // 4. FUERZA BRUTA: Recargar la página hacia /home
+      // Esto elimina cualquier "vista zombi" y limpia la memoria de la batalla
+      window.location.href = '/home';
   };
 
-  // Handlers Modal Bancos
+  // Handlers Modal
   const resetForm = () => { setNewBankName(''); setNewQuestions([{ question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]); };
   const handleAddQuestion = () => { if (newQuestions.length >= 20) return showNiceAlert("Límite", "Máximo 20 preguntas"); setNewQuestions([...newQuestions, { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]); };
   const handleRemoveQuestion = (idx: number) => { setNewQuestions(newQuestions.filter((_, i) => i !== idx)); };
@@ -208,13 +246,27 @@ const BattleControlScreen: React.FC = () => {
   };
 
   const isLastQuestion = totalQuestionsCount > 0 && currentQuestionIndex >= totalQuestionsCount;
+  
+  // 2. Calculamos la lista antes del return para evitar error TS
+  const shouldShowRanking = phase === 'RESULTS' || phase === 'PODIUM_ANIMATION' || phase === 'SUMMARY';
+  const usersListToRender = shouldShowRanking ? roundStats.ranking : students;
+
+  if (phase === 'PODIUM_ANIMATION') {
+      return (
+        <div style={{height: '100vh', width: '100%', position: 'absolute', top:0, left:0, zIndex: 9999}}>
+             <PodiumScreen 
+                winners={finalWinners} 
+                onContinue={() => setPhase('SUMMARY')} 
+             />
+        </div>
+      );
+  }
 
   return (
     <IonPage>
       <IonContent fullscreen className="battle-bg-clean">
         <div className="relative-container">
           
-          {/* BOTÓN SALIR QUE ABRE LA ALERTA */}
           <button onClick={() => setShowExitConfirm(true)} className="float-back-btn">
             <IonIcon icon={arrowBackOutline} />
           </button>
@@ -327,13 +379,16 @@ const BattleControlScreen: React.FC = () => {
                </div>
             )}
 
-            {phase === 'PODIUM' && (
+            {phase === 'SUMMARY' && (
                <div className="hero-card-green">
                   <IonIcon icon={trophy} className="trophy-icon-lg"/>
                   <h2>Batalla Finalizada</h2>
-                  <p className="text-center text-white/80" style={{marginBottom: '20px'}}>Revisa el podio en la pantalla de los estudiantes</p>
                   
-                  {/* 🔥 BOTÓN FINAL PARA SALIR 🔥 */}
+                  <p className="text-center text-white/90" style={{marginBottom: '20px', fontSize: '1rem'}}>
+                     Se han asignado los puntos correspondientes a los participantes ganadores.
+                  </p>
+                  
+                  {/* Ambos botones usan la función de salida forzada */}
                   <button onClick={handleExitToMenu} className="btn-white-pill">
                       <IonIcon icon={homeOutline} /> Volver al Menú
                   </button>
@@ -344,7 +399,7 @@ const BattleControlScreen: React.FC = () => {
                <div className="white-card-clean mt-4">
                   <h2 className="section-title">Ranking</h2>
                   <div className="ranking-list-clean">
-                     {(phase === 'RESULTS' || phase === 'PODIUM' ? roundStats.ranking : students).map((s: any, idx) => (
+                     {usersListToRender.map((s: any, idx: number) => (
                         <div key={idx} className={`ranking-row-clean rank-${idx + 1}`}>
                            <div className="rank-left"><div className="rank-badge">{idx + 1}</div><p className="rank-name">{s.name}</p></div>
                            <p className="rank-score">{s.score} pts</p>
@@ -377,7 +432,6 @@ const BattleControlScreen: React.FC = () => {
 
           <IonAlert isOpen={alertConfig.isOpen} onDidDismiss={() => setAlertConfig({ ...alertConfig, isOpen: false })} header={alertConfig.header} message={alertConfig.message} buttons={alertConfig.buttons}/>
 
-          {/* ALERTA DE SALIDA CON MENSAJE DE PÉRDIDA DE SALA */}
           <IonAlert
             isOpen={showExitConfirm}
             onDidDismiss={() => setShowExitConfirm(false)}
@@ -389,10 +443,7 @@ const BattleControlScreen: React.FC = () => {
                 text: 'Salir y Cerrar',
                 cssClass: 'danger-button',
                 handler: () => {
-                    // 1. Matar sala en backend
-                    socketService.getBattleSocket()?.emit('end-battle', { roomId });
-                    // 2. Navegar fuera (la limpieza de localStorage la hace la función handleExitToMenu, pero aquí la forzamos)
-                    handleExitToMenu();
+                    handleExitToMenu(); 
                     return true;
                 }
               }

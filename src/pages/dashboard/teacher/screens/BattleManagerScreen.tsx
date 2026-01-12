@@ -2,19 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { IonIcon, IonActionSheet, IonSpinner } from '@ionic/react';
 import { 
-  arrowBack, 
-  bookOutline, 
-  addCircleOutline, 
-  playOutline, 
-  trashOutline, 
-  list, 
-  create,
-  folderOpenOutline 
+  arrowBack, bookOutline, addCircleOutline, playOutline, trashOutline, list, create, folderOpenOutline 
 } from 'ionicons/icons';
 import { User } from '../../../../AppTypes';
 import CreateBattleModal from './CreateBattleModal'; 
 import { socketService } from '../../../../api/socket';
-import './BattleManagerScreen.css';
+import './BattleManagerScreen.css'; 
 
 interface BattleRoom {
   id: string;
@@ -34,87 +27,70 @@ interface BattleManagerScreenProps {
 const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, teacherId, onBack }) => { 
   const history = useHistory();
   
-  // 1. CARGA INICIAL CON LIMPIEZA DE FANTASMAS
-  const [rooms, setRooms] = useState<BattleRoom[]>(() => {
-    try {
-      const saved = localStorage.getItem(`battles_${teacherId}`);
-      if (!saved) return [];
-      const parsed = JSON.parse(saved);
-      
-      // FILTRO ESTRICTO: Solo pasan las salas con ID y Nombre válidos
-      const cleanRooms = Array.isArray(parsed) 
-        ? parsed.filter((r: any) => r && r.id && r.name && r.battleCode) 
-        : [];
-      
-      // Si encontramos basura, la limpiamos de una vez
-      if (cleanRooms.length !== parsed.length) {
-         localStorage.setItem(`battles_${teacherId}`, JSON.stringify(cleanRooms));
+  // Carga segura
+  const [rooms, setRooms] = useState<BattleRoom[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
+
+  useEffect(() => {
+      // Cargamos dentro de un useEffect para evitar errores de hidratación/render
+      try {
+          const saved = localStorage.getItem(`battles_${teacherId}`);
+          if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed)) {
+                  setRooms(parsed.filter((r: any) => r && r.id));
+              }
+          }
+      } catch (e) {
+          console.error("Error cargando salas", e);
+      } finally {
+          setLoadingRooms(false);
       }
-      
-      return cleanRooms;
-    } catch (e) {
-      return [];
-    }
-  });
+  }, [teacherId]);
   
   const tempBattleName = useRef<string>('');
   const [isCreateBattleModalOpen, setIsCreateBattleModalOpen] = useState(false);
   const [showBankOptions, setShowBankOptions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 2. Sincronizar cambios con localStorage
   useEffect(() => {
-    if (teacherId) {
+    if (!loadingRooms && teacherId) {
       localStorage.setItem(`battles_${teacherId}`, JSON.stringify(rooms));
     }
-  }, [rooms, teacherId]);
+  }, [rooms, teacherId, loadingRooms]);
 
   useEffect(() => {
     const socket = socketService.connectToBattle();
     
-    socket.on('room-created', (data: { roomId: string, code?: string, mySubjects?: any[], name?: string }) => {
-      if (data.mySubjects) {
-        localStorage.setItem(`subjects_${teacherId}`, JSON.stringify(data.mySubjects));
-      }
+    const handleRoomCreated = (data: { roomId: string, code?: string, mySubjects?: any[], name?: string }) => {
+      if (data.mySubjects) localStorage.setItem(`subjects_${teacherId}`, JSON.stringify(data.mySubjects));
       
       const finalCode = data.code || data.roomId;
       const finalName = data.name || tempBattleName.current || `Batalla ${finalCode}`;
       
       const newRoom: BattleRoom = {
-        id: data.roomId,
-        name: finalName,
-        questionCount: 0, 
-        battleCode: finalCode,
-        groupCount: 0,
-        status: 'waiting'
+        id: data.roomId, name: finalName, questionCount: 0, battleCode: finalCode, groupCount: 0, status: 'waiting'
       };
       
-      // Agregamos la nueva sala (el useEffect arriba la guardará automáticamente)
       setRooms(prev => [newRoom, ...prev]);
-      
       tempBattleName.current = '';
       setIsLoading(false);
       setIsCreateBattleModalOpen(false); 
-      
-      // Navegación segura al crear
-      setTimeout(() => history.push('/teacher/battle'), 100);
-    });
+      setTimeout(() => history.push('/teacher/battle'), 50);
+    };
 
-    return () => { socket.off('room-created'); };
+    socket.on('room-created', handleRoomCreated);
+    return () => { socket.off('room-created', handleRoomCreated); };
   }, [teacherId, history]);
 
-  // --- HANDLERS ---
-
-  const handleCreateBattle = (name: string, qCount: number, gCount: number, qs: any[], sPerGroup: number) => {
+  const handleCreateBattle = (name: string) => {
       localStorage.removeItem('currentBattleId');
       localStorage.setItem('tempBattleName', name);
-      
       const socket = socketService.getBattleSocket();
       if(socket) {
           setIsLoading(true);
           tempBattleName.current = name;
           socket.emit('create-room', { teacherId, name });
-          // Esperamos al evento del socket para navegar
       }
   };
 
@@ -126,49 +102,41 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
 
   const handleDeleteRoom = (e: React.MouseEvent, roomId: string) => {
     e.stopPropagation();
-    if(confirm('¿Borrar esta sala de tu lista?')) {
+    if(confirm('¿Borrar esta sala de la lista?')) {
         setRooms(prev => prev.filter(r => r.id !== roomId));
     }
   };
 
-  const goToQuestionBank = () => {
-    history.push('/teacher/questions');
-  };
+  const goToQuestionBank = () => history.push('/teacher/questions');
+
+  if (loadingRooms) return <div style={{padding:50, textAlign:'center'}}><IonSpinner/></div>;
 
   return (
     <div className="bm-screen">
-      <button onClick={onBack} className="bm-back-btn">
-        <IonIcon icon={arrowBack} />
-      </button>
+      <button onClick={onBack} className="bm-back-btn"><IonIcon icon={arrowBack} /></button>
       
       <div className="bm-content">
-        <div className="bm-header animate-in">
+        <div className="bm-header">
           <h1>Gestor de Batallas</h1>
           <p>Crea y administra las batallas para tus clases.</p>
         </div>
 
         <div className="bm-actions-grid">
           <button onClick={() => setShowBankOptions(true)} className="bm-action-btn btn-green">
-            <IonIcon icon={bookOutline} className="bm-icon" />
-            Banco de Preguntas
+            <IonIcon icon={bookOutline} className="bm-icon" /> Banco de Preguntas
           </button>
-          
           <button onClick={() => setIsCreateBattleModalOpen(true)} className="bm-action-btn btn-blue">
-            <IonIcon icon={addCircleOutline} className="bm-icon" />
-            Crear Batalla
+            <IonIcon icon={addCircleOutline} className="bm-icon" /> Crear Batalla
           </button>
         </div>
 
-        <div className="bm-list-section animate-in delay-100">
+        <div className="bm-list-section">
           <h2>Batallas Activas</h2>
-          
           {rooms.length === 0 ? (
             <div className="bm-empty-state-pro">
-               <div className="empty-icon-circle">
-                  <IonIcon icon={folderOpenOutline} />
-               </div>
+               <div className="empty-icon-circle"><IonIcon icon={folderOpenOutline} /></div>
                <h3>Todavía no tienes batallas</h3>
-               <p>Crea una nueva sala para comenzar a jugar con tus estudiantes.</p>
+               <p>Crea una nueva sala para comenzar.</p>
             </div>
           ) : (
             <div className="bm-cards-container">
@@ -177,17 +145,11 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
                   <div className="bm-card-header">
                     <div>
                       <p className="bm-room-name">{room.name}</p>
-                      <p className="bm-room-info">
-                        {room.status === 'waiting' ? 'Esperando...' : 'En curso'}
-                      </p>
+                      <p className="bm-room-info">{room.status === 'waiting' ? 'Esperando...' : 'En curso'}</p>
                     </div>
                     <div style={{display:'flex', gap:'10px'}}>
-                        <button onClick={(e) => handleDeleteRoom(e, room.id)} className="bm-control-btn" style={{background:'#ef4444'}}>
-                            <IonIcon icon={trashOutline}/>
-                        </button>
-                        <button onClick={() => handleOpenBattle(room.id, room.name)} className="bm-control-btn">
-                            <IonIcon icon={playOutline}/> Controlar
-                        </button>
+                        <button onClick={(e) => handleDeleteRoom(e, room.id)} className="bm-control-btn" style={{background:'#ef4444'}}><IonIcon icon={trashOutline}/></button>
+                        <button onClick={() => handleOpenBattle(room.id, room.name)} className="bm-control-btn"><IonIcon icon={playOutline}/> Controlar</button>
                     </div>
                   </div>
                   <div className="bm-code-box">
@@ -202,31 +164,17 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
       </div>
       
       {isCreateBattleModalOpen && (
-         <CreateBattleModal
-           isOpen={isCreateBattleModalOpen}
-           onClose={() => setIsCreateBattleModalOpen(false)}
-           onCreate={handleCreateBattle}
-           teacherId={teacherId}
-           isLoading={isLoading}
-         />
+         <CreateBattleModal isOpen={isCreateBattleModalOpen} onClose={() => setIsCreateBattleModalOpen(false)} onCreate={handleCreateBattle} teacherId={teacherId} isLoading={isLoading} />
       )}
 
       {isLoading && (
-        <div style={{position:'fixed', top:0, left:0, right:0, bottom:0, background:'rgba(255,255,255,0.7)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center'}}>
+        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column'}}>
             <IonSpinner name="crescent" color="primary"/>
+            <p style={{marginTop: 10, color: '#64748b', fontWeight: 600}}>Creando sala...</p>
         </div>
       )}
 
-      <IonActionSheet
-        isOpen={showBankOptions}
-        onDidDismiss={() => setShowBankOptions(false)}
-        header="Gestión de Bancos"
-        buttons={[
-          { text: 'Ver mis bancos de preguntas', icon: list, handler: goToQuestionBank },
-          { text: 'Crear banco de preguntas', icon: create, handler: goToQuestionBank },
-          { text: 'Cancelar', role: 'cancel' }
-        ]}
-      />
+      <IonActionSheet isOpen={showBankOptions} onDidDismiss={() => setShowBankOptions(false)} header="Gestión de Bancos" buttons={[{ text: 'Ver mis bancos', icon: list, handler: goToQuestionBank }, { text: 'Crear banco', icon: create, handler: goToQuestionBank }, { text: 'Cancelar', role: 'cancel' }]} />
     </div>
   );
 };
