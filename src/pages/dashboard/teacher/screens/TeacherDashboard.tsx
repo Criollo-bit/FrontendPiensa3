@@ -10,7 +10,7 @@ import './TeacherDashboard.css';
 
 // Componentes de Navegación
 import TeacherBottomNav from './TeacherBottomNav';
-import DashboardScreen from './DashboardScreen'; // Asegúrate que la ruta sea correcta
+import DashboardScreen from './DashboardScreen'; 
 
 // --- IMPORTACIÓN DE PANTALLAS REALES ---
 import AllForAllControlScreen from './AllForAllControlScreen';
@@ -18,16 +18,13 @@ import TeacherProfileScreen from './TeacherProfileScreen';
 import BattleManagerScreen from './BattleManagerScreen';
 import StudentListScreen from './StudentListScreen';
 
+// 🔥 IMPORTAMOS LA PANTALLA DE PREMIOS
+import RewardsManagementScreen from '../screens/RewardsManagementScreen';
+
+// 🔥 NUEVO IMPORT: Importamos la pantalla de Bancos que creamos antes
+import QuestionBankScreen from './QuestionBankScreen';
+
 // --- COMPONENTES INTERNOS (Placeholders) ---
-
-const RewardsManagementScreen: React.FC<any> = ({ onBack }) => (
-  <div className="ion-padding">
-    <h2>Gestión de Premios</h2>
-    <p>Crea recompensas para tus alumnos.</p>
-    <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px' }}>Volver</button>
-  </div>
-); 
-
 const BattleLobbyScreen: React.FC<any> = ({ onBack }) => (
   <div className="ion-padding">
     <h2>Sala de Espera</h2>
@@ -60,7 +57,6 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const navigateTo = (screen: TeacherScreen) => setActiveScreen(screen);
 
   const renderContent = () => {
-    // Función para volver al dashboard principal
     const handleBack = () => setActiveScreen(TeacherScreen.Dashboard);
     
     switch (activeScreen) {
@@ -68,23 +64,36 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         return <DashboardScreen navigateTo={navigateTo}/>;
         
       case TeacherScreen.BattleManager:
-        return <BattleManagerScreen students={students} teacherId={user.id} onBack={handleBack} />;
+        return (
+          <BattleManagerScreen 
+            students={students} 
+            teacherId={user.id} 
+            onBack={handleBack} 
+            // 👇 Pasamos la función para navegar al Banco
+            onOpenBank={() => setActiveScreen('questions')} 
+          />
+        );
         
       case TeacherScreen.StudentList:
-        // Renderiza la lista de estudiantes
         return <StudentListScreen onBack={handleBack} />;
         
       case TeacherScreen.Profile:
         return <TeacherProfileScreen user={user} onLogout={onLogout} />;
         
       case TeacherScreen.AllForAll:
-        // Aquí pasamos subjectId hardcodeado o dinámico según tu lógica futura. 
-        // Por ahora asumimos que el componente lo maneja o que TeacherDashboard sabe el subject actual.
-        // Nota: Ajusta las props si AllForAllControlScreen requiere subjectId explícito aquí.
         return <AllForAllControlScreen subjectId={1} teacherName={user.name} onBack={handleBack} />;
         
       case 'rewards':
         return <RewardsManagementScreen teacherId={user.id} onBack={handleBack} />;
+
+      // 🔥 NUEVO CASO: Renderizamos el Banco de Preguntas
+      case 'questions':
+        return (
+           <QuestionBankScreen 
+             onBack={() => setActiveScreen(TeacherScreen.BattleManager)} 
+             teacherId={user.id} // ID Real para guardar en BD
+           />
+        );
         
       default:
         const customModule = customModules.find(m => m.id === activeScreen);

@@ -4,7 +4,6 @@ import { close, add, trash, save, arrowBack, checkmarkCircle } from 'ionicons/ic
 import { socketService } from '../../../../api/socket';
 import './SubjectManagerModal.css';
 
-// Interfaces basadas en tu lógica
 interface Question {
   question_text: string;
   answers: string[];
@@ -14,6 +13,7 @@ interface Question {
 interface Subject {
   id: string;
   name: string;
+  cycle?: string;
   _count?: { questions: number };
 }
 
@@ -30,7 +30,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
   const [isLoading, setIsLoading] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  // --- ESTADOS PARA CREACIÓN (Tu lógica de referencia) ---
   const [setName, setSetName] = useState('');
   const [newQuestions, setNewQuestions] = useState<Question[]>([
     { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }
@@ -40,7 +39,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
     if (isOpen) {
       setMode(initialMode);
       if(initialMode === 'view') loadSubjects();
-      // Resetear formulario al abrir
       if(initialMode === 'create') resetForm();
     }
   }, [isOpen, initialMode]);
@@ -55,12 +53,13 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
     const socket = socketService.connectToBattle();
     socket.emit('get-my-subjects', { teacherId });
     socket.on('subjects-list', (data: Subject[]) => {
-      setSubjects(data);
+      // 🟢 FILTRO: Solo mostramos bancos
+      const banksOnly = data.filter(s => s.cycle === 'BANK');
+      setSubjects(banksOnly);
       setIsLoading(false);
     });
   };
 
-  // --- LÓGICA DE GESTIÓN DE PREGUNTAS (Idéntica a tu referencia) ---
   const handleAddQuestion = () => {
     if (newQuestions.length >= 20) return setToastMsg('Máximo 20 preguntas');
     setNewQuestions([...newQuestions, { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]);
@@ -90,10 +89,7 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
   };
 
   const handleCreateSet = () => {
-    // Validaciones
     if (!setName.trim()) return setToastMsg('Ingresa un nombre para el banco');
-    // if (newQuestions.length < 5) return setToastMsg('Mínimo 5 preguntas requeridas'); // Descomenta si quieres restricción estricta
-
     for (let i = 0; i < newQuestions.length; i++) {
       const q = newQuestions[i];
       if (!q.question_text.trim()) return setToastMsg(`Pregunta ${i + 1} está vacía`);
@@ -103,21 +99,21 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
     setIsLoading(true);
     const socket = socketService.getBattleSocket();
     
-    // Enviamos TODO el objeto complejo al backend
     if (socket) {
+        // 🟢 CREACIÓN: cycle='BANK'
         socket.emit('create-full-subject', { 
             name: setName, 
             teacherId, 
-            questions: newQuestions 
+            questions: newQuestions,
+            cycle: 'BANK' 
         });
 
-        // Esperamos confirmación
         socket.once('subject-created-success', () => {
             setToastMsg('¡Banco creado exitosamente!');
             setIsLoading(false);
             resetForm();
             setMode('view');
-            loadSubjects(); // Recargar lista
+            loadSubjects(); 
         });
 
         socket.once('error', (err) => {
@@ -127,7 +123,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
     }
   };
 
-  // --- RENDERIZADO ---
   const renderContent = () => {
     if (mode === 'view') {
       return (
@@ -150,7 +145,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
                           {sub._count?.questions || 0} preguntas
                         </span>
                       </div>
-                      {/* Aquí irían botones editar/borrar */}
                    </div>
                  ))
                }
@@ -160,7 +154,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
       );
     }
 
-    // --- MODO CREAR (Estilo Idéntico a tu Referencia) ---
     return (
       <div className="sm-container">
         <div className="sm-header-actions">
@@ -190,7 +183,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
             </button>
         </div>
 
-        {/* LISTA DE PREGUNTAS */}
         {newQuestions.map((q, qIdx) => (
             <div key={qIdx} className="sm-question-card">
                 <div className="sm-card-header">
@@ -256,7 +248,6 @@ const SubjectManagerModal: React.FC<SubjectManagerModalProps> = ({ isOpen, onClo
         </IonToolbar>
       </IonHeader>
       <IonContent>{renderContent()}</IonContent>
-      
       <IonToast isOpen={!!toastMsg} message={toastMsg || ''} duration={2000} onDidDismiss={() => setToastMsg(null)} />
     </IonModal>
   );

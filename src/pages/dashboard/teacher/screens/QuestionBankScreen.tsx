@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { IonIcon, IonSpinner, IonAlert } from '@ionic/react';
+import { IonIcon, IonSpinner } from '@ionic/react';
 import { 
   arrowBackOutline, 
   addCircleOutline, 
   trashOutline, 
-  createOutline, 
   listOutline, 
   checkmarkCircle,
   closeCircleOutline,
@@ -14,8 +13,7 @@ import {
 import { socketService } from '../../../../api/socket'; 
 import './QuestionBankScreen.css';
 
-// ID Simulado (Igual que en BattleScreen)
-const TEACHER_ID = "profesor-demo"; 
+// 🔴 BORRADO: const TEACHER_ID = "profesor-demo"; 
 
 interface Question {
   question_text: string;
@@ -26,19 +24,21 @@ interface Question {
 interface Subject {
   id: string;
   name: string;
+  cycle?: string;
   _count?: { questions: number };
 }
 
+// 🟢 AGREGADO: teacherId ahora es obligatorio
 interface QuestionBankScreenProps {
   onBack: () => void;
+  teacherId: string; 
 }
 
-const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
-  // --- ESTADOS ---
+// 🟢 RECIBIMOS teacherId AQUÍ 👇
+const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacherId }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Estados para Crear/Editar
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [setName, setSetName] = useState('');
@@ -46,32 +46,27 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
     { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }
   ]);
 
-  // Alerta de confirmación
-  const [showAlert, setShowAlert] = useState<{show: boolean, msg: string}>({show: false, msg: ''});
-
-  // --- LÓGICA SOCKETS ---
   useEffect(() => {
     const socket = socketService.connectToBattle();
     
-    // 1. Pedir lista de bancos al cargar
-    socket.emit('get-my-subjects', { teacherId: TEACHER_ID });
+    // 🟢 USAMOS EL ID REAL
+    socket.emit('get-my-subjects', { teacherId: teacherId });
 
-    // 2. Escuchar lista
     socket.on('subjects-list', (data: Subject[]) => {
-      setSubjects(data);
+      const banksOnly = data.filter(s => s.cycle === 'BANK');
+      setSubjects(banksOnly);
       setIsLoading(false);
       setIsSubmitting(false);
     });
 
-    // 3. Escuchar éxito de creación
     socket.on('subject-created-success', () => {
       setShowModal(false);
       resetForm();
-      socket.emit('get-my-subjects', { teacherId: TEACHER_ID }); // Recargar
+      // 🟢 USAMOS EL ID REAL
+      socket.emit('get-my-subjects', { teacherId: teacherId });
       alert("¡Banco de preguntas creado exitosamente!");
     });
 
-    // 4. Manejo de errores
     socket.on('error', (err) => {
       alert("Error: " + err);
       setIsSubmitting(false);
@@ -82,9 +77,9 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
       socket.off('subject-created-success');
       socket.off('error');
     };
-  }, []);
+  }, [teacherId]); // 🟢 Agregamos teacherId a las dependencias
 
-  // --- MANEJO DEL FORMULARIO ---
+  // ... (El resto de las funciones handleAddQuestion, etc. siguen igual) ...
   const handleAddQuestion = () => {
     if (questions.length >= 20) return alert('Máximo 20 preguntas por set');
     setQuestions([...questions, { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]);
@@ -116,40 +111,35 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
 
   const validateAndSave = () => {
     if (!setName.trim()) return alert('Ingresa un nombre para el banco');
-    if (questions.length < 1) return alert('Agrega al menos 1 pregunta'); // Bajé el mínimo para pruebas
+    if (questions.length < 1) return alert('Agrega al menos 1 pregunta');
 
-    // Validar campos vacíos
     for (let i = 0; i < questions.length; i++) {
       if (!questions[i].question_text.trim()) return alert(`La pregunta ${i + 1} no tiene texto`);
       if (questions[i].answers.some(a => !a.trim())) return alert(`La pregunta ${i + 1} tiene respuestas vacías`);
     }
 
     setIsSubmitting(true);
-    // Enviar al Backend (Coincide con handleCreateFullSubject del Gateway)
+    // 🟢 USAMOS EL ID REAL AQUÍ TAMBIÉN 👇
     socketService.getBattleSocket()?.emit('create-full-subject', {
       name: setName,
-      teacherId: TEACHER_ID,
-      questions: questions
+      teacherId: teacherId, 
+      questions: questions,
+      cycle: 'BANK' 
     });
   };
 
-  // --- RENDER ---
   return (
     <div className="qbs-container">
-      {/* Botón Volver Flotante */}
       <button onClick={onBack} className="qbs-float-back-btn">
         <IonIcon icon={arrowBackOutline} />
       </button>
 
       <div className="qbs-content">
-        
-        {/* HEADER */}
         <div className="qbs-header">
           <h1 className="qbs-title">Mis Bancos de Preguntas</h1>
           <p className="qbs-subtitle">Gestiona tus cuestionarios para las batallas</p>
         </div>
 
-        {/* LOADING */}
         {isLoading && (
           <div className="qbs-loading">
             <IonSpinner name="crescent" color="primary" />
@@ -157,7 +147,6 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
           </div>
         )}
 
-        {/* LISTA DE BANCOS */}
         {!isLoading && (
           <>
             <div className="qbs-actions">
@@ -167,19 +156,13 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
             </div>
 
             {subjects.length === 0 ? (
-              /* EMPTY STATE */
               <div className="qbs-empty-state">
-                <div className="qbs-empty-icon">
-                  <IonIcon icon={documentTextOutline} />
-                </div>
+                <div className="qbs-empty-icon"><IonIcon icon={documentTextOutline} /></div>
                 <h3>No tienes bancos de preguntas</h3>
                 <p>Crea tu primer set de preguntas para iniciar una batalla.</p>
-                <button className="qbs-btn-outline" onClick={() => setShowModal(true)}>
-                  Crear Ahora
-                </button>
+                <button className="qbs-btn-outline" onClick={() => setShowModal(true)}>Crear Ahora</button>
               </div>
             ) : (
-              /* GRID DE BANCOS */
               <div className="qbs-grid">
                 {subjects.map((sub) => (
                   <div key={sub.id} className="qbs-card">
@@ -191,8 +174,7 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
                       </div>
                     </div>
                     <div className="qbs-card-footer">
-                       {/* Aquí podrías agregar botones de Editar/Eliminar si el backend tuviera esos eventos */}
-                       <span className="qbs-status-badge">Activo</span>
+                        <span className="qbs-status-badge">Listo para Batalla</span>
                     </div>
                   </div>
                 ))}
@@ -202,19 +184,15 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* --- MODAL CREACIÓN (Custom CSS Overlay) --- */}
       {showModal && (
         <div className="qbs-modal-overlay">
           <div className="qbs-modal-content">
             <div className="qbs-modal-header">
               <h2>Nuevo Banco de Preguntas</h2>
-              <button onClick={() => setShowModal(false)} className="qbs-close-icon">
-                <IonIcon icon={closeCircleOutline} />
-              </button>
+              <button onClick={() => setShowModal(false)} className="qbs-close-icon"><IonIcon icon={closeCircleOutline} /></button>
             </div>
 
             <div className="qbs-modal-body">
-              {/* Nombre del Set */}
               <div className="qbs-form-group">
                 <label>Nombre del Banco</label>
                 <input 
@@ -226,13 +204,12 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
                 />
               </div>
 
-              {/* Lista de Preguntas */}
               <div className="qbs-questions-list">
                  <div className="qbs-list-header">
-                    <h3>Preguntas ({questions.length})</h3>
-                    <button className="qbs-btn-small" onClick={handleAddQuestion} disabled={questions.length >= 20}>
-                       <IonIcon icon={addOutline} /> Agregar
-                    </button>
+                   <h3>Preguntas ({questions.length})</h3>
+                   <button className="qbs-btn-small" onClick={handleAddQuestion} disabled={questions.length >= 20}>
+                      <IonIcon icon={addOutline} /> Agregar
+                   </button>
                  </div>
 
                  {questions.map((q, qIdx) => (
@@ -240,13 +217,10 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
                       <div className="qbs-q-header">
                          <span className="qbs-q-num">#{qIdx + 1}</span>
                          {questions.length > 1 && (
-                           <button onClick={() => handleRemoveQuestion(qIdx)} className="qbs-btn-trash">
-                             <IonIcon icon={trashOutline} />
-                           </button>
+                           <button onClick={() => handleRemoveQuestion(qIdx)} className="qbs-btn-trash"><IonIcon icon={trashOutline} /></button>
                          )}
                       </div>
                       
-                      {/* Texto Pregunta */}
                       <input 
                         className="qbs-input full" 
                         placeholder="Escribe la pregunta aquí..."
@@ -254,7 +228,6 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
                         onChange={e => handleQuestionChange(qIdx, 'text', e.target.value)}
                       />
 
-                      {/* Respuestas */}
                       <div className="qbs-answers-grid">
                         {q.answers.map((ans, aIdx) => (
                           <div key={aIdx} className={`qbs-answer-row ${q.correct_answer_index === aIdx ? 'correct' : ''}`}>
@@ -294,7 +267,6 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack }) => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

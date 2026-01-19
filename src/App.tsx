@@ -10,9 +10,11 @@ import Subjects from './pages/academic/Subjects';
 import AssignPoints from './pages/gamification/AssignPoints';
 
 // --- IMPORTS DE GAMIFICACIÓN (DOCENTE) ---
-// Ajusta estas rutas si tus carpetas son diferentes, pero basado en tu info:
 import BattleControlScreen from './pages/dashboard/teacher/screens/BattleControlScreen'; 
 import QuestionBankScreen from './pages/dashboard/teacher/screens/QuestionBankScreen'; 
+
+// 🔥 NUEVO IMPORT: La pantalla real que creamos con Axios
+import RewardsManagementScreen from './pages/dashboard/teacher/screens/RewardsManagementScreen'; 
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -54,22 +56,38 @@ const App: React.FC = () => {
           <Route exact path="/subjects" component={Subjects} />
           <Route exact path="/assign-points" component={AssignPoints} />
 
-          {/* --- RUTAS DEL DOCENTE (BATALLAS) --- */}
+          {/* --- RUTAS DEL DOCENTE (BATALLAS Y PREMIOS) --- */}
           
-          {/* 1. Control de Batalla (Sala de Espera / Juego) */}
-          {/* Nota: Quitamos :roomId porque la sala se crea al entrar */}
+          {/* 1. Control de Batalla */}
           <Route exact path="/teacher/battle" component={BattleControlScreen} />
 
-          {/* 2. Banco de Preguntas (Gestión) */}
+          {/* 2. Banco de Preguntas */}
           <Route 
             exact 
             path="/teacher/questions" 
             render={(props) => (
               <QuestionBankScreen 
-                {...props} // Pasa location, history, match
-                onBack={() => props.history.goBack()} // Conecta el botón volver
+                {...props} 
+                onBack={() => props.history.goBack()} 
               />
             )} 
+          />
+
+          {/* 3. 🔥 NUEVA RUTA: Gestión de Premios */}
+          <Route 
+            exact 
+            path="/teacher/rewards" 
+            render={(props) => {
+               // Recuperamos el usuario del localStorage para pasar el ID
+               const userStr = localStorage.getItem('user');
+               const user = userStr ? JSON.parse(userStr) : { id: '' };
+               return (
+                 <RewardsManagementScreen 
+                   teacherId={user.id} 
+                   onBack={() => props.history.goBack()} 
+                 />
+               );
+            }} 
           />
 
           {/* --- REDIRECCIÓN POR DEFECTO --- */}

@@ -22,9 +22,11 @@ interface BattleManagerScreenProps {
   students: User[]; 
   teacherId: string;
   onBack: () => void;
+  // 👇 NUEVA PROP: Para navegar al banco
+  onOpenBank: () => void;
 }
 
-const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, teacherId, onBack }) => { 
+const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, teacherId, onBack, onOpenBank }) => { 
   const history = useHistory();
   
   // Carga segura
@@ -32,7 +34,6 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
   const [loadingRooms, setLoadingRooms] = useState(true);
 
   useEffect(() => {
-      // Cargamos dentro de un useEffect para evitar errores de hidratación/render
       try {
           const saved = localStorage.getItem(`battles_${teacherId}`);
           if (saved) {
@@ -76,7 +77,8 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
       tempBattleName.current = '';
       setIsLoading(false);
       setIsCreateBattleModalOpen(false); 
-      setTimeout(() => history.push('/teacher/battle'), 50);
+      // Aquí podrías navegar a la sala creada si tienes la ruta configurada
+      // history.push('/teacher/battle'); 
     };
 
     socket.on('room-created', handleRoomCreated);
@@ -97,6 +99,7 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
   const handleOpenBattle = (battleId: string, battleName: string) => {
     localStorage.setItem('currentBattleId', battleId);
     localStorage.setItem('tempBattleName', battleName);
+    // Asumiendo que esta ruta existe en tu App.tsx principal
     history.push(`/teacher/battle`); 
   };
 
@@ -106,8 +109,6 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
         setRooms(prev => prev.filter(r => r.id !== roomId));
     }
   };
-
-  const goToQuestionBank = () => history.push('/teacher/questions');
 
   if (loadingRooms) return <div style={{padding:50, textAlign:'center'}}><IonSpinner/></div>;
 
@@ -122,6 +123,7 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
         </div>
 
         <div className="bm-actions-grid">
+          {/* 👇 CORRECCIÓN: Usamos onOpenBank en lugar del history.push indirecto */}
           <button onClick={() => setShowBankOptions(true)} className="bm-action-btn btn-green">
             <IonIcon icon={bookOutline} className="bm-icon" /> Banco de Preguntas
           </button>
@@ -174,7 +176,28 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, tea
         </div>
       )}
 
-      <IonActionSheet isOpen={showBankOptions} onDidDismiss={() => setShowBankOptions(false)} header="Gestión de Bancos" buttons={[{ text: 'Ver mis bancos', icon: list, handler: goToQuestionBank }, { text: 'Crear banco', icon: create, handler: goToQuestionBank }, { text: 'Cancelar', role: 'cancel' }]} />
+      {/* Menú de opciones de Banco */}
+      <IonActionSheet 
+        isOpen={showBankOptions} 
+        onDidDismiss={() => setShowBankOptions(false)} 
+        header="Gestión de Bancos" 
+        buttons={[
+          { 
+            text: 'Ver mis bancos', 
+            icon: list, 
+            handler: onOpenBank // 🟢 Usamos la prop aquí
+          }, 
+          { 
+            text: 'Crear banco', 
+            icon: create, 
+            handler: onOpenBank // 🟢 Y aquí también
+          }, 
+          { 
+            text: 'Cancelar', 
+            role: 'cancel' 
+          }
+        ]} 
+      />
     </div>
   );
 };

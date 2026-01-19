@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IonButton, IonIcon, IonSpinner, IonToast } from '@ionic/react';
 import { arrowBack, folderOpenOutline, peopleOutline, personOutline } from 'ionicons/icons';
-// Asegúrate de que esta ruta apunte a tu configuración de axios
 import { api } from '../../../../api/axios'; 
 import './StudentListScreen.css';
 
@@ -9,7 +8,6 @@ interface StudentListScreenProps {
   onBack: () => void;
 }
 
-// Interfaces basadas en tu Schema Prisma y lo que devuelve el backend
 interface Subject {
   id: string;
   name: string;
@@ -27,30 +25,23 @@ interface Student {
 }
 
 const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
-  // --- ESTADOS ---
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // --- EFECTOS ---
-  
-  // 1. Carga inicial: Traer las materias del profesor
   useEffect(() => {
     loadSubjects();
   }, []);
 
-  // --- FUNCIONES DE CARGA ---
-
   const loadSubjects = async () => {
     setIsLoading(true);
     try {
-      // Endpoint existente en SubjectController
       const response = await api.get('/subjects');
-      setSubjects(response.data);
+      // 🟢 FILTRO: Excluimos los bancos de preguntas (cycle === 'BANK')
+      const classesOnly = response.data.filter((s: Subject) => s.cycle !== 'BANK');
+      setSubjects(classesOnly);
     } catch (error) {
       console.error('Error cargando materias:', error);
       setErrorMsg('No se pudieron cargar tus clases.');
@@ -61,11 +52,10 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
 
   const handleSelectSubject = async (subject: Subject) => {
     setSelectedSubject(subject);
-    setStudents([]); // Limpiar lista anterior para que no parpadee info vieja
+    setStudents([]); 
     setIsLoading(true);
 
     try {
-      // 👇 CORRECCIÓN AQUÍ: 'enrollment' en singular para coincidir con el backend
       const response = await api.get(`/enrollment/subject/${subject.id}`);
       setStudents(response.data);
     } catch (error) {
@@ -76,15 +66,11 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
     }
   };
 
-  // --- NAVEGACIÓN ---
-
   const handleInternalBack = () => {
     if (selectedSubject) {
-      // Si estamos dentro de una materia, "volvemos" a la lista de materias
       setSelectedSubject(null);
       setStudents([]);
     } else {
-      // Si estamos en la raíz, volvemos al Dashboard principal
       onBack();
     }
   };
@@ -94,13 +80,10 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
     return name.charAt(0).toUpperCase();
   };
 
-  // --- RENDER ---
-
   return (
     <div className="student-list-container">
       <div className="sl-content">
         
-        {/* ENCABEZADO DINÁMICO */}
         <div className="sl-header">
           <IonButton fill="clear" onClick={handleInternalBack} className="sl-back-btn">
              <IonIcon icon={arrowBack} style={{ fontSize: '24px', color: '#334155' }} />
@@ -116,7 +99,6 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
           </div>
         </div>
 
-        {/* CONTENIDO PRINCIPAL */}
         {isLoading && students.length === 0 && subjects.length === 0 ? (
           <div className="loading-container">
             <IonSpinner name="crescent" color="primary" />
@@ -124,7 +106,6 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
           </div>
         ) : (
           <>
-            {/* VISTA 1: GRID DE MATERIAS (Cuando no hay materia seleccionada) */}
             {!selectedSubject && (
               <div className="subjects-grid">
                 {subjects.length === 0 && !isLoading ? (
@@ -142,12 +123,11 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
                         <IonIcon icon={peopleOutline} style={{ fontSize: '2.5rem', color: '#6366f1' }} />
                         <h3 className="subject-name">{subj.name}</h3>
                         
-                        {/* VISUALIZACIÓN DEL CÓDIGO */}
                         <p style={{
                             margin: '5px 0', 
                             fontSize: '1.2rem', 
                             fontWeight: 'bold', 
-                            color: '#f59e0b', // Color Ámbar
+                            color: '#f59e0b', 
                             letterSpacing: '2px'
                         }}>
                             {subj.joinCode}
@@ -160,7 +140,6 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
               </div>
             )}
 
-            {/* VISTA 2: LISTA DE ESTUDIANTES (Cuando hay materia seleccionada) */}
             {selectedSubject && (
               <div className="students-list-wrapper">
                 {students.length === 0 && !isLoading ? (
@@ -188,7 +167,6 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
                     </div>
                   ))
                 )}
-                {/* Spinner pequeño si recargamos la lista interna */}
                 {isLoading && (
                     <div style={{textAlign: 'center', padding: '10px'}}>
                         <IonSpinner name="dots" />
@@ -200,7 +178,6 @@ const StudentListScreen: React.FC<StudentListScreenProps> = ({ onBack }) => {
         )}
       </div>
 
-      {/* Notificaciones de Error */}
       <IonToast
         isOpen={!!errorMsg}
         message={errorMsg || ''}
