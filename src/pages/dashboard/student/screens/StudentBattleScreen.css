@@ -1,0 +1,188 @@
+/* src/pages/dashboard/student/screens/StudentBattleScreen.css */
+
+/* --- FONDO GENERAL --- */
+.student-battle-container {
+    min-height: 100vh;
+    height: 100%;
+    background-color: #f8fafc; /* Fondo claro por defecto (estilo Lobby) */
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden; 
+}
+
+/* --- ESTILO DEL LOBBY (WAITING) --- */
+/* Recuperando el estilo blanco limpio que pediste */
+.lobby-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8fafc; /* Slate-50 */
+    padding: 20px;
+    text-align: center;
+}
+
+.lobby-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.lobby-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.lobby-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+    max-width: 300px;
+    line-height: 1.5;
+}
+
+/* --- PANTALLA DE FEEDBACK (FULL SCREEN FIX) --- */
+/* Esto arregla la barra morada abajo. Usamos position absolute para tapar todo */
+.sb-feedback-overlay {
+    position: fixed; /* Forzamos que flote sobre todo */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999; /* Encima de todo */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Centrado vertical perfecto */
+    color: white;
+    padding: 20px;
+}
+
+.bg-correct { background-color: #166534; } /* Verde oscuro intenso */
+.bg-wrong { background-color: #991b1b; }   /* Rojo oscuro intenso */
+
+.feedback-content-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-20px); /* Un pequeño ajuste visual hacia arriba */
+}
+
+/* Títulos y Textos */
+.feedback-title {
+    font-size: 3.5rem; /* Más grande */
+    font-weight: 900;
+    margin: 20px 0;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.points-pill {
+    background: rgba(0,0,0,0.3);
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 2rem;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    backdrop-filter: blur(5px);
+}
+
+.rank-display {
+    background: white;
+    color: #333;
+    padding: 25px 50px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    text-align: center;
+    min-width: 200px;
+}
+
+.rank-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.rank-value {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #46178F;
+    line-height: 1;
+}
+
+/* --- ANIMACIONES ICONOS --- */
+.checkmark-animation { animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.x-animation { animation: shake 0.5s ease-in-out both; }
+
+@keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+
+/* Barra de tiempo feedback */
+.feedback-timer-bar {
+    position: absolute;
+    bottom: 0; left: 0; width: 100%; height: 10px; background: rgba(0,0,0,0.3);
+}
+.feedback-progress {
+    height: 100%; background: rgba(255,255,255,0.9); width: 100%;
+    animation: shrink 8s linear forwards;
+}
+@keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+/* --- PANTALLA LOCKED (BLANCA/LIMPIA) --- */
+.locked-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f8fafc; /* Fondo blanco/gris claro */
+    color: #1e293b;
+    padding: 20px;
+    text-align: center;
+}
+
+.locked-title { font-size: 2rem; font-weight: 800; margin-top: 30px; margin-bottom: 10px; color: #334155; }
+.locked-subtitle { font-size: 1.1rem; color: #64748b; }
+
+/* Custom Animation Container */
+.custom-waiting-animation {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- KAHOOT LAYOUT --- */
+.kahoot-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    background: #46178F; /* Solo la pregunta tiene fondo morado */
+}
+/* ... (El resto de estilos de Kahoot Grid y botones se mantienen igual que antes, 
+   puedes copiarlos del bloque anterior si faltan, pero lo importante es lo de arriba) ... */
+.kahoot-header { margin-bottom: 20px; width: 100%; }
+.kahoot-progress-track { flex: 1; height: 12px; background: rgba(255,255,255,0.3); border-radius: 6px; margin-right: 15px; }
+.kahoot-progress-fill { height: 100%; background: #FFA602; border-radius: 6px; transition: width 0.5s; }
+.kahoot-counter { color: white; font-weight: 700; }
+.kahoot-question-box { background: white; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 20px; min-height: 150px; display: flex; align-items: center; justify-content: center; }
+.kahoot-question-text { color: #333; font-size: 1.4rem; font-weight: 800; }
+.kahoot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; }
+.kahoot-btn { border: none; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+.k-red { background: #E21B3C; } .k-blue { background: #1368CE; } .k-yellow { background: #D89E00; } .k-green { background: #26890C; }
+.k-icon { font-size: 2.5rem; margin-bottom: 5px; } .k-text { font-size: 1.1rem; font-weight: 700; }

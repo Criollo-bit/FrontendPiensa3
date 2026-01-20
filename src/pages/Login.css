@@ -1,0 +1,136 @@
+/* src/pages/Login.css */
+
+/* --- Fondo General --- */
+ion-content {
+  --background: #f8fafc; /* Slate-50 */
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2rem;
+  background-color: #f8fafc;
+  color: #1e293b; /* Slate-800 */
+}
+
+/* --- Animaciones del Robot --- */
+.robot-container {
+  width: 12rem;
+  height: 12rem;
+  margin: 0 auto;
+  position: relative;
+}
+
+.robot-idle-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.robot-arm {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Inputs Flotantes (Floating Labels) --- */
+.floating-label-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.floating-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 2px solid #e2e8f0; /* Slate-200 */
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+  color: #0f172a;
+}
+
+.floating-input:focus {
+  border-color: #38bdf8; /* Sky-400 */
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.floating-label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: white;
+  padding: 0 0.25rem;
+  color: #64748b; /* Slate-500 */
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+/* Efecto cuando el input tiene texto o foco (Mover label arriba) */
+.floating-input:focus + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label {
+  top: 0;
+  font-size: 0.75rem;
+  color: #0ea5e9; /* Sky-500 */
+}
+
+/* --- Botón Principal --- */
+.btn-primary {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #0ea5e9; /* Sky-500 */
+  color: white;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  transition: transform 0.1s;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* --- Toggle Switch (Estudiante/Docente) --- */
+.role-toggle {
+  display: flex;
+  background-color: #e2e8f0;
+  padding: 0.25rem;
+  border-radius: 9999px;
+  margin-bottom: 1.5rem;
+  position: relative;
+  width: 100%;
+  max-width: 24rem; /* max-w-sm */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.role-btn {
+  flex: 1;
+  padding: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: bold;
+  z-index: 10;
+  border-radius: 9999px;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.role-btn.active {
+  color: #0284c7; /* Sky-600 */
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.role-btn.inactive {
+  color: #64748b;
+}

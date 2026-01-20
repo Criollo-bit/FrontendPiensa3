@@ -1,0 +1,311 @@
+/* RewardsManagementScreen.css */
+
+.rewards-page {
+  height: 100%;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); /* Slate-50 to Slate-100 */
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.rewards-container-limit {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* --- HEADER --- */
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #475569;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-bottom: 24px;
+}
+
+.back-button:hover {
+  color: #1e293b;
+}
+
+.icon-circle {
+  width: 32px;
+  height: 32px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.page-header-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.page-title {
+  font-size: 1.875rem; /* 30px */
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-subtitle {
+  color: #64748b;
+  margin: 0;
+}
+
+/* --- BOTÓN CREAR --- */
+.btn-create-toggle {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+
+.btn-create-toggle.create {
+  background: linear-gradient(to right, #10b981, #0d9488); /* Emerald to Teal */
+}
+
+.btn-create-toggle.create:hover {
+  transform: scale(1.01);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-create-toggle.cancel {
+  background: #64748b;
+}
+
+/* --- FORMULARIO --- */
+.create-form-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #10b981; /* Borde verde a la izquierda */
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background-color: #f8fafc; /* Slate-50 */
+  color: #1e293b;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: #10b981;
+  background-color: white;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: #059669;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s;
+}
+
+.btn-submit:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: #047857;
+}
+
+/* --- LISTA DE PREMIOS --- */
+.empty-state {
+  background: white;
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.reward-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.reward-card.inactive {
+  opacity: 0.7;
+  filter: grayscale(0.8);
+}
+
+.reward-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.reward-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .reward-content {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.reward-info {
+  flex: 1;
+}
+
+.reward-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.subject-tag {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.reward-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.status-badge {
+  background-color: #fee2e2;
+  color: #dc2626;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.reward-desc {
+  color: #475569;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.points-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #fffbeb; /* Amber-50 */
+  border: 1px solid #fef3c7;
+  padding: 4px 12px;
+  border-radius: 8px;
+  color: #d97706; /* Amber-600 */
+  font-weight: 700;
+}
+
+/* --- BOTONES ACCIÓN CARD --- */
+.reward-actions {
+  display: flex;
+  gap: 8px;
+  min-width: 140px;
+}
+
+@media (min-width: 768px) {
+  .reward-actions {
+    flex-direction: column;
+  }
+}
+
+.btn-action {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.btn-toggle {
+  background-color: #dcfce7; /* Green-100 */
+  color: #15803d; /* Green-700 */
+}
+.btn-toggle:hover { background-color: #bbf7d0; }
+
+.btn-toggle.is-active {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+.btn-toggle.is-active:hover { background-color: #e2e8f0; }
+
+.btn-delete {
+  background-color: #fef2f2; /* Red-50 */
+  color: #dc2626; /* Red-600 */
+}
+.btn-delete:hover { background-color: #fee2e2; }

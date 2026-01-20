@@ -1,0 +1,46 @@
+/* Contenedor relativo para posicionar la etiqueta */
+.floating-label-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+/* El campo de texto (Input) */
+.floating-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: white;
+  border: 2px solid #e2e8f0; /* Gris claro */
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  color: #0f172a; /* Texto oscuro */
+}
+
+/* Cuando el input tiene el foco (borde azul) */
+.floating-input:focus {
+  border-color: #38bdf8; /* Azul cielo */
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+/* La etiqueta (Label) en reposo (centro) */
+.floating-label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: white;
+  padding: 0 0.25rem;
+  color: #64748b; /* Gris medio */
+  transition: all 0.2s ease-in-out;
+  pointer-events: none; /* Permite hacer click a través del label */
+}
+
+/* La magia: Cuando el input tiene foco O tiene texto, el label sube */
+.floating-input:focus + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label {
+  top: 0;
+  font-size: 0.75rem;
+  color: #0ea5e9; /* Azul más fuerte */
+  font-weight: 600;
+}

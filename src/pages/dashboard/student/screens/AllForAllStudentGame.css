@@ -1,0 +1,125 @@
+.all-for-all-student-container {
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* --- LOBBY --- */
+.student-lobby-view {
+  margin: auto;
+  width: 85%;
+  text-align: center;
+}
+
+.status-card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  padding: 40px 20px;
+  border-radius: 30px;
+  border: 1px solid white;
+  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.1);
+}
+
+.icon-pulse {
+  font-size: 5rem;
+  color: #8b5cf6;
+  animation: pulse-animation 2s infinite;
+  margin-bottom: 20px;
+}
+
+.welcome-text { color: #4c1d95; font-weight: 800; margin-bottom: 5px; }
+.hint-text { color: #7c3aed; opacity: 0.8; margin-bottom: 25px; }
+
+.pin-pill {
+  display: inline-block;
+  background: #7c3aed;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* --- PLAYING --- */
+.instruction-header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.instruction-pill {
+  background: #f3f4f6;
+  padding: 8px 15px;
+  border-radius: 12px;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.instruction-pill b { color: #7c3aed; text-decoration: underline; }
+
+.word-challenge-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stroop-word {
+  font-size: 4.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+}
+
+.colors-grid-input {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  padding: 20px;
+  height: 45%;
+}
+
+.color-choice-btn {
+  border: none;
+  border-radius: 24px;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+  transition: 0.1s;
+}
+
+.color-choice-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+}
+
+/* --- FEEDBACK --- */
+.student-feedback-view {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.is-correct { background: #22c55e; color: white; }
+.is-wrong { background: #ef4444; color: white; }
+
+.feedback-content { text-align: center; }
+.feedback-icon { font-size: 6rem; margin-bottom: 10px; }
+.loading-dots { margin-top: 30px; font-size: 0.9rem; opacity: 0.8; }
+
+@keyframes pulse-animation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}

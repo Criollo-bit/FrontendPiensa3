@@ -1,0 +1,105 @@
+/* Contenedor principal (fixed bottom) */
+.student-nav-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 80px; /* Altura para el botón flotante */
+  pointer-events: none; /* Permite clicks pasen por arriba */
+}
+
+/* --- BOTÓN FLOTANTE (El círculo activo) --- */
+.floating-active-container {
+  position: absolute;
+  bottom: 32px; /* Ajuste exacto según tu referencia */
+  z-index: 1002;
+  transition: left 0.7s ease-in-out; /* Duración suave */
+  width: 60px;
+  height: 60px;
+  margin-left: -30px; /* Centrar (mitad del ancho) */
+  pointer-events: none;
+}
+
+.floating-outer-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-inner-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: black; /* El diseño original usa negro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+/* --- FONDO SVG (La barra blanca curvada) --- */
+.nav-svg-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  pointer-events: auto; /* Reactivar clicks */
+}
+
+.nav-svg-path {
+  transition: d 0.7s ease-in-out; /* Anima la curva */
+}
+
+/* --- ITEMS DE NAVEGACIÓN --- */
+.nav-items-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  z-index: 1001;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+  pointer-events: none;
+}
+
+.nav-btn {
+  pointer-events: auto;
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 60px;
+  padding-top: 10px;
+  cursor: pointer;
+}
+
+.nav-icon {
+  font-size: 24px;
+  color: #4b5563; /* text-gray-600 */
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4b5563; /* text-gray-600 */
+  white-space: nowrap;
+}
+
+/* Utilidad para ocultar elementos cuando están activos */
+.hidden-element {
+  visibility: hidden;
+  opacity: 0;
+} 

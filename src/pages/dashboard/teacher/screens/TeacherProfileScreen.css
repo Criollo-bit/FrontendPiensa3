@@ -1,0 +1,167 @@
+/* ========================================= */
+/* --- GENERALES / CONTENEDOR PRINCIPAL --- */
+/* ========================================= */
+.profile-screen-container {
+    padding: 0; /* 💥 AJUSTE 1: Eliminado el padding lateral y superior del contenedor base */
+    background-color: #f4f5f8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 40px; 
+}
+
+.profile-content {
+    width: 100%;
+    /* 💥 AJUSTE 2: Disminuye el padding lateral para que la tarjeta sea más ancha */
+    max-width: 450px; 
+    padding: 0 10px; /* Reducido a 10px de padding lateral */
+}
+
+/* ========================================= */
+/* --- TARJETA DE PERFIL (CARD) --- */
+/* ========================================= */
+.profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    /* 💥 AJUSTE 3: Disminuye el margen superior. De 50px a 20px. */
+    margin-top: 20px; 
+}
+
+/* --- Encabezado y Patrón (Gradiente) --- */
+.profile-header {
+    height: 120px;
+    background: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+/* --- AVATAR Y SOLUCIÓN DE RECORTE --- */
+.avatar-container {
+    position: relative;
+    z-index: 10;
+    /* Ajusta el margen superior del avatar para que se superponga */
+    margin-top: 50px; 
+    display: flex;
+    justify-content: center;
+}
+
+.profile-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 6px solid #ffffff; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+    object-fit: cover; 
+    object-position: center top; 
+}
+
+/* ========================================= */
+/* --- INFORMACIÓN DEL PERFIL --- */
+/* ========================================= */
+.profile-info {
+    padding: 20px;
+    padding-top: 15px; 
+}
+
+.profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.profile-title {
+    color: #6c5ce7;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.profile-location {
+    font-size: 0.9rem;
+    color: #777;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.profile-location ion-icon {
+    margin-right: 5px;
+    font-size: 1.1rem;
+    color: #a29bfe;
+}
+
+/* --- Botón de Edición (EDITAR PERFIL) --- */
+.btn-follow {
+    background: #00cec9;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0, 206, 201, 0.4);
+}
+
+.btn-follow:hover {
+    background: #00b894;
+    transform: translateY(-1px);
+}
+
+.btn-follow:active {
+    transform: translateY(1px);
+}
+
+/* --- Sección About / Biografía --- */
+.about-section {
+    text-align: left;
+    margin-top: 20px;
+    padding-top: 25px;
+    border-top: 1px solid #eeeeee;
+}
+
+.about-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.about-text {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* --- Botón Logout --- */
+.btn-logout-bottom {
+    margin-top: 20px;
+    background: none;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 250px;
+    text-transform: uppercase;
+}
+
+.btn-logout-bottom:hover {
+    background: #e74c3c;
+    color: white;
+}
