@@ -105,18 +105,26 @@ const AllForAllStudentGame: React.FC<Props> = ({ subjectId, studentId, studentNa
           </div>
 
           {/* PALABRA DEL RETO (STROOP) */}
-          <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <h1 style={{ 
-              fontSize: '5.5rem', 
-              fontWeight: 900, 
-              margin: 0,
-              filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))',
-              color: challenge.color === 'red' ? '#ef4444' : 
-                     challenge.color === 'blue' ? '#3b82f6' : 
-                     challenge.color === 'green' ? '#22c55e' : '#eab308'
-            }}>
-              {challenge.word}
-            </h1>
+          <div style={{ height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+           <h1 style={{ 
+  /* Bajamos a 10vw para que palabras largas como AMARILLO quepan mejor */
+  fontSize: 'clamp(1.5rem, 10vw, 4.5rem)', 
+  fontWeight: 900, 
+  margin: 0,
+  filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.1))',
+  color: challenge.color === 'red' ? '#ef4444' : 
+         challenge.color === 'blue' ? '#3b82f6' : 
+         challenge.color === 'green' ? '#22c55e' : '#eab308',
+  width: '100%',
+  textAlign: 'center',
+  whiteSpace: 'nowrap',
+  /* Añadimos esto para que si aun así es grande, se encoja un poco más */
+  letterSpacing: '-1px',
+  display: 'block',
+  overflow: 'hidden',
+}}>
+  {challenge.word}
+</h1>
           </div>
 
           {/* BOTONES DE RESPUESTA */}
