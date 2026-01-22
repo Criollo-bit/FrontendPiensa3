@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { IonIcon, IonToast, IonSpinner } from '@ionic/react';
-import { 
-  schoolOutline, trophy, star, pencilOutline, logOutOutline 
-} from 'ionicons/icons';
+import { locationOutline } from 'ionicons/icons';
 
+// Tipos e Importaciones
 import { User } from '../../../../AppTypes';
-import { api } from '../../../../api/axios'; 
+import { api } from '../../../../api/axios';
 import EditStudentProfileModal, { EditableStudent } from './EditStudentProfileModal';
 import './StudentProfileScreen.css';
 
@@ -15,70 +14,54 @@ interface StudentProfileScreenProps {
 }
 
 const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLogout }) => {
-  
+
+  // --- ESTADOS ---
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [scrollY, setScrollY] = useState(0);
 
+  // Estado del perfil
   const [profileData, setProfileData] = useState<EditableStudent>({
     ...user,
-    bio: ''
+    bio: (user as any).bio || '',
+    avatarUrl: (user as any).avatarUrl || user.avatar || '',
+    name: user.name || (user as any).fullName || ''
   });
 
-  const [stats, setStats] = useState({
-    totalPoints: 0,
-    enrolledSubjects: 0,
-    level: 1
-  });
-
+  // --- EFECTOS ---
   useEffect(() => {
     loadUserProfile();
-    loadStudentStats();
   }, []);
 
-  const handleScroll = (e: React.UIEvent<HTMLElement>) => {
-    setScrollY(e.currentTarget.scrollTop);
-  };
-
+  // --- FUNCIONES API ---
   const loadUserProfile = async () => {
+    setIsLoading(true);
     try {
+      // Usamos /auth/me para estudiantes
       const response = await api.get('/auth/me');
       const backendUser = response.data;
 
       setProfileData(prev => ({
         ...prev,
-        name: backendUser.fullName,
-        email: backendUser.email,
-        bio: backendUser.bio,
-        avatarUrl: backendUser.avatarUrl,
-        id: backendUser.id
+        name: backendUser.fullName || prev.name,
+        email: backendUser.email || prev.email,
+        bio: backendUser.bio || prev.bio,
+        avatarUrl: backendUser.avatarUrl || prev.avatarUrl,
+        id: backendUser.id || prev.id,
       }));
+      
+      setErrorMsg(null);
     } catch (error) {
-      console.error('Error loading profile:', error);
-    }
-  };
-
-  const loadStudentStats = async () => {
-    try {
-      const { data } = await api.get('/enrollment/student'); 
-      const totalPoints = data.reduce((acc: number, curr: any) => acc + (curr.accumulatedPoints || 0), 0);
-      const subjectsCount = data.length;
-      const calculatedLevel = Math.floor(totalPoints / 100) + 1; 
-
-      setStats({
-        totalPoints,
-        enrolledSubjects: subjectsCount,
-        level: calculatedLevel
-      });
-    } catch (error) {
-      console.error("Error loading stats", error);
+      console.error('Error cargando perfil:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSaveProfile = async (updatedData: { fullName: string; bio: string; avatarUrl: string }) => {
     setIsLoading(true);
     try {
+      // Endpoint de estudiante
       const response = await api.patch('/auth/me', updatedData);
       const updatedUser = response.data;
 
@@ -88,98 +71,81 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
         bio: updatedUser.bio,
         avatarUrl: updatedUser.avatarUrl
       }));
-      
+
       setIsEditModalOpen(false);
       setErrorMsg(null);
     } catch (error) {
+      console.error('Error guardando perfil:', error);
       setErrorMsg('Error al guardar los cambios.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Generador de avatar si no hay imagen
   const displayImage = profileData.avatarUrl || `https://ui-avatars.com/api/?name=${profileData.name}&background=random`;
 
   return (
     <div className="profile-screen-container">
-      <main className="profile-content" onScroll={handleScroll}>
-        
-        {/* Encabezado con degradado e imagen */}
-        <div className="hero-image-container">
-          <img
-            src={displayImage}
-            alt={profileData.name}
-            className="hero-image"
-            style={{
-              transform: `translateY(${Math.min(scrollY * 0.3, 50)}px)` 
-            }}
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              if (!target.src.includes('ui-avatars.com')) {
-                  target.src = `https://ui-avatars.com/api/?name=${profileData.name}&background=random`;
-              }
-            }}
-          />
-        </div>
+      <main className="profile-content">
 
-        {/* Tarjeta de información principal */}
-        <div className="profile-main-card">
-          <h1 className="profile-name">{profileData.name}</h1>
-          <div className="profile-role">
-            <IonIcon icon={schoolOutline} />
-            <span>Estudiante</span>
-          </div>
-          
-          {profileData.bio && (
-            <p className="profile-bio">"{profileData.bio}"</p>
-          )}
+        {/* Card de Perfil */}
+        <div className="profile-card">
 
-          <div className="stats-row">
-            <div className="stat-item">
-              <div className="stat-number" style={{ color: '#0ea5e9' }}>{stats.level}</div>
-              <div className="stat-label">Nivel</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">{stats.totalPoints}</div>
-              <div className="stat-label">Puntos</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">{stats.enrolledSubjects}</div>
-              <div className="stat-label">Materias</div>
-            </div>
+          {/* Header con Gradiente (Azul para estudiante) */}
+          <div className="profile-header"></div>
+
+          {/* Avatar Circular Centrado */}
+          <div className="avatar-container">
+            <img
+              src={displayImage}
+              alt={profileData.name}
+              className="profile-avatar"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = `https://ui-avatars.com/api/?name=${profileData.name}&background=random`;
+              }}
+            />
           </div>
 
-          <div className="action-buttons-row">
-            <button
+          {/* Información del Perfil */}
+          <div className="profile-info">
+            <h1 className="profile-name">{profileData.name}</h1>
+            <p className="profile-title">Estudiante</p>
+            
+            <p className="profile-location">
+              <IonIcon icon={locationOutline} />
+              Instituto Sudamericano
+            </p>
+
+            {/* Botón EDITAR */}
+            <button 
+              className="btn-follow" 
               onClick={() => setIsEditModalOpen(true)}
-              className="btn-edit-profile"
-              style={{ background: '#0ea5e9' }} 
+              disabled={isLoading}
             >
-              <IonIcon icon={pencilOutline} style={{marginRight: '8px'}} />
-              Editar Perfil
+              {isLoading ? <IonSpinner name="dots" /> : 'EDITAR PERFIL'}
             </button>
-            <button onClick={onLogout} className="btn-logout">
-              <IonIcon icon={logOutOutline} style={{marginRight: '8px'}} />
-              Salir
+
+            {/* About Section (Biografía) */}
+            <div className="about-section">
+              <h3 className="about-title">Acerca de mí</h3>
+              <p className="about-text">
+                {profileData.bio || 'Hola, soy estudiante de Desarrollo de Software. ¡Toca "Editar Perfil" para añadir tu biografía!'}
+              </p>
+            </div>
+
+            {/* Botón Logout */}
+            <button className="btn-logout-bottom" onClick={onLogout}>
+              Cerrar Sesión
             </button>
           </div>
+
         </div>
 
-        {/* Sección de Logros */}
-        <div className="info-section">
-          <div className="glass-card-modern">
-            <h3 className="section-title">
-              <IonIcon icon={trophy} style={{ color: '#f59e0b' }} />
-              Logros Destacados
-            </h3>
-            <div className="empty-achievements">
-                <IonIcon icon={star} className="empty-icon" />
-                <p>¡Pronto verás tus medallas aquí!</p>
-            </div>
-          </div>
-        </div>
       </main>
 
+      {/* MODAL DE EDICIÓN */}
       <EditStudentProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -187,7 +153,8 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
         onSave={handleSaveProfile}
         isLoading={isLoading}
       />
-      
+
+      {/* Toast Error */}
       <IonToast
         isOpen={!!errorMsg}
         message={errorMsg || ''}

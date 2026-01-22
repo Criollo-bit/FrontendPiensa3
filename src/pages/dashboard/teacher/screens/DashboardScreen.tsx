@@ -1,21 +1,22 @@
-import React, { useState } from 'react'; // <--- 1. Importamos useState
-import { IonIcon, IonAlert } from '@ionic/react'; // <--- 2. Importamos IonAlert
-// Agregamos addCircleOutline para el nuevo botón
+import React, { useState } from 'react'; 
+import { IonIcon, IonAlert } from '@ionic/react'; 
 import { flashOutline, peopleOutline, trophyOutline, addCircleOutline } from 'ionicons/icons'; 
 import { useHistory } from 'react-router-dom';
 
 import { TeacherScreen } from '../../../../AppTypes';
 
-// Importamos el Modal (Asegúrate de que la ruta sea correcta donde guardaste el archivo)
+// Importamos el Modal de Crear Materia
 import CreateSubjectModal from './CreateSubjectModal'; 
 
 import './DashboardScreen.css';
 
+// 🔥 CAMBIO 1: Agregamos la propiedad opcional onOpenAssignPoints
 interface DashboardScreenProps {
   navigateTo: (screen: TeacherScreen) => void;
+  onOpenAssignPoints?: () => void; 
 }
 
-// Componente ActionCard reutilizable (Sin cambios)
+// Componente ActionCard reutilizable
 const ActionCard: React.FC<{ 
   title: string; 
   description: string; 
@@ -38,10 +39,11 @@ const ActionCard: React.FC<{
   </button>
 );
 
-const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
+// 🔥 CAMBIO 2: Desestructuramos onOpenAssignPoints
+const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo, onOpenAssignPoints }) => {
   const history = useHistory();
 
-  // --- 3. ESTADOS PARA EL MODAL ---
+  // Estados para el modal de Crear Materia
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
@@ -75,19 +77,26 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
           delay="200ms"
         />
 
-        {/* 3. Asignar Puntos */}
+        {/* 3. Asignar Puntos (MODIFICADO) */}
         <ActionCard
           title="Asignar Puntos"
           description="Otorga puntos a los alumnos manualmente."
           icon={trophyOutline}
-          onClick={() => history.push('/assign-points')}
+          // 🔥 CAMBIO 3: Usamos la función del modal en lugar de history.push
+          onClick={() => {
+            if (onOpenAssignPoints) {
+                onOpenAssignPoints();
+            } else {
+                console.warn("Función onOpenAssignPoints no proporcionada");
+            }
+          }}
           delay="300ms"
         />
 
-        {/* --- 4. NUEVO BOTÓN: CREAR MATERIA --- */}
+        {/* 4. Crear Materia */}
         <ActionCard
           title="Crear Materia"
-          description="Genera una nueva asignatura y obtén el código de acceso."
+          description="Genera una nueva asignatura y obtén el código."
           icon={addCircleOutline}
           onClick={() => setIsCreateModalOpen(true)}
           delay="400ms"
@@ -95,7 +104,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
 
       </div>
 
-      {/* --- 5. RENDERIZADO DEL MODAL Y ALERTA --- */}
+      {/* RENDERIZADO DEL MODAL DE MATERIAS Y ALERTA */}
       <CreateSubjectModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)}
@@ -107,7 +116,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo }) => {
         onDidDismiss={() => setShowSuccessAlert(false)}
         header="¡Materia Creada!"
         subHeader="Código Generado"
-        message="La materia se ha creado correctamente. Comparte el código con tus alumnos para que se unan."
+        message="La materia se ha creado correctamente. Comparte el código con tus alumnos."
         buttons={['Entendido']}
       />
 

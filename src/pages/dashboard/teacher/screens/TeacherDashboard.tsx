@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { 
-  IonButton 
-} from '@ionic/react';
- 
+import React, { useState, useEffect } from 'react';
+import { IonIcon } from '@ionic/react';
+import { notificationsOutline } from 'ionicons/icons';
 import { TeacherScreen, User, AppScreen, CustomModule } from '../../../../AppTypes';
+import { api } from '../../../../api/axios';
 
 // Estilos CSS
 import './TeacherDashboard.css';
@@ -15,24 +14,20 @@ import DashboardScreen from './DashboardScreen';
 // --- IMPORTACIÓN DE PANTALLAS REALES ---
 import AllForAllControlScreen from './AllForAllControlScreen';
 import TeacherProfileScreen from './TeacherProfileScreen';
-import BattleManagerScreen from './BattleManagerScreen';
-import StudentListScreen from './StudentListScreen';
-
-// 🔥 IMPORTAMOS LA PANTALLA DE PREMIOS
-import RewardsManagementScreen from '../screens/RewardsManagementScreen';
-
-// 🔥 NUEVO IMPORT: Importamos la pantalla de Bancos que creamos antes
+import BattleManagerScreen from './BattleManagerScreen'; 
+import StudentListScreen from './StudentListScreen'; 
+import RewardsManagementScreen from '../screens/RewardsManagementScreen'; 
 import QuestionBankScreen from './QuestionBankScreen';
 
-// --- COMPONENTES INTERNOS (Placeholders) ---
+// Modal de Asignar Puntos
+import AssignPointsModal from '../../../gamification/AssignPointsModal';
+
 const BattleLobbyScreen: React.FC<any> = ({ onBack }) => (
   <div className="ion-padding">
     <h2>Sala de Espera</h2>
     <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px' }}>Volver</button>
   </div>
 );
-
-// --- COMPONENTE PRINCIPAL ---
 
 interface TeacherDashboardProps {
   user: User;
@@ -53,7 +48,23 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 }) => {
   
   const [activeScreen, setActiveScreen] = useState<TeacherScreen | string>(TeacherScreen.Dashboard);
-  
+  const [showAssignPointsModal, setShowAssignPointsModal] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const checkNotifications = async () => {
+      try {
+        const { data } = await api.get('/rewards/teacher/pending');
+        setPendingCount(data.length);
+      } catch (e) {
+        console.error("Error al cargar notificaciones");
+      }
+    };
+    checkNotifications();
+    const interval = setInterval(checkNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const navigateTo = (screen: TeacherScreen) => setActiveScreen(screen);
 
   const renderContent = () => {
@@ -61,62 +72,70 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     
     switch (activeScreen) {
       case TeacherScreen.Dashboard:
-        return <DashboardScreen navigateTo={navigateTo}/>;
-        
-      case TeacherScreen.BattleManager:
         return (
-          <BattleManagerScreen 
-            students={students} 
-            teacherId={user.id} 
-            onBack={handleBack} 
-            // 👇 Pasamos la función para navegar al Banco
-            onOpenBank={() => setActiveScreen('questions')} 
-          />
+            <DashboardScreen 
+                navigateTo={navigateTo} 
+                onOpenAssignPoints={() => setShowAssignPointsModal(true)}
+            />
         );
-        
+      case TeacherScreen.BattleManager:
+        return <BattleManagerScreen students={students} teacherId={user.id} onBack={handleBack} onOpenBank={() => setActiveScreen('questions')} />;
       case TeacherScreen.StudentList:
         return <StudentListScreen onBack={handleBack} />;
-        
       case TeacherScreen.Profile:
         return <TeacherProfileScreen user={user} onLogout={onLogout} />;
-        
       case TeacherScreen.AllForAll:
-        return <AllForAllControlScreen subjectId={1} teacherName={user.name} onBack={handleBack} />;
-        
+        return <AllForAllControlScreen subjectId="placeholder-subject-id" teacherName={user.name} onBack={handleBack} />;
       case 'rewards':
         return <RewardsManagementScreen teacherId={user.id} onBack={handleBack} />;
-
-      // 🔥 NUEVO CASO: Renderizamos el Banco de Preguntas
       case 'questions':
-        return (
-           <QuestionBankScreen 
-             onBack={() => setActiveScreen(TeacherScreen.BattleManager)} 
-             teacherId={user.id} // ID Real para guardar en BD
-           />
-        );
-        
+        return <QuestionBankScreen onBack={() => setActiveScreen(TeacherScreen.BattleManager)} teacherId={user.id} />;
       default:
-        const customModule = customModules.find(m => m.id === activeScreen);
-        if (customModule) {
-            return <BattleLobbyScreen onBack={handleBack} />;
-        }
         return <DashboardScreen navigateTo={navigateTo} />;
     }
   };
 
   return (
     <div className="teacher-dashboard-container">
-      {/* Área Principal con Scroll */}
-      <main className="teacher-content-area">
+      
+      {/* HEADER AJUSTADO PARA GANAR ESPACIO VERTICAL */}
+      <header className="dashboard-header-dark">
+        <div className="header-info-main">
+          <p className="welcome-label">Hola, <strong>{(user?.name || 'Juan').split(' ')[0]}</strong></p>
+          <h1 className="header-title-main">Panel de Docente</h1>
+          <p className="header-subtitle-main">Gestiona tus clases y actividades.</p>
+        </div>
+        
+        <div className="header-actions-main">
+          <button 
+            className="notif-bell-main" 
+            onClick={() => navigateTo('rewards' as any)}
+          >
+            <div className="bell-wrapper-main">
+              <IonIcon icon={notificationsOutline} />
+              {pendingCount > 0 && (
+                <span className="notif-badge-float-main">{pendingCount}</span>
+              )}
+            </div>
+          </button>
+        </div>
+      </header>
+
+      {/* ÁREA DE CONTENIDO CON OVERLAP AJUSTADO */}
+      <main className="teacher-content-area overlap-active">
         {renderContent()}
       </main>
       
-      {/* Barra de Navegación Inferior */}
       <TeacherBottomNav
         activeScreen={activeScreen}
         setActiveScreen={setActiveScreen}
         enabledModules={enabledModules}
         customModules={customModules}
+      />
+
+      <AssignPointsModal 
+        isOpen={showAssignPointsModal}
+        onClose={() => setShowAssignPointsModal(false)}
       />
     </div>
   );

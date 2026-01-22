@@ -7,14 +7,16 @@ import { IonReactRouter } from '@ionic/react-router';
 import Login from './pages/auth/Login';
 import Home from './pages/dashboard/Home';
 import Subjects from './pages/academic/Subjects';
-import AssignPoints from './pages/gamification/AssignPoints';
+import AssignPoints from './pages/gamification/AssignPointsModal';
 
 // --- IMPORTS DE GAMIFICACIÓN (DOCENTE) ---
 import BattleControlScreen from './pages/dashboard/teacher/screens/BattleControlScreen'; 
-import QuestionBankScreen from './pages/dashboard/teacher/screens/QuestionBankScreen'; 
-
-// 🔥 NUEVO IMPORT: La pantalla real que creamos con Axios
+import QuestionBankScreen from './pages/dashboard/teacher/screens/QuestionBankScreen';
 import RewardsManagementScreen from './pages/dashboard/teacher/screens/RewardsManagementScreen'; 
+
+// --- IMPORTS DE ESTUDIANTE ---
+import MyClassesScreen from './pages/dashboard/student/screens/MyClassesScreen';
+import StudentClassDetailScreen from './pages/dashboard/student/screens/StudentClassDetailScreen'; 
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -42,43 +44,44 @@ const App: React.FC = () => {
   return (
     <IonApp>
       <IonReactRouter>
-        
-        {/* El Outlet maneja el cambio de pantallas */}
+         
         <IonRouterOutlet>
           
           {/* --- RUTAS PÚBLICAS --- */}
           <Route exact path="/login" component={Login} />
           
-          {/* --- HOME (DASHBOARD PRINCIPAL) --- */}
+          {/* --- HOME --- */}
           <Route exact path="/home" component={Home} />
 
-          {/* --- RUTAS ACADÉMICAS Y GAMIFICACIÓN --- */}
+          {/* --- ACADÉMICAS --- */}
           <Route exact path="/subjects" component={Subjects} />
           <Route exact path="/assign-points" component={AssignPoints} />
 
-          {/* --- RUTAS DEL DOCENTE (BATALLAS Y PREMIOS) --- */}
-          
-          {/* 1. Control de Batalla */}
+          {/* --- DOCENTE --- */}
           <Route exact path="/teacher/battle" component={BattleControlScreen} />
-
-          {/* 2. Banco de Preguntas */}
+          
+          {/* 🔥 CORRECCIÓN AQUÍ (Línea 65) 🔥 
+              Ahora recuperamos el usuario y pasamos 'teacherId' 
+          */}
           <Route 
             exact 
             path="/teacher/questions" 
-            render={(props) => (
-              <QuestionBankScreen 
-                {...props} 
-                onBack={() => props.history.goBack()} 
-              />
-            )} 
+            render={(props) => {
+              const userStr = localStorage.getItem('user');
+              const user = userStr ? JSON.parse(userStr) : { id: '' };
+              return (
+                <QuestionBankScreen 
+                   onBack={() => props.history.goBack()}
+                   teacherId={user.id} // 👈 ¡ESTO FALTABA!
+                />
+              );
+            }} 
           />
-
-          {/* 3. 🔥 NUEVA RUTA: Gestión de Premios */}
+ 
           <Route 
             exact 
             path="/teacher/rewards" 
-            render={(props) => {
-               // Recuperamos el usuario del localStorage para pasar el ID
+            render={(props) => { 
                const userStr = localStorage.getItem('user');
                const user = userStr ? JSON.parse(userStr) : { id: '' };
                return (
@@ -90,7 +93,20 @@ const App: React.FC = () => {
             }} 
           />
 
-          {/* --- REDIRECCIÓN POR DEFECTO --- */}
+          {/* --- ESTUDIANTE --- */}
+          <Route 
+            exact 
+            path="/student/my-classes" 
+            component={MyClassesScreen} 
+          />
+
+          <Route 
+            exact 
+            path="/student/class/:subjectId" 
+            component={StudentClassDetailScreen} 
+          />
+
+          {/* --- REDIRECCIÓN --- */}
           <Route exact path="/">
             <Redirect to="/login" />
           </Route>

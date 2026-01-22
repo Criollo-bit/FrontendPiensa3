@@ -3,34 +3,31 @@
 .rewards-page {
   height: 100%;
   overflow-y: auto;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); /* Slate-50 to Slate-100 */
-  padding: 24px;
+  background-color: #f8fafc;
+  padding: 16px; /* Reducido de 20px */
   font-family: 'Inter', sans-serif;
 }
 
 .rewards-container-limit {
-  max-width: 900px;
+  max-width: 600px;
   margin: 0 auto;
+  padding-bottom: 80px; /* Espacio extra abajo para que no lo tape el menú */
 }
 
 /* --- HEADER --- */
+.header-nav { margin-bottom: 15px; }
 .back-button {
   display: flex;
   align-items: center;
   gap: 8px;
   background: transparent;
   border: none;
-  color: #475569;
   font-weight: 600;
+  color: #475569;
   cursor: pointer;
-  transition: color 0.2s;
-  margin-bottom: 24px;
+  padding: 0;
+  font-size: 0.9rem;
 }
-
-.back-button:hover {
-  color: #1e293b;
-}
-
 .icon-circle {
   width: 32px;
   height: 32px;
@@ -39,39 +36,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  color: #334155;
+  font-size: 1.1rem;
 }
 
 .page-header-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid #e2e8f0;
+  text-align: center;
+  margin-bottom: 20px;
 }
-
 .page-title {
-  font-size: 1.875rem; /* 30px */
+  font-size: 1.5rem; /* Más pequeño (antes 1.8) */
   font-weight: 800;
   color: #1e293b;
-  margin: 0 0 8px 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  margin: 0 0 4px 0;
 }
-
-.page-subtitle {
-  color: #64748b;
-  margin: 0;
-}
+.page-subtitle { color: #64748b; font-size: 0.85rem; margin: 0; }
 
 /* --- BOTÓN CREAR --- */
 .btn-create-toggle {
   width: 100%;
-  padding: 16px;
+  padding: 14px; /* Más compacto */
   border-radius: 12px;
   font-weight: 700;
+  font-size: 0.95rem;
   color: white;
   display: flex;
   align-items: center;
@@ -79,233 +67,202 @@
   gap: 8px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s;
-  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+  transition: transform 0.1s;
+  margin-bottom: 25px;
 }
-
-.btn-create-toggle.create {
-  background: linear-gradient(to right, #10b981, #0d9488); /* Emerald to Teal */
-}
-
-.btn-create-toggle.create:hover {
-  transform: scale(1.01);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.btn-create-toggle.cancel {
-  background: #64748b;
-}
+.btn-create-toggle:active { transform: scale(0.98); }
+.btn-create-toggle.create { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+.btn-create-toggle.cancel { background: #ef4444; box-shadow: none; }
 
 /* --- FORMULARIO --- */
 .create-form-card {
   background: white;
+  padding: 20px;
   border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #10b981; /* Borde verde a la izquierda */
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #334155;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.form-input, .form-textarea, .form-select {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
-  background-color: #f8fafc; /* Slate-50 */
-  color: #1e293b;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus, .form-textarea:focus, .form-select:focus {
-  border-color: #10b981;
-  background-color: white;
-}
-
-.btn-submit {
-  width: 100%;
-  padding: 12px;
-  background-color: #059669;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 16px;
-  transition: background 0.2s;
-}
-
-.btn-submit:disabled {
-  background-color: #cbd5e1;
-  cursor: not-allowed;
-}
-
-.btn-submit:hover:not(:disabled) {
-  background-color: #047857;
-}
-
-/* --- LISTA DE PREMIOS --- */
-.empty-state {
-  background: white;
-  border-radius: 16px;
-  padding: 48px;
-  text-align: center;
+  box-shadow: 0 8px 25px -10px rgba(0,0,0,0.1);
+  margin-bottom: 25px;
   border: 1px solid #e2e8f0;
 }
+.form-group { margin-bottom: 15px; }
+.form-label { display: block; font-weight: 600; color: #334155; margin-bottom: 6px; font-size: 0.85rem; }
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.95rem;
+  outline: none;
+}
+.form-input:focus { border-color: #3b82f6; background: white; }
+.btn-submit {
+  width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 10px;
+}
+
+/* --- TARJETAS DE PREMIOS (Compactas) --- */
+.rewards-list { display: flex; flex-direction: column; gap: 15px; }
 
 .reward-card {
   background: white;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s;
-}
-
-.reward-card.inactive {
-  opacity: 0.7;
-  filter: grayscale(0.8);
-}
-
-.reward-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.reward-content {
+  border-radius: 16px; /* Menos redondeado */
+  padding: 16px;       /* Menos padding (antes 20px) */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;           /* Menos espacio entre elementos */
+  position: relative;
+  overflow: hidden;
 }
 
-@media (min-width: 768px) {
-  .reward-content {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-}
+.reward-card.inactive { opacity: 0.6; filter: grayscale(100%); }
 
-.reward-info {
-  flex: 1;
-}
-
-.reward-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-.subject-tag {
-  background-color: #f1f5f9;
-  color: #475569;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-}
-
-.reward-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-}
-
-.status-badge {
-  background-color: #fee2e2;
-  color: #dc2626;
-  font-size: 0.75rem;
+/* 1. Header */
+.rc-header { display: flex; justify-content: space-between; align-items: center; }
+.rc-subject-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.7rem;
   font-weight: 800;
   padding: 4px 10px;
-  border-radius: 99px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.rc-status-badge {
+  background: #fee2e2; color: #dc2626; font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;
 }
 
-.reward-desc {
-  color: #475569;
-  font-size: 0.95rem;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
+/* 2. Body */
+.rc-body { text-align: center; }
+.rc-title { margin: 0 0 4px 0; font-size: 1.1rem; color: #1e293b; font-weight: 700; }
+.rc-desc { margin: 0; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
 
-.points-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background-color: #fffbeb; /* Amber-50 */
-  border: 1px solid #fef3c7;
-  padding: 4px 12px;
-  border-radius: 8px;
-  color: #d97706; /* Amber-600 */
-  font-weight: 700;
-}
-
-/* --- BOTONES ACCIÓN CARD --- */
-.reward-actions {
-  display: flex;
-  gap: 8px;
-  min-width: 140px;
-}
-
-@media (min-width: 768px) {
-  .reward-actions {
-    flex-direction: column;
-  }
-}
-
-.btn-action {
-  flex: 1;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.875rem;
-  border: none;
-  cursor: pointer;
+/* 3. Hero: Puntos (Compacto) */
+.rc-points-hero {
+  background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%);
+  border-radius: 12px;
+  padding: 8px 15px; /* Mucho más delgado */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: background 0.2s;
+  gap: 8px;
+  color: #b45309;
+  margin: 0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.btn-toggle {
-  background-color: #dcfce7; /* Green-100 */
-  color: #15803d; /* Green-700 */
-}
-.btn-toggle:hover { background-color: #bbf7d0; }
+.rc-star-icon { font-size: 1.6rem; /* Reducido de 2.5rem */ color: #d97706; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1)); }
+.rc-points-value { font-size: 1.8rem; /* Reducido de 2.5rem */ font-weight: 800; line-height: 1; }
+.rc-points-label { font-size: 0.8rem; font-weight: 700; opacity: 0.8; margin-top: 6px; }
 
-.btn-toggle.is-active {
-  background-color: #f1f5f9;
-  color: #475569;
+/* 4. Actions: Botones abajo */
+.rc-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+.rc-btn {
+  padding: 10px; /* Botones más delgados */
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
 }
-.btn-toggle.is-active:hover { background-color: #e2e8f0; }
+.rc-btn:active { opacity: 0.8; }
+
+.btn-disable { background: #f1f5f9; color: #475569; }
+.btn-enable { background: #dcfce7; color: #166534; }
 
 .btn-delete {
-  background-color: #fef2f2; /* Red-50 */
-  color: #dc2626; /* Red-600 */
+  background: #fee2e2;
+  color: #dc2626;
+  flex: 0 0 42px; /* Botón cuadrado más pequeño */
+  font-size: 1.1rem;
 }
-.btn-delete:hover { background-color: #fee2e2; }
+
+/* Empty State */
+.empty-state { padding: 40px; text-align: center; color: #94a3b8; }
+
+/* --- NUEVA SECCIÓN: SOLICITUDES PENDIENTES --- */
+.pending-rewards-section {
+  margin-bottom: 30px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 2px dashed #3b82f6; /* Azul para resaltar */
+}
+
+.pending-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 15px 0;
+}
+
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pending-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+}
+
+.pending-info h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.p-reward-name {
+  margin: 2px 0;
+  font-size: 0.85rem;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.p-subject {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pending-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.p-btn {
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.p-btn:active { transform: scale(0.9); }
+.p-btn.approve { color: #10b981; }
+.p-btn.reject { color: #ef4444; }

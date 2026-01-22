@@ -20,12 +20,14 @@ export enum TeacherScreen {
   Rewards = 'rewards'
 }
 
+// 👇 AQUÍ AGREGAMOS EL studentCode
 export interface User {
   id: string;
   email: string;
   name: string;
   role: AppRole | string;
   avatar?: string;
+  studentCode?: string; // 👈 ¡ESTA LÍNEA ES LA CLAVE!
 }
 
 export type Student = User;

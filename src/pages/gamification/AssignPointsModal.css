@@ -1,0 +1,19 @@
+ion-modal.assign-points-modal {
+    --height: auto; --max-height: 90%; --width: 90%; --max-width: 400px;
+    --border-radius: 20px; --box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+.modal-content-wrapper { background: #ffffff; padding: 20px; position: relative; overflow-y: auto; max-height: 80vh; }
+.modal-close-btn { position: absolute; top: 15px; right: 15px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 1.2rem; cursor: pointer; z-index: 10; }
+.card-header { text-align: center; margin-bottom: 20px; }
+.card-header h2 { margin: 0; font-size: 1.4rem; font-weight: 800; color: #1e293b; }
+.input-group { margin-bottom: 12px; }
+.label-with-icon { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: #475569; font-weight: 700; font-size: 0.8rem; }
+.label-with-icon ion-icon { color: #3b82f6; font-size: 1rem; }
+.custom-input-wrapper { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 0 10px; min-height: 42px; display: flex; align-items: center; }
+.custom-select { width: 100%; font-size: 0.9rem; }
+.custom-input-wrapper ion-input { font-size: 0.9rem; --padding-start: 0; }
+.points-wrapper { justify-content: space-between; }
+.points-input { font-weight: 800; color: #1e293b; max-width: 80px; }
+.quick-points { display: flex; gap: 6px; }
+.quick-points span { font-size: 0.7rem; background: #e0f2fe; color: #0284c7; padding: 4px 8px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+.btn-assign-submit { margin-top: 20px; --background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); --border-radius: 12px; font-weight: 700; height: 45px; }

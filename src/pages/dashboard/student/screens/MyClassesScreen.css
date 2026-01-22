@@ -1,0 +1,127 @@
+/* MyClassesScreen.css */
+
+.my-classes-inner {
+    background-color: #f8fafc;
+    min-height: 100%;
+}
+
+/* 🟢 ARREGLO RESPONSIVE: Espacio superior seguro */
+.safe-area-top {
+    padding-top: 60px; /* Baja el título para que no choque con el notch */
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 25px;
+}
+
+.sl-header-text h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.sl-header-text p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+/* --- GRID --- */
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 15px;
+    padding: 0 20px;
+}
+
+.subject-folder-card {
+    position: relative; /* Necesario para posicionar el botón de menú */
+    background: white;
+    padding: 20px 15px;
+    border-radius: 20px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.1s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 180px;
+    border: 1px solid #f1f5f9;
+}
+
+.subject-folder-card:active {
+    transform: scale(0.97);
+}
+
+/* 🟢 BOTÓN DE 3 PUNTOS */
+.card-options-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    color: #94a3b8;
+    padding: 6px;
+    z-index: 10;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-options-btn:active {
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+/* Resto de estilos */
+.folder-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background-color: #e0f2fe;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    margin-top: 10px; /* Espacio extra por el botón de menú */
+}
+
+.folder-icon-wrapper ion-icon { font-size: 24px; color: #0ea5e9; }
+
+.subject-name {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #334155;
+    line-height: 1.2;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.teacher-name-label { margin: 0; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
+
+.subject-cycle {
+    margin-top: auto;
+    font-size: 0.7rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* Loading & Empty */
+.loading-container { display: flex; flex-direction: column; align-items: center; padding-top: 50px; color: #64748b; }
+.empty-state-container { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 20px; background: white; border-radius: 20px; border: 2px dashed #e2e8f0; }
+.empty-icon-circle { width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 40px; color: #94a3b8; }
+.empty-state-container h3 { margin: 0 0 10px 0; color: #334155; font-weight: 700; }
+.empty-state-container p { color: #64748b; margin: 0 0 20px 0; }
+.empty-btn { --background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+
+/* Color rojo para alerta */
+.alert-danger-text {
+    color: var(--ion-color-danger) !important;
+    font-weight: bold;
+}

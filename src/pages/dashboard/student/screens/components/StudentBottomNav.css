@@ -91,10 +91,11 @@
   color: #4b5563; /* text-gray-600 */
 }
 
+/* En StudentBottomNav.css, ajusta nav-label si es necesario */
 .nav-label {
-  font-size: 10px;
+  font-size: 9px; /* Reducido de 10px a 9px para que quepan mejor los 6 items */
   font-weight: 500;
-  color: #4b5563; /* text-gray-600 */
+  color: #4b5563; 
   white-space: nowrap;
 }
 
@@ -103,3 +104,4 @@
   visibility: hidden;
   opacity: 0;
 } 
+

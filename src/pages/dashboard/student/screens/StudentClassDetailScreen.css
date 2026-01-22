@@ -1,0 +1,112 @@
+/* --- ESTILOS GENERALES --- */
+.class-detail-content {
+    --background: #f8fafc;
+}
+
+.loading-center, .error-center {
+    height: 100%; display: flex; flex-direction: column; 
+    align-items: center; justify-content: center; color: #64748b;
+}
+
+/* Tarjeta de Saldo */
+.points-hero-card {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    margin: 10px 20px 25px;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+}
+.points-label { font-size: 0.8rem; letter-spacing: 1px; opacity: 0.9; margin-bottom: 5px; text-transform: uppercase; }
+.points-value { font-size: 3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.teacher-ref { margin-top: 10px; font-size: 0.85rem; background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 12px; border-radius: 12px; }
+
+/* Sección Premios */
+.section-header {
+    margin: 0 20px 15px; font-size: 1.1rem; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 8px;
+}
+
+.rewards-grid { padding: 0 20px 40px; display: flex; flex-direction: column; gap: 15px; }
+
+.reward-item-card {
+    background: white; padding: 15px; border-radius: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s;
+}
+
+.reward-item-card.locked {
+    opacity: 0.7;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.reward-info h4 { margin: 0 0 4px; color: #1e293b; font-weight: 700; font-size: 1rem; }
+.reward-desc { margin: 0 0 8px; color: #64748b; font-size: 0.85rem; max-width: 200px; }
+
+.cost-badge { font-weight: 700; font-size: 0.9rem; }
+.cost-badge.affordable { color: #10b981; } 
+.cost-badge.expensive { color: #ef4444; } 
+
+.redeem-btn { height: 35px; --border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+
+.empty-rewards { text-align: center; padding: 30px; color: #94a3b8; font-style: italic; background: white; border-radius: 16px; border: 1px dashed #cbd5e1; }
+
+/* --- MODALES PERSONALIZADOS --- */
+ion-modal.custom-modal-small {
+    --width: 90%;
+    --max-width: 350px;
+    --height: auto;
+    --border-radius: 20px;
+    --box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modal-content-wrapper {
+    background: white;
+    padding: 25px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-icon-header {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px; margin-bottom: 15px;
+}
+.modal-icon-header.success { background: #ecfdf5; color: #10b981; }
+.modal-icon-header.error { background: #fef2f2; color: #ef4444; }
+
+.modal-content-wrapper h2 { margin: 0 0 10px; font-size: 1.3rem; font-weight: 800; color: #1e293b; }
+.modal-content-wrapper p { margin: 0 0 20px; color: #64748b; font-size: 0.95rem; line-height: 1.5; }
+
+.reward-preview-box {
+    background: #f8fafc; border: 1px solid #e2e8f0;
+    padding: 15px; border-radius: 12px; width: 100%; margin-bottom: 15px;
+}
+.reward-preview-box h3 { margin: 0 0 5px; font-size: 1.1rem; color: #334155; font-weight: 700; }
+.pts-tag { background: #ef4444; color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+
+.modal-note { font-size: 0.8rem !important; color: #94a3b8 !important; margin-bottom: 25px !important; }
+
+.modal-actions { display: flex; gap: 10px; width: 100%; }
+.modal-actions.single { justify-content: center; }
+
+button.btn-cancel, button.btn-confirm {
+    flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.1s;
+}
+button.btn-cancel:active, button.btn-confirm:active { transform: scale(0.96); }
+
+button.btn-cancel { background: #f1f5f9; color: #475569; }
+button.btn-confirm { background: #10b981; color: white; box-shadow: 0 4px 10px -2px rgba(16, 185, 129, 0.4); }
+
+.full-width { width: 100%; }
+
+/* Estilo para el botón de alerta rojo (opcional, si Ionic no lo toma solo) */
+.alert-danger-button {
+    color: var(--ion-color-danger) !important;
+    font-weight: bold;
+}

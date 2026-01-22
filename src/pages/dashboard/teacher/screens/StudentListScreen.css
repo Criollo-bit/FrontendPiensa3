@@ -1,118 +1,137 @@
-/* Contenedor Principal */
 .student-list-container {
     height: 100%;
-    width: 100%;
-    overflow-y: auto;
-    background-color: #f8fafc;
-    padding-bottom: 80px;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc; /* Fondo gris claro */
 }
 
 .sl-content {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
 }
 
-/* Header */
 .sl-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 25px;
 }
 
 .sl-back-btn {
+    margin-right: 15px;
     --padding-start: 0;
-    --padding-end: 0;
-    margin: 0;
 }
 
 .sl-title-box h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
+    margin: 0;
+    font-size: 1.8rem;
     color: #1e293b;
-    margin: 0;
-}
-
-.sl-subtitle {
-    color: #64748b;
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-/* --- VISTA 1: GRID DE MATERIAS --- */
-.subjects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-}
-
-.subject-folder-card {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    border: 1px solid #e2e8f0;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.subject-folder-card:active {
-    transform: scale(0.96);
-    background-color: #f1f5f9;
-}
-
-.subject-name {
     font-weight: 700;
-    color: #334155;
+}
+
+.sl-title-box .sl-subtitle {
+    margin: 5px 0 0;
+    color: #64748b;
+}
+
+/* --- ESTILOS DE LA TARJETA DEL CÓDIGO (NUEVO) --- */
+.code-banner-card {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* Gradiente azul */
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5); /* Sombra azul suave */
+}
+
+.code-label {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    text-transform: uppercase;
+}
+
+.code-display-container {
+    background: rgba(255, 255, 255, 0.1); /* Fondo semi-transparente */
+    border-radius: 12px;
+    padding: 15px 25px;
+    margin: 15px 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.code-value {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    font-family: 'Courier New', Courier, monospace; /* Fuente monoespaciada para el código */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.copy-icon {
+    font-size: 1.8rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.copy-icon:hover {
+    opacity: 1;
+}
+
+.code-hint {
     margin: 0;
     font-size: 1rem;
+    opacity: 0.9;
 }
 
-.subject-cycle {
-    font-size: 0.75rem;
-    color: #64748b;
-    background: #f1f5f9;
-    padding: 2px 10px;
-    border-radius: 10px;
+/* --- ESTILOS DE LA LISTA DE ESTUDIANTES --- */
+.list-section-title {
+    font-size: 1.2rem;
+    color: #334155;
+    margin-bottom: 15px;
     font-weight: 600;
 }
 
-/* --- VISTA 2: LISTA DE ESTUDIANTES --- */
 .students-list-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 10px;
 }
 
 .student-item {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    background: white;
-    padding: 1rem;
-    border-radius: 0.8rem;
-    border-bottom: 1px solid #f1f5f9;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.student-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .student-avatar {
-    width: 45px;
-    height: 45px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: white;
+    background: #e0e7ff;
+    color: #4f46e5;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.5rem;
     font-weight: bold;
-    font-size: 1.2rem;
+    margin-right: 15px;
     overflow: hidden;
 }
 
@@ -128,35 +147,234 @@
 
 .student-details h3 {
     margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.1rem;
     color: #1e293b;
+    font-weight: 600;
 }
 
 .student-details p {
-    margin: 2px 0 0 0;
-    font-size: 0.85rem;
+    margin: 5px 0 0;
+    font-size: 0.9rem;
     color: #64748b;
 }
 
 .joined-date {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: #94a3b8;
 }
 
-/* Loading y Empty States */
-.loading-container {
+/* --- ESTILOS DEL GRID DE MATERIAS (VISTA PRINCIPAL) --- */
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+}
+
+.subject-folder-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
     text-align: center;
-    padding: 3rem;
-    color: #64748b;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+}
+
+.subject-folder-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    border-color: #cbd5e1;
+}
+
+.subject-name {
+    margin: 10px 0 5px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.subject-cycle {
+    font-size: 0.85rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+}
+
+/* --- LOADING Y EMPTY STATES --- */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    color: #64748b;
 }
 
 .empty-state-icon {
-    font-size: 3rem;
+    font-size: 4rem;
     color: #cbd5e1;
-    margin-bottom: 0.5rem;
+    margin-bottom: 15px;
 }
+
+.student-list-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+}
+
+.sl-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sl-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.sl-back-btn { margin-right: 15px; --padding-start: 0; }
+.sl-title-box h1 { margin: 0; font-size: 1.8rem; color: #1e293b; font-weight: 700; }
+.sl-title-box .sl-subtitle { margin: 5px 0 0; color: #64748b; }
+
+/* --- 🟢 TARJETA DEL CÓDIGO (REDUCIDA) --- */
+.code-banner-card {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 12px;
+    padding: 15px; /* Menos padding */
+    text-align: center;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 20px -5px rgba(59, 130, 246, 0.4);
+}
+
+.code-label {
+    margin: 0;
+    font-size: 0.8rem; /* Fuente más pequeña */
+    font-weight: 600;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    text-transform: uppercase;
+}
+
+.code-display-container {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 8px 20px; /* Menos padding */
+    margin: 10px 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.code-value {
+    font-size: 2rem; /* Reducido de 3rem a 2rem */
+    font-weight: 800;
+    letter-spacing: 3px;
+    font-family: 'Courier New', Courier, monospace;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.copy-icon { font-size: 1.4rem; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
+.copy-icon:hover { opacity: 1; }
+.code-hint { margin: 0; font-size: 0.85rem; opacity: 0.9; }
+
+/* --- LISTA DE ESTUDIANTES --- */
+.list-section-title { font-size: 1.2rem; color: #334155; margin-bottom: 15px; font-weight: 600; }
+.students-list-wrapper { display: flex; flex-direction: column; gap: 10px; }
+.student-item { background: white; padding: 15px; border-radius: 12px; display: flex; align-items: center; border: 1px solid #e2e8f0; transition: transform 0.2s, box-shadow 0.2s; }
+.student-avatar { width: 50px; height: 50px; border-radius: 50%; background: #e0e7ff; color: #4f46e5; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-right: 15px; overflow: hidden; }
+.student-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.student-details { flex: 1; }
+.student-details h3 { margin: 0; font-size: 1.1rem; color: #1e293b; font-weight: 600; }
+.student-details p { margin: 5px 0 0; font-size: 0.9rem; color: #64748b; }
+.joined-date { font-size: 0.85rem; color: #94a3b8; }
+
+/* --- 🟢 GRID DE MATERIAS (TARJETAS PEQUEÑAS) --- */
+.subjects-grid {
+    display: grid;
+    /* Tarjetas de ~135px de ancho */
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+    gap: 15px;
+}
+
+.subject-folder-card {
+    position: relative; /* Necesario para los 3 puntos */
+    background: white;
+    padding: 15px 10px; /* Menos padding */
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.subject-folder-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-color: #cbd5e1; }
+
+.card-main-icon {
+    font-size: 2rem !important; /* Icono más pequeño */
+    color: #6366f1;
+    margin-bottom: 8px;
+}
+
+.subject-name {
+    margin: 5px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.subject-cycle {
+    font-size: 0.75rem;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-top: 8px;
+}
+
+/* --- 🟢 BOTÓN DE 3 PUNTOS --- */
+.card-options-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: transparent;
+    border: none;
+    padding: 5px;
+    border-radius: 50%;
+    color: #94a3b8;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-options-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+/* Loading & Empty */
+.loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px; color: #64748b; }
+.empty-state-icon { font-size: 4rem; color: #cbd5e1; margin-bottom: 15px; }

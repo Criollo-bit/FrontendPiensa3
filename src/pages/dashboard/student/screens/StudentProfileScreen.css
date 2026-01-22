@@ -1,145 +1,162 @@
-/* StudentProfileScreen.css */
-
+/* ========================================= */
+/* --- GENERALES / CONTENEDOR PRINCIPAL --- */
+/* ========================================= */
 .profile-screen-container {
-  background: #f8fafc; /* Color de fondo suave */
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+    padding: 0;
+    background-color: #f4f5f8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center; /* Centrado horizontal */
+    padding-bottom: 90px; /* Espacio para el menú de abajo */
 }
 
 .profile-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 80px; /* Espacio para el footer si existe */
+    width: 100%;
+    max-width: 450px; /* Ancho máximo estilo móvil */
+    padding: 0 10px;
 }
 
-/* Contenedor de la imagen de fondo/avatar */
-.hero-image-container {
-  height: 200px;
-  overflow: hidden;
-  position: relative;
-  background: linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* ========================================= */
+/* --- TARJETA DE PERFIL (CARD) --- */
+/* ========================================= */
+.profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+    margin-top: 20px; 
 }
 
-.hero-image {
-  width: 120px;
-  height: 120px;
-  border-radius: 30px; /* Cuadrado redondeado moderno */
-  object-fit: cover;
-  border: 5px solid white;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  transition: transform 0.1s ease-out;
-  z-index: 2;
+/* --- Encabezado (Gradiente Azul/Verde para estudiante) --- */
+.profile-header {
+    height: 120px;
+    /* Gradiente diferente al del profesor para distinguir */
+    background: linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
-/* Tarjeta Principal */
-.profile-main-card {
-  margin: -40px 16px 20px 16px;
-  background: white;
-  border-radius: 24px;
-  padding: 50px 20px 24px 20px; /* Padding superior extra por la imagen */
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  position: relative;
+/* --- AVATAR --- */
+.avatar-container {
+    position: relative;
+    z-index: 10;
+    margin-top: 55px; /* Para que quede mitad dentro mitad fuera del header */
+    display: flex;
+    justify-content: center;
+}
+
+.profile-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 5px solid #ffffff; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    object-fit: cover; 
+    background-color: white;
+}
+
+/* ========================================= */
+/* --- INFORMACIÓN DEL PERFIL --- */
+/* ========================================= */
+.profile-info {
+    padding: 20px;
+    padding-top: 10px; 
 }
 
 .profile-name {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0;
-  text-transform: capitalize;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 5px;
+    text-transform: capitalize;
 }
 
-.profile-role {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: #64748b;
-  font-weight: 600;
-  margin-top: 4px;
-  font-size: 0.95rem;
+.profile-title {
+    color: #0ea5e9; /* Azul Sky */
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
 }
 
-/* Fila de Estadísticas */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin: 24px 0;
-  padding: 16px 0;
-  border-top: 1px solid #f1f5f9;
-  border-bottom: 1px solid #f1f5f9;
+.profile-location {
+    font-size: 0.9rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
 }
 
-.stat-number {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #1e293b;
+.profile-location ion-icon {
+    margin-right: 5px;
+    font-size: 1.1rem;
+    color: #94a3b8;
 }
 
-.stat-label {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  text-transform: uppercase;
-  font-weight: 700;
-  margin-top: 2px;
+/* --- Botón de Edición (Píldora Azul) --- */
+.btn-follow {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.1s;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
 }
 
-/* Botones de Acción */
-.action-buttons-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
+.btn-follow:active {
+    transform: scale(0.98);
 }
 
-.btn-edit-profile, .btn-logout {
-  flex: 1;
-  border: none;
-  padding: 12px;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
+/* --- Sección About / Biografía --- */
+.about-section {
+    text-align: left;
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
 }
 
-.btn-edit-profile {
-  color: white;
+.about-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
 }
 
-.btn-logout {
-  background: #fee2e2;
-  color: #ef4444;
+.about-text {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 20px;
 }
 
-.btn-edit-profile:active, .btn-logout:active {
-  transform: scale(0.96);
+/* --- Botón Logout --- */
+.btn-logout-bottom {
+    margin-top: 15px;
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
 }
 
-/* Sección de Logros */
-.info-section {
-  padding: 0 16px;
-}
-
-.glass-card-modern {
-  background: white;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #334155;
-  margin-bottom: 16px;
+.btn-logout-bottom:active {
+    transform: scale(0.98);
+    background: #fecaca;
 }

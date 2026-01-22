@@ -1,10 +1,20 @@
 /* src/pages/dashboard/student/screens/JoinBattleScreen.css */
 
-/* Fondo general */
+/* Fondo general y CENTRADO */
 .bg-join-battle {
   background: radial-gradient(circle at top left, #e0f2fe, #f0f9ff);
-  min-height: 100vh;
+  min-height: 100%;       /* Ocupa todo el alto disponible */
   width: 100%;
+  
+  /* 🔥 AGREGADO: Propiedades para centrar todo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;    /* Centrado Horizontal */
+  justify-content: center;/* Centrado Vertical */
+  
+  /* 🔥 Importante: Espacio abajo para que el menú no tape el botón */
+  padding-bottom: 100px;  
+  box-sizing: border-box;
 }
 
 /* Contenedor del Título e Icono */
@@ -12,7 +22,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem; /* Un poco más de espacio */
+  text-align: center;
 }
 
 /* Efecto Cristal (Glassmorphism) */
@@ -27,29 +38,31 @@
 /* Inputs del Código (Cuadrados) */
 .code-inputs-container {
   display: flex;
-  gap: 8px;
+  gap: 12px; /* Un poco más de separación */
   justify-content: center;
+  margin-bottom: 2rem; /* Separar del botón */
 }
 
 .code-input-glass {
-  width: 45px;
-  height: 55px;
-  border-radius: 12px;
+  width: 50px;  /* Ligeramente más grandes */
+  height: 60px;
+  border-radius: 14px;
   border: 2px solid #e2e8f0; /* Slate 200 */
   background: rgba(255, 255, 255, 0.8);
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   text-align: center;
   color: #1e293b; /* Slate 800 */
   outline: none;
   transition: all 0.2s ease;
   text-transform: uppercase;
+  padding: 0; /* Asegura centrado del texto */
 }
 
 .code-input-glass:focus {
   border-color: #3b82f6; /* Blue 500 */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 15px rgba(59, 130, 246, 0.25);
   background: white;
 }
 
