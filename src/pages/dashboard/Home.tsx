@@ -1,12 +1,11 @@
-import { IonLoading } from '@ionic/react';
+import { IonPage, IonContent, IonLoading } from '@ionic/react';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { api } from '../../api/axios'; // Ajusta la ruta si es necesario
+import { api } from '../../api/axios';
 
-// Importamos los dashboards
-import TeacherDashboard from '../dashboard/teacher/screens/TeacherDashboard'; // Ajusta ruta según tu estructura
-import StudentDashboard from '../dashboard/student/screens/StudentDashboard'; // Ajusta ruta según tu estructura
-import { User } from '../../AppTypes'; 
+import TeacherDashboard from '../dashboard/teacher/screens/TeacherDashboard';
+import StudentDashboard from '../dashboard/student/screens/StudentDashboard';
+import { User } from '../../AppTypes';
 
 const Home: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -17,12 +16,12 @@ const Home: React.FC = () => {
     const fetchUser = async () => {
       try {
         const { data } = await api.get('/auth/me');
-         
+
         const currentUser: User = {
           id: data.id,
           email: data.email,
           name: data.fullName,
-          role: data.role,     
+          role: data.role,
           avatar: data.avatarUrl
         };
 
@@ -35,6 +34,7 @@ const Home: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, [history]);
 
@@ -44,20 +44,21 @@ const Home: React.FC = () => {
   };
 
   if (loading) {
-    return <IonLoading isOpen={true} message="Cargando perfil..." />;
+    return <IonLoading isOpen message="Cargando perfil..." />;
   }
 
-  // --- CAMBIO IMPORTANTE ---
-  // Eliminamos IonPage, IonHeader y IonContent.
-  // Devolvemos DIRECTAMENTE el dashboard correspondiente.
-  // El dashboard ya tiene su propio IonPage e IonContent.
-  
   if (!user) return null;
 
-  return user.role === 'TEACHER' ? (
-    <TeacherDashboard user={user} onLogout={logout} />
-  ) : (
-    <StudentDashboard user={user} onLogout={logout} />
+  return (
+    <IonPage>
+      <IonContent fullscreen>
+        {user.role === 'TEACHER' ? (
+          <TeacherDashboard user={user} onLogout={logout} />
+        ) : (
+          <StudentDashboard user={user} onLogout={logout} />
+        )}
+      </IonContent>
+    </IonPage>
   );
 };
 

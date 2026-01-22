@@ -1,13 +1,12 @@
-/* Contenedor principal de la barra */
 .bottom-nav-container {
-  position: absolute;
-  bottom: 0;
+  position: fixed;
   left: 0;
   right: 0;
-  z-index: 10;
-  height: auto; /* Permite que el botón flotante sobresalga */
-  pointer-events: none; /* Permite clicks a través de las áreas vacías */
+  bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+  pointer-events: none;
 }
+
 
 /* El SVG del fondo curvo */
 .nav-background-svg {
@@ -27,7 +26,7 @@
 /* Botón Flotante Activo (El círculo negro) */
 .floating-active-btn {
   position: absolute;
-  bottom: 32px; /* Eleva el botón sobre la barra */
+ bottom: calc(32px + env(safe-area-inset-bottom));
   width: 60px;
   height: 60px;
   background-color: white;
@@ -66,7 +65,7 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 0 10px;
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: 20;
   pointer-events: auto;
 }

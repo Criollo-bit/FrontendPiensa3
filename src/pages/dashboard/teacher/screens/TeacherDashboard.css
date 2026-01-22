@@ -1,5 +1,5 @@
 .teacher-dashboard-container {
-  height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   background-color: #f8fafc;
@@ -8,16 +8,23 @@
 
 /* HEADER OSCURO COMPACTO */
 .dashboard-header-dark {
-  background-color: #242d3c; 
-  /* Reducimos el padding: 25px arriba, 35px abajo para compensar la curva */
-  padding: 25px 25px 35px 25px; 
+  background-color: #242d3c;
+
+  padding-top: calc(16px + env(safe-area-inset-top));
+  padding-right: 25px;
+  padding-bottom: 35px;
+  padding-left: 25px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   border-bottom-left-radius: 28px;
   border-bottom-right-radius: 28px;
+
   z-index: 10;
 }
+
 
 .welcome-label {
   margin: 0;
@@ -88,6 +95,7 @@
   padding: 0 18px;
   /* Aumentamos el overlap para que las tarjetas suban más */
   margin-top: -20px; 
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
 }
 
 /* OCULTAR TEXTOS VIEJOS DE DASHBOARDSCREEN */
