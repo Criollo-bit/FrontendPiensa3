@@ -3,7 +3,6 @@ import {
   IonModal, 
   IonButton, 
   IonIcon, 
-  IonContent, 
   IonSpinner 
 } from '@ionic/react';
 import { qrCodeOutline, closeOutline, enterOutline } from 'ionicons/icons';

@@ -2,12 +2,6 @@ import React, { useState } from 'react';
 import { 
   IonIcon, 
   IonModal, 
-  IonContent, 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonButtons, 
-  IonButton,
   IonSpinner
 } from '@ionic/react';
 import { closeCircleOutline, rocketOutline } from 'ionicons/icons';

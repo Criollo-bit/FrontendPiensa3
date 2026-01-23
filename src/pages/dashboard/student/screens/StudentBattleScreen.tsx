@@ -4,7 +4,6 @@ import {
   checkmarkCircle, 
   closeCircle, 
   pause, 
-  alertCircle,
   arrowBackOutline
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 

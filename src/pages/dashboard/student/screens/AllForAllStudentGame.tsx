@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IonIcon, IonSpinner } from '@ionic/react';
-import { colorFillOutline, chatboxEllipsesOutline, arrowBack } from 'ionicons/icons';
+import { colorFillOutline, chatboxEllipsesOutline } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
 import { sendColorResponse } from '../../../../lib/allForAllService';
 
@@ -11,7 +11,7 @@ interface Props {
   onBack: () => void; 
 }
 
-const AllForAllStudentGame: React.FC<Props> = ({ subjectId, studentId, studentName, onBack }) => {
+const AllForAllStudentGame: React.FC<Props> = ({ subjectId, studentId, studentName }) => {
   const [phase, setPhase] = useState<'LOBBY' | 'PLAYING' | 'FEEDBACK'>('LOBBY');
   const [challenge, setChallenge] = useState<any>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);

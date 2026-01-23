@@ -15,7 +15,6 @@ interface JoinBattleResponse {
 
 export const joinBattleWithCode = (
   code: string, 
-  studentId: string, 
   studentName: string
 ): Promise<JoinBattleResponse> => {
   

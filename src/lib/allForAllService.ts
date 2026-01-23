@@ -24,7 +24,7 @@ export const joinAllForAllRoom = (
     };
 
     socket.on('room-update', handleResponse);
-    socket.on('error', (err) => {
+    socket.on('error', () => {
       cleanup();
       resolve({ success: false, message: "Sala no encontrada" });
     });

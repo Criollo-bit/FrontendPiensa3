@@ -70,7 +70,7 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     setErrorMsg(null);
 
     try {
-      const result = await battleApi.joinBattleWithCode(fullCode, studentId, studentName);
+      const result = await battleApi.joinBattleWithCode(fullCode, studentName);
 
       if (result.success && result.group) {
         setJoinedGroup({

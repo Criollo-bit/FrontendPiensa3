@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   IonContent, IonPage, IonIcon, IonLoading, IonAlert, IonToast, useIonViewWillEnter,
   IonRefresher, IonRefresherContent, IonModal, IonList, IonItem, IonLabel, IonButton

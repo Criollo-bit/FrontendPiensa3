@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, 
-  IonContent, IonItem, IonLabel, IonInput, IonTextarea, IonAvatar, IonSpinner, IonIcon
+  IonContent, IonInput, IonTextarea, IonAvatar, IonSpinner, IonIcon
 } from '@ionic/react';
 import { camera, person, chatbubble, close, checkmark } from 'ionicons/icons';
 import './EditStudentProfileModal.css';

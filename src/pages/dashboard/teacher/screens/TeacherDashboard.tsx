@@ -22,12 +22,7 @@ import QuestionBankScreen from './QuestionBankScreen';
 // Modal de Asignar Puntos
 import AssignPointsModal from '../../../gamification/AssignPointsModal';
 
-const BattleLobbyScreen: React.FC<any> = ({ onBack }) => (
-  <div className="ion-padding">
-    <h2>Sala de Espera</h2>
-    <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px' }}>Volver</button>
-  </div>
-);
+
 
 interface TeacherDashboardProps {
   user: User;
@@ -35,16 +30,13 @@ interface TeacherDashboardProps {
   enabledModules?: Set<AppScreen | TeacherScreen | string>;
   customModules?: CustomModule[];
   students?: User[];
-  onInviteStudents?: (studentIds: string[], roomCode: string, battleName: string) => void;
 }
 
 const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ 
   user, 
   onLogout, 
   enabledModules = new Set(), 
-  customModules = [], 
-  students = [], 
-  onInviteStudents = () => {} 
+  customModules = []
 }) => {
   
   const [activeScreen, setActiveScreen] = useState<TeacherScreen | string>(TeacherScreen.Dashboard);
@@ -79,13 +71,13 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
             />
         );
       case TeacherScreen.BattleManager:
-        return <BattleManagerScreen students={students} teacherId={user.id} onBack={handleBack} onOpenBank={() => setActiveScreen('questions')} />;
+        return <BattleManagerScreen students={[]} teacherId={user.id} onBack={handleBack} onOpenBank={() => setActiveScreen('questions')} />;
       case TeacherScreen.StudentList:
         return <StudentListScreen onBack={handleBack} />;
       case TeacherScreen.Profile:
         return <TeacherProfileScreen user={user} onLogout={onLogout} />;
       case TeacherScreen.AllForAll:
-        return <AllForAllControlScreen subjectId="placeholder-subject-id" teacherName={user.name} onBack={handleBack} />;
+        return <AllForAllControlScreen onBack={handleBack} />;
       case 'rewards':
         return <RewardsManagementScreen teacherId={user.id} onBack={handleBack} />;
       case 'questions':

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'; 
 import { IonIcon, IonAlert } from '@ionic/react'; 
-import { flashOutline, peopleOutline, trophyOutline, addCircleOutline } from 'ionicons/icons'; 
-import { useHistory } from 'react-router-dom';
+import { flashOutline, peopleOutline, trophyOutline, addCircleOutline } from 'ionicons/icons';
 
 import { TeacherScreen } from '../../../../AppTypes';
 
@@ -41,7 +40,6 @@ const ActionCard: React.FC<{
 
 // 🔥 CAMBIO 2: Desestructuramos onOpenAssignPoints
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigateTo, onOpenAssignPoints }) => {
-  const history = useHistory();
 
   // Estados para el modal de Crear Materia
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

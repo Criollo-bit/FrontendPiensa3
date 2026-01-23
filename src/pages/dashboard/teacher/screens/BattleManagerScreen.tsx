@@ -26,7 +26,7 @@ interface BattleManagerScreenProps {
   onOpenBank: () => void;
 }
 
-const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ students, teacherId, onBack, onOpenBank }) => { 
+const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, onBack, onOpenBank }) => { 
   const history = useHistory();
   
   // Carga segura

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonIcon, IonSpinner, IonContent } from '@ionic/react';
+import { IonIcon, IonSpinner } from '@ionic/react';
 import { closeOutline, arrowBackOutline, star, giftOutline, checkmarkCircle } from 'ionicons/icons';
 import { api } from '../../../../api/axios'; 
 
