@@ -36,7 +36,7 @@ export const joinAllForAllRoom = (
       gameType: 'all-for-all'
     });
 
-    setTimeout(() => { cleanup(); resolve({ success: false, message: "Timeout" }); }, 5000);
+    setTimeout(() => { cleanup(); resolve({ success: false, message: "Tiempo de espera agotado" }); }, 10000); // 👈 Subimos a 10s;
   });
 };
 
