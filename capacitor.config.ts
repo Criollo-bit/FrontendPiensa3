@@ -1,9 +1,13 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.piensa.app',
-  appName: 'Piensa',
-  webDir: 'build'
+  appId: 'com.example.app',
+  appName: 'frontend-piensa',
+  webDir: 'dist',
+  /* 👇 AÑADE ESTO PARA EVITAR EL TIMEOUT */
+  server: {
+    allowNavigation: ['backend-piensa-production.up.railway.app']
+  }
 };
 
 export default config;

@@ -34,3 +34,24 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Ajuste global para que NADA choque con la cámara o botones del cel */
+ion-content {
+  --padding-top: var(--ion-safe-area-top);
+  --padding-bottom: var(--ion-safe-area-bottom);
+}
+
+/* Animación de entrada suave */
+.app-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Evitar que el header se pegue al notch */
+.welcome-header {
+  padding-top: calc(10px + var(--ion-safe-area-top)) !important;
+}

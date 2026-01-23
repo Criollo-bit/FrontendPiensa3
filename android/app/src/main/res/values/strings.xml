@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Piensa</string>
-    <string name="title_activity_main">Piensa</string>
-    <string name="package_name">com.piensa.app</string>
-    <string name="custom_url_scheme">com.piensa.app</string>
+    <string name="app_name">frontend-piensa</string>
+    <string name="title_activity_main">frontend-piensa</string>
+    <string name="package_name">com.example.app</string>
+    <string name="custom_url_scheme">com.example.app</string>
 </resources>

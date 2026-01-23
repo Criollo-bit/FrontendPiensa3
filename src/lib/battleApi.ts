@@ -28,8 +28,8 @@ export const joinBattleWithCode = (
 
     const timeout = setTimeout(() => {
       cleanup();
-      reject(new Error("El servidor no responde. Verifica tu conexión."));
-    }, 5000);
+      reject(new Error("El servidor tarda en responder. Reintenta en un momento."));
+    }, 10000); // 👈 Subimos a 10s
 
     const cleanup = () => {
       clearTimeout(timeout);

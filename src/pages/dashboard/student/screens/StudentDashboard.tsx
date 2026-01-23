@@ -72,11 +72,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
     }
   };
 
-  // 🔥 CARGAR NOTIFICACIONES (Canjes aceptados/rechazados)
   const fetchNotifications = async () => {
     try {
       const { data } = await api.get('/rewards/student/my-requests');
-      // Filtramos para mostrar solo los que ya fueron procesados (APPROVED / REJECTED)
       const processed = data.filter((r: any) => r.status !== 'PENDING');
       setNotifications(processed);
     } catch (e) {
@@ -95,7 +93,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
       .finally(() => setLoading(false));
   });
 
-  // --- DRAG HANDLERS (Igual que antes) ---
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [dragState, setDragState] = useState({ isDragging: false, startX: 0, currentX: 0 });
   const handleDragStart = (e: any) => {
@@ -157,67 +154,69 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
 
         <IonLoading isOpen={loading} message="Cargando..." />
         
-        {currentScreen === 'HOME' && (
-          <div className="student-dashboard">
-            {/* HEADER CON CAMPANA */}
-            <div className="welcome-header">
-              <div className="header-left">
-                <img 
-                  src={userProfile.avatar || `https://ui-avatars.com/api/?name=${userProfile.name}`} 
-                  className="avatar-small"
-                  alt="Profile"
-                  onClick={() => setCurrentScreen('PROFILE')} 
-                />
-                <div className="welcome-text">
-                  <h1>Hola, {userProfile.name.split(' ')[0]}</h1>
-                  <div className="id-badge">ID: <span className="id-value">{userProfile.studentCode || '...'}</span></div>
+        {/* 🔥 AGREGADA CLASE DE ANIMACIÓN AQUÍ */}
+        <div className="app-fade-in">
+          {currentScreen === 'HOME' && (
+            <div className="student-dashboard">
+              <div className="welcome-header">
+                <div className="header-left">
+                  <img 
+                    src={userProfile.avatar || `https://ui-avatars.com/api/?name=${userProfile.name}`} 
+                    className="avatar-small"
+                    alt="Profile"
+                    onClick={() => setCurrentScreen('PROFILE')} 
+                  />
+                  <div className="welcome-text">
+                    <h1>Hola, {userProfile.name.split(' ')[0]}</h1>
+                    <div className="id-badge">ID: <span className="id-value">{userProfile.studentCode || '...'}</span></div>
+                  </div>
+                </div>
+                
+                <div className="header-actions">
+                  <button className="notif-btn" onClick={() => setShowNotifModal(true)}>
+                    <IonIcon icon={notificationsOutline} />
+                    {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
+                  </button>
                 </div>
               </div>
-              
-              <div className="header-actions">
-                <button className="notif-btn" onClick={() => setShowNotifModal(true)}>
-                  <IonIcon icon={notificationsOutline} />
-                  {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
+
+              <div className="actions-grid"> 
+                <button className="action-card btn-join" onClick={() => setIsJoinModalOpen(true)}>
+                  <IonIcon icon={enterOutline} className="action-icon-large" />
+                  <h3>Unirse</h3>
+                </button>
+                <button className="action-card btn-classes" onClick={() => setCurrentScreen('MY_CLASSES')}>
+                  <IonIcon icon={bookOutline} className="action-icon-large" />
+                  <h3>Mis Clases</h3>
                 </button>
               </div>
+
+              <h2 className="section-title">Clases Recientes</h2>
+              {teachers.length === 0 && !loading ? (
+                  <div className="empty-classes-state"><p>No estás inscrito en ninguna clase aún.</p></div>
+              ) : (
+                  <div className="carousel-container" onMouseDown={handleDragStart} onMouseMove={handleDragMove} onMouseUp={handleDragEnd} onTouchStart={handleDragStart} onTouchMove={handleDragMove} onTouchEnd={handleDragEnd}>
+                     <div style={{ position: 'relative', width: '240px', height: '320px', margin: '0 auto' }}>
+                        {teachers.map((teacher, index) => (
+                          <div key={index} style={getCardStyle(index)} onClick={() => index === activeCardIndex && navigateToClassDetail(teacher.cardId)}>
+                            <ProfessorCard professor={teacher} isActive={index === activeCardIndex} points={teacher.points} requiredPoints={100} />
+                          </div>
+                        ))}
+                     </div>
+                  </div>
+              )}
             </div>
+          )}
 
-            <div className="actions-grid"> 
-              <button className="action-card btn-join" onClick={() => setIsJoinModalOpen(true)}>
-                <IonIcon icon={enterOutline} className="action-icon-large" />
-                <h3>Unirse</h3>
-              </button>
-              <button className="action-card btn-classes" onClick={() => setCurrentScreen('MY_CLASSES')}>
-                <IonIcon icon={bookOutline} className="action-icon-large" />
-                <h3>Mis Clases</h3>
-              </button>
-            </div>
+          {/* --- PANTALLAS SECUNDARIAS CON ANIMACIÓN --- */}
+          {currentScreen === 'BATTLE' && <JoinBattleScreen onBack={() => setCurrentScreen('HOME')} studentId={userProfile.id} studentName={userProfile.name} />}
+          {currentScreen === 'ALLFORALL' && <JoinAllForAllScreen onBack={() => setCurrentScreen('HOME')} studentId={userProfile.id} studentName={userProfile.name} />}
+          {currentScreen === 'MY_CLASSES' && <MyClassesScreen />} 
+          {currentScreen === 'REWARDS' && <AchievementsScreen user={userProfile} onBack={() => setCurrentScreen('HOME')} />}
+          {currentScreen === 'PROFILE' && <StudentProfileScreen user={userProfile} onLogout={onLogout} />}
+        </div>
 
-            <h2 className="section-title">Clases Recientes</h2>
-            {teachers.length === 0 && !loading ? (
-                <div className="empty-classes-state"><p>No estás inscrito en ninguna clase aún.</p></div>
-            ) : (
-                <div className="carousel-container" onMouseDown={handleDragStart} onMouseMove={handleDragMove} onMouseUp={handleDragEnd} onTouchStart={handleDragStart} onTouchMove={handleDragMove} onTouchEnd={handleDragEnd}>
-                   <div style={{ position: 'relative', width: '240px', height: '320px', margin: '0 auto' }}>
-                      {teachers.map((teacher, index) => (
-                        <div key={index} style={getCardStyle(index)} onClick={() => index === activeCardIndex && navigateToClassDetail(teacher.cardId)}>
-                          <ProfessorCard professor={teacher} isActive={index === activeCardIndex} points={teacher.points} requiredPoints={100} />
-                        </div>
-                      ))}
-                   </div>
-                </div>
-            )}
-          </div>
-        )}
-
-        {/* --- PANTALLAS SECUNDARIAS --- */}
-        {currentScreen === 'BATTLE' && <JoinBattleScreen onBack={() => setCurrentScreen('HOME')} studentId={userProfile.id} studentName={userProfile.name} />}
-        {currentScreen === 'ALLFORALL' && <JoinAllForAllScreen onBack={() => setCurrentScreen('HOME')} studentId={userProfile.id} studentName={userProfile.name} />}
-        {currentScreen === 'MY_CLASSES' && <MyClassesScreen />} 
-        {currentScreen === 'REWARDS' && <AchievementsScreen user={userProfile} onBack={() => setCurrentScreen('HOME')} />}
-        {currentScreen === 'PROFILE' && <StudentProfileScreen user={userProfile} onLogout={onLogout} />}
-
-        {/* --- 🔥 MODAL DE NOTIFICACIONES --- */}
+        {/* --- MODALES --- */}
         <IonModal isOpen={showNotifModal} onDidDismiss={() => setShowNotifModal(false)} className="notif-modal">
           <div className="modal-notif-container">
             <div className="modal-notif-header">

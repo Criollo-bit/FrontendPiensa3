@@ -1,3 +1,5 @@
+/* StudentBottomNav.css - ACTUALIZADO PARA ZONAS SEGURAS */
+
 /* Contenedor principal (fixed bottom) */
 .student-nav-wrapper {
   position: fixed;
@@ -5,14 +7,16 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  height: 80px; /* Altura para el botón flotante */
+  /* AJUSTE: Altura dinámica sumando la zona de gestos/botones de Android */
+  height: calc(80px + var(--ion-safe-area-bottom)); 
   pointer-events: none; /* Permite clicks pasen por arriba */
 }
 
 /* --- BOTÓN FLOTANTE (El círculo activo) --- */
 .floating-active-container {
   position: absolute;
-  bottom: 32px; /* Ajuste exacto según tu referencia */
+  /* AJUSTE: Lo subimos para que no choque con la barra inferior del sistema */
+  bottom: calc(32px + var(--ion-safe-area-bottom)); 
   z-index: 1002;
   transition: left 0.7s ease-in-out; /* Duración suave */
   width: 60px;
@@ -49,8 +53,14 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70px;
+  /* AJUSTE: El fondo blanco ahora cubre también la zona segura inferior */
+  height: calc(70px + var(--ion-safe-area-bottom)); 
   pointer-events: auto; /* Reactivar clicks */
+}
+
+.nav-svg-layer svg {
+  height: 100%; /* Asegura que el color de fondo llene el espacio extra */
+  display: block;
 }
 
 .nav-svg-path {
@@ -63,12 +73,14 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70px;
+  /* AJUSTE: El contenedor de botones crece para mantenerse arriba del sistema */
+  height: calc(70px + var(--ion-safe-area-bottom)); 
   z-index: 1001;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 0 10px;
+  /* AJUSTE: Añadimos padding inferior para separar etiquetas de los botones físicos */
+  padding: 0 10px var(--ion-safe-area-bottom) 10px; 
   pointer-events: none;
 }
 
@@ -81,7 +93,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-width: 60px;
+  min-width: 50px; /* Ajustado para mejor distribución de 6 items */
   padding-top: 10px;
   cursor: pointer;
 }
@@ -91,9 +103,9 @@
   color: #4b5563; /* text-gray-600 */
 }
 
-/* En StudentBottomNav.css, ajusta nav-label si es necesario */
+/* Etiquetas del menú */
 .nav-label {
-  font-size: 9px; /* Reducido de 10px a 9px para que quepan mejor los 6 items */
+  font-size: 9px; 
   font-weight: 500;
   color: #4b5563; 
   white-space: nowrap;
@@ -103,5 +115,4 @@
 .hidden-element {
   visibility: hidden;
   opacity: 0;
-} 
-
+}
