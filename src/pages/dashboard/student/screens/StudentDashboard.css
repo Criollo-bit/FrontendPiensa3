@@ -1,139 +1,150 @@
-  /* StudentDashboard.css */
-  :root {
-    --color-slate-50: #f8fafc;
-    --color-slate-200: #e2e8f0;
-    --color-slate-800: #1e293b;
-    --color-sky-500: #0ea5e9;
-    --color-sky-600: #0284c7;
-  }
+/* StudentDashboard.css ACTUALIZADO */
+:root {
+  --color-slate-50: #f8fafc;
+  --color-slate-200: #e2e8f0;
+  --color-slate-800: #1e293b;
+  --color-sky-500: #0ea5e9;
+  --color-sky-600: #0284c7;
+}
 
-  .student-dashboard {
-    background-color: var(--color-slate-50);
-    min-height: 100%;
-    padding-bottom: 90px; /* Espacio para el navbar */
-  }
+/* --- ANIMACIÓN DE ENTRADA --- */
+.app-fade-in {
+  animation: fadeInDashboard 0.8s ease-out forwards;
+}
 
-  /* --- HEADER COMPACTO --- */
-  .welcome-header {
-    padding: 10px 15px; /* 🔥 Reducido: Más delgado */
+@keyframes fadeInDashboard {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.student-dashboard {
+  background-color: var(--color-slate-50);
+  min-height: 100%;
+  /* AJUSTE: Sumamos el espacio del navbar + la zona de gestos de Android */
+  padding-bottom: calc(90px + var(--ion-safe-area-bottom)); 
+}
+
+/* --- HEADER COMPACTO --- */
+.welcome-header {
+  /* AJUSTE: Añadimos padding superior dinámico para el Notch */
+  padding: calc(10px + var(--ion-safe-area-top)) 15px 10px 15px; 
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-slate-200);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.welcome-text h1 {
+  margin: 0 0 2px 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--color-slate-800);
+}
+
+/* Estilo para el ID */
+.id-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem; 
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.id-value {
+  color: #334155;
+  font-family: monospace;
+  font-weight: 700;
+}
+
+.avatar-small {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--color-slate-200);
+  object-fit: cover;
+}
+
+/* --- ACCIONES (BOTONES) --- */
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px; 
+  padding: 15px;
+}
+
+.action-card {
+  height: 90px;
+  border-radius: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  color: white;
+  box-shadow: 0 4px 10px -2px rgba(0,0,0,0.15);
+  transition: transform 0.1s;
+}
+
+.action-card:active {
+    transform: scale(0.96);
+}
+
+.action-icon-large {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+}
+
+.btn-join { background: linear-gradient(135deg, var(--color-sky-500), var(--color-sky-600)); }
+.btn-classes { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+.action-card h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* --- CLASES RECIENTES --- */
+.section-title {
+  padding: 0 15px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-slate-800);
+}
+
+.carousel-container {
+  overflow: hidden;
+  padding: 10px 0 20px 0;
+  cursor: grab;
+  min-height: 330px; 
+}
+
+.carousel-container:active {
+  cursor: grabbing;
+}
+
+.empty-classes-state {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-style: italic;
     background: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--color-slate-200);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-  }
+    margin: 10px 15px;
+    border-radius: 16px;
+    border: 1px dashed #e2e8f0;
+} 
 
-  .welcome-text h1 {
-    margin: 0 0 2px 0;
-    font-size: 1.1rem; /* 🔥 Reducido */
-    font-weight: 800;
-    color: var(--color-slate-800);
-  }
-
-  /* Estilo para el ID */
-  .id-badge {
-      background: #f1f5f9;
-      color: #64748b;
-      padding: 2px 8px; /* 🔥 Más pequeño */
-      border-radius: 12px;
-      font-size: 0.7rem; 
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      border: 1px solid #e2e8f0;
-  }
-  .id-value {
-      color: #334155;
-      font-family: monospace;
-      font-weight: 700;
-  }
-
-  .avatar-small {
-    width: 38px; /* 🔥 Reducido */
-    height: 38px;
-    border-radius: 50%;
-    border: 2px solid var(--color-slate-200);
-    object-fit: cover;
-  }
-
-  /* --- ACCIONES (BOTONES) --- */
-  .actions-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px; 
-    padding: 15px; /* Menos padding lateral */
-  }
-
-  .action-card {
-    height: 90px; /* 🔥 Reducido de 105px a 90px */
-    border-radius: 16px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    color: white;
-    box-shadow: 0 4px 10px -2px rgba(0,0,0,0.15);
-    transition: transform 0.1s;
-  }
-
-  .action-card:active {
-      transform: scale(0.96);
-  }
-
-  /* Iconos Ajustados */
-  .action-icon-large {
-      font-size: 1.8rem; /* 🔥 Reducido de 2.2rem */
-      margin-bottom: 4px;
-      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
-  }
-
-  .btn-join { background: linear-gradient(135deg, var(--color-sky-500), var(--color-sky-600)); }
-  .btn-classes { background: linear-gradient(135deg, #f59e0b, #d97706); }
-
-  .action-card h3 {
-    margin: 0;
-    font-size: 0.85rem; /* 🔥 Texto más fino */
-    font-weight: 700;
-    letter-spacing: 0.3px;
-  }
-
-  /* --- CLASES RECIENTES --- */
-  .section-title {
-    padding: 0 15px;
-    margin-top: 5px;
-    margin-bottom: 0;
-    font-size: 1rem; /* 🔥 Título sección más discreto */
-    font-weight: 800;
-    color: var(--color-slate-800);
-  }
-
-  .carousel-container {
-    overflow: hidden;
-    padding: 10px 0 20px 0;
-    cursor: grab;
-    /* 🔥 Ajustamos la altura del contenedor para que no sea enorme */
-    min-height: 330px; 
-  }
-
-  .carousel-container:active {
-    cursor: grabbing;
-  }
-
-  .empty-classes-state {
-      text-align: center;
-      padding: 20px;
-      color: #94a3b8;
-      font-size: 0.85rem;
-      font-style: italic;
-      background: white;
-      margin: 10px 15px;
-      border-radius: 16px;
-      border: 1px dashed #e2e8f0;
-  } 
-  
 /* --- MODAL DE NOTIFICACIONES --- */
 ion-modal.notif-modal {
   --height: auto;
