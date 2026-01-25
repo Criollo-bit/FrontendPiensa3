@@ -1,148 +1,149 @@
-/* AllForAllControlScreen.css */
+.afa-container {
+  background: #f4f7fe;
+  min-height: 100vh;
+}
 
-.all-for-all-container {
-  height: 100vh;
-  background-color: #f8fafc;
-  padding: 20px;
+.afa-header {
+  background: #1e293b;
+  color: white;
+  padding: 40px 20px;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.afa-card {
+  background: white;
+  margin: -30px 20px;
+  padding: 25px;
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.color-row {
   display: flex;
-  flex-direction: column;
-  overflow-y: auto;
+  margin: 10px 0;
 }
 
-.game-header-top {
-  display: grid;
-  grid-template-columns: 50px 1fr 50px;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.back-btn-circle {
-  width: 42px;
-  height: 42px;
+.color-row button {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
-  background: white;
-  color: #334155;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.mode-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  margin: 15px 0;
 }
 
-.header-text-center { text-align: center; }
-
-.game-title { font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0; }
-
-.config-card {
-  background: white;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-/* BLOQUE DE PIN */
-.pin-display {
-  text-align: center;
-  background: #0f172a;
-  color: white;
-  padding: 24px;
+.mode-row button {
+  margin-right: 10px;
+  padding: 10px 20px;
   border-radius: 20px;
-  margin-bottom: 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.pin-display small {
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 0.75rem;
-  opacity: 0.8;
-  display: block;
+.primary {
+  background: #6366f1;
+  color: white;
+  padding: 15px;
+  border-radius: 20px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
 }
 
-.pin-number {
-  font-size: 4rem; /* Un poco más grande al ser solo 4 números */
-  font-weight: 900;
-  letter-spacing: 12px; /* Más espacio entre números para que se vea premium */
-  color: #fbbf24;
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
-  margin-top: 10px;
-  font-family: 'Courier New', Courier, monospace; /* Opcional: fuente monoespaciada para el PIN */
+.start {
+  background: #22c55e;
+  color: white;
+  padding: 15px;
+  border-radius: 20px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
 }
 
-.status-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+.rank-item {
+  padding: 12px;
   background: #f1f5f9;
-  padding: 14px;
-  border-radius: 14px;
-  margin-bottom: 20px;
-  font-weight: 700;
+  border-radius: 15px;
+  margin-top: 8px;
 }
-
-.status-banner.students-ready {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.preview-box {
-  background: #f8fafc;
-  border: 2px dashed #e2e8f0;
-  padding: 18px;
-  border-radius: 16px;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.preview-box b { font-size: 2.2rem; display: block; }
-
-.color-grid { display: flex; gap: 10px; }
-.color-btn { flex: 1; height: 55px; border-radius: 12px; border: 3px solid transparent; cursor: pointer; }
-.color-btn.selected { border-color: #0f172a; transform: scale(1.08); }
-
-.answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.choice-btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 52px; border-radius: 12px; border: 2px solid #f1f5f9; background: #f8fafc; font-weight: 700; cursor: pointer; }
-.choice-btn.active { background: #1e293b; color: white; border-color: #1e293b; }
-
-.primary-btn.open-room {
-  width: 100%;
-  height: 60px;
-  border-radius: 16px;
-  background: #3b82f6;
-  color: white;
-  border: none;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.launch-btn {
-  width: 100%;
-  height: 65px;
-  border-radius: 18px;
-  background: #e2e8f0;
-  color: #94a3b8;
-  border: none;
-  font-size: 1.1rem;
-  font-weight: 800;
+.podium-container {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 12px;
+  align-items: flex-end;
+  gap: 20px;
+  margin-top: 40px;
 }
 
-.launch-btn.enabled {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+.podium-item {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.podium-bar {
+  width: 100%;
+  text-align: center;
   color: white;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+  padding-top: 10px;
+  border-radius: 15px 15px 0 0;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.5s ease; /* animación suave al cambiar altura */
 }
 
-.rocket-ready { animation: vibration 0.2s infinite alternate; }
+/* Podio con gradientes y colores claros */
+.podium-bar.first {
+  height: 150px;
+  background: linear-gradient(180deg, #FFD700 0%, #FFC200 100%);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+}
 
-.text-btn { width: 100%; background: transparent; border: none; color: #94a3b8; font-weight: 600; margin-top: 15px; cursor: pointer; text-decoration: underline; }
+.podium-bar.second {
+  height: 120px;
+  background: linear-gradient(180deg, #C0C0C0 0%, #A9A9A9 100%);
+  box-shadow: 0 5px 15px rgba(192, 192, 192, 0.4);
+}
 
-@keyframes vibration { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.podium-bar.third {
+  height: 100px;
+  background: linear-gradient(180deg, #CD7F32 0%, #B87333 100%);
+  box-shadow: 0 5px 15px rgba(205, 127, 50, 0.4);
+}
+
+.podium-name {
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+  color: #1e293b;
+}
+
+.ranking-list {
+  margin-top: 30px;
+  width: 100%;
+}
+
+.ranking-list .rank-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  margin-top: 10px;
+  font-weight: bold;
+  transition: all 0.3s ease; /* animación al cambiar ranking */
+}

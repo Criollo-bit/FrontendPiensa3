@@ -1,192 +1,177 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IonIcon, IonAlert } from '@ionic/react';
-import { 
-  arrowBack, chatboxEllipsesOutline, colorFillOutline, 
-  checkmark, rocketOutline, people, listOutline 
-} from 'ionicons/icons';
-import { socketService } from '../../../../api/socket'; // Ajusta la ruta a tu servicio
+import { arrowBack, rocketOutline, people } from 'ionicons/icons';
+import { socketService } from '../../../../api/socket';
 import './AllForAllControlScreen.css';
 
-const COLOR_OPTIONS = [
-  { name: 'ROJO', value: 'red', colorCode: '#ef4444' },     
-  { name: 'AZUL', value: 'blue', colorCode: '#3b82f6' },    
-  { name: 'VERDE', value: 'green', colorCode: '#22c55e' },  
-  { name: 'AMARILLO', value: 'yellow', colorCode: '#eab308' } 
+const COLORS = [
+  { name: 'ROJO', value: 'red', hex: '#ef4444' },
+  { name: 'AZUL', value: 'blue', hex: '#3b82f6' },
+  { name: 'VERDE', value: 'green', hex: '#22c55e' },
+  { name: 'AMARILLO', value: 'yellow', hex: '#eab308' },
 ];
 
 const AllForAllControlScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  // Configuración del juego
-  const [wordText, setWordText] = useState('ROJO');
-  const [wordColor, setWordColor] = useState('blue');
-  const [correctAnswer, setCorrectAnswer] = useState<'text' | 'color'>('color');
-  
-  // Control de Sala
-  const [isRoomOpen, setIsRoomOpen] = useState(false);
-  const [roomPin, setRoomPin] = useState('');
+  const [roomId, setRoomId] = useState('');
   const [students, setStudents] = useState<any[]>([]);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [ranking, setRanking] = useState<any[]>([]);
+  const [word, setWord] = useState('ROJO');
+  const [color, setColor] = useState('blue');
+  const [mode, setMode] = useState<'text' | 'color'>('color');
+  const [started, setStarted] = useState(false);
+  const [showExit, setShowExit] = useState(false);
 
-  // Al igual que en Battle, conectamos al socket al montar
   useEffect(() => {
-    const socket = socketService.connectToBattle(); // Reutilizamos el namespace de battle o el que prefieras
+    const socket = socketService.connectToBattle();
+
+    socket.on('room-created', (data: any) => {
+      setRoomId(data.roomId);
+      setStudents([]);
+      setRanking([]);
+    });
 
     socket.on('room-update', (data: any) => {
       if (data.students) setStudents(data.students);
     });
 
-    socket.on('error', (msg: string) => {
-      console.error("Socket Error:", msg);
+    socket.on('all-for-all-ranking', (data: any) => {
+      setRanking(data.ranking);
     });
 
     return () => {
+      socket.off('room-created');
       socket.off('room-update');
-      socket.off('error');
+      socket.off('all-for-all-ranking');
     };
   }, []);
 
-  const handleOpenRoom = () => {
-    // Generamos PIN de 4 dígitos
-    const newPin = Math.floor(1000 + Math.random() * 9000).toString();
-    setRoomPin(newPin);
-    setIsRoomOpen(true);
-
-    // Emitimos la creación de la sala tipo "all-for-all"
-    const socket = socketService.getBattleSocket();
-    socket?.emit('create-room', { 
-      teacherId: JSON.parse(localStorage.getItem('user') || '{}').id,
-      name: "All for All - Desafío",
-      type: 'all-for-all', // Diferenciador para el backend
-      customPin: newPin 
+  const createRoom = () => {
+    socketService.getBattleSocket()?.emit('create-room', {
+      teacherId: 'TEMP_TEACHER',
+      name: 'All For All',
     });
   };
 
-  const handleStartGame = () => {
-    const socket = socketService.getBattleSocket();
-    // Enviamos la configuración que el profe eligió
-    socket?.emit('start-all-for-all', {
-      roomId: roomPin,
-      config: {
-        word: wordText,
-        color: wordColor,
-        mode: correctAnswer // 'text' o 'color'
-      }
-    });
-    console.log("Juego iniciado definitivamente");
-  };
+  const startGame = () => {
+    setStarted(true);
+    setRanking([]);
 
-  const handleExit = () => {
-    // Limpieza similar a handleExitToMenu de Battle
-    const socket = socketService.getBattleSocket();
-    socket?.emit('end-battle', { roomId: roomPin });
-    setIsRoomOpen(false);
-    onBack();
+    socketService.getBattleSocket()?.emit('start-all-for-all', {
+      roomId,
+      config: { word, color, mode },
+    });
   };
 
   return (
-    <div className="all-for-all-container">
-      <div className="game-header-top">
-        <button onClick={() => isRoomOpen ? setShowExitConfirm(true) : onBack()} className="back-btn-circle">
+    <div className="afa-container">
+      <header className="afa-header">
+        <button onClick={() => setShowExit(true)} className="back-btn">
           <IonIcon icon={arrowBack} />
         </button>
-        <div className="header-text-center">
-          <h1 className="game-title">All for All</h1>
-          <p className="game-subtitle">{isRoomOpen ? `PIN: ${roomPin}` : 'Configura el reto'}</p>
-        </div>
-        <div className="header-spacer"></div>
-      </div>
+        <h1>All For All</h1>
+        <p>{roomId ? `PIN: ${roomId}` : 'Crear sala'}</p>
+      </header>
 
-      <div className="config-card">
-        {!isRoomOpen ? (
-          /* VISTA DE CONFIGURACIÓN */
-          <div className="setup-view">
-            <h2 className="section-title">1. Personaliza la ronda</h2>
-            
-            <div className="form-group">
-              <label className="config-label">Palabra que leerán</label>
-              <select className="form-select" value={wordText} onChange={(e) => setWordText(e.target.value)}>
-                {COLOR_OPTIONS.map(opt => <option key={opt.value} value={opt.name}>{opt.name}</option>)}
-              </select>
+      <div className="afa-card">
+        {!roomId && (
+          <>
+            <h2>Configurar ronda</h2>
+
+            <select value={word} onChange={e => setWord(e.target.value)}>
+              {COLORS.map(c => (
+                <option key={c.value} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+
+            <div className="color-row">
+              {COLORS.map(c => (
+                <button
+                  key={c.value}
+                  style={{
+                    backgroundColor: c.hex,
+                    outline: color === c.value ? '3px solid black' : 'none',
+                  }}
+                  onClick={() => setColor(c.value)}
+                />
+              ))}
             </div>
 
-            <div className="form-group">
-              <label className="config-label">Color del texto</label>
-              <div className="color-grid">
-                {COLOR_OPTIONS.map((c) => (
-                  <button 
-                    key={c.value} 
-                    className={`color-btn ${wordColor === c.value ? 'selected' : ''}`}
-                    style={{ backgroundColor: c.colorCode }}
-                    onClick={() => setWordColor(c.value)}
-                  >
-                    {wordColor === c.value && <IonIcon icon={checkmark} />}
-                  </button>
+            <div className="mode-row">
+              <button
+                onClick={() => setMode('text')}
+                style={{
+                  backgroundColor: mode === 'text' ? '#3b82f6' : '#f0f0f0',
+                  color: mode === 'text' ? 'white' : 'black',
+                }}
+              >
+                Texto
+              </button>
+              <button
+                onClick={() => setMode('color')}
+                style={{
+                  backgroundColor: mode === 'color' ? '#3b82f6' : '#f0f0f0',
+                  color: mode === 'color' ? 'white' : 'black',
+                }}
+              >
+                Color
+              </button>
+            </div>
+
+            <button className="primary" onClick={createRoom}>
+              MOSTRAR PIN
+            </button>
+          </>
+        )}
+
+        {roomId && !started && (
+          <>
+            <h2>Código: {roomId}</h2>
+            <p><IonIcon icon={people} /> {students.length} estudiantes</p>
+            <button className="start" onClick={startGame}>
+              <IonIcon icon={rocketOutline} /> EMPEZAR
+            </button>
+          </>
+        )}
+
+        {started && ranking.length > 0 && (
+          <>
+            <h2>🏆 Ranking en vivo</h2>
+
+            {/* Podio para los 3 primeros */}
+            <div className="podium-container">
+              {ranking.slice(0,3).map((r, i) => (
+                <div key={i} className="podium-item">
+                  <div className={`podium-bar ${i === 0 ? 'first' : i === 1 ? 'second' : 'third'}`}>
+                    {r.name}
+                  </div>
+                  <div className="podium-name">{i + 1}°</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Resto del ranking */}
+            {ranking.length > 3 && (
+              <div className="ranking-list">
+                {ranking.slice(3).map((r, i) => (
+                  <div key={i} className="rank-item">
+                    <span>{i + 4}. {r.name}</span>
+                    <span>{r.score || ''}</span>
+                  </div>
                 ))}
               </div>
-            </div>
-
-            <div className="form-group">
-              <label className="config-label">El alumno debe elegir:</label>
-              <div className="answer-grid">
-                <button className={`choice-btn ${correctAnswer === 'text' ? 'active' : ''}`} onClick={() => setCorrectAnswer('text')}>
-                  <IonIcon icon={chatboxEllipsesOutline} /> <span>El Texto</span>
-                </button>
-                <button className={`choice-btn ${correctAnswer === 'color' ? 'active' : ''}`} onClick={() => setCorrectAnswer('color')}>
-                  <IonIcon icon={colorFillOutline} /> <span>El Color</span>
-                </button>
-              </div>
-            </div>
-
-            <button className="primary-btn open-room" onClick={handleOpenRoom}>
-              <IonIcon icon={listOutline} />
-              MOSTRAR PIN A LOS ALUMNOS
-            </button>
-          </div>
-        ) : (
-          /* VISTA DE ESPERA (PIN Y ALUMNOS) */
-          <div className="waiting-view">
-            <div className="pin-display">
-              <small>CÓDIGO DE ACCESO</small>
-              <div className="pin-number">{roomPin}</div>
-            </div>
-
-            <div className={`status-banner ${students.length > 0 ? 'students-ready' : ''}`}>
-              <IonIcon icon={people} />
-              <span>{students.length} Estudiantes conectados</span>
-            </div>
-
-            <div className="preview-box">
-              <p>Vista previa del reto:</p>
-              <b style={{ color: COLOR_OPTIONS.find(c => c.value === wordColor)?.colorCode }}>
-                {wordText}
-              </b>
-              <small>Deben marcar {correctAnswer === 'color' ? 'EL COLOR' : 'LA PALABRA'}</small>
-            </div>
-
-            <button 
-              className={`launch-btn ${students.length > 0 ? 'enabled' : ''}`} 
-              disabled={students.length === 0}
-              onClick={handleStartGame}
-            >
-              <IonIcon icon={rocketOutline} className={students.length > 0 ? 'rocket-ready' : ''} />
-              <span>{students.length === 0 ? 'ESPERANDO ALUMNOS...' : '¡EMPEZAR JUEGO!'}</span>
-            </button>
-
-            <button className="text-btn" onClick={() => setShowExitConfirm(true)}>
-              Cancelar sala
-            </button>
-          </div>
+            )}
+          </>
         )}
       </div>
 
       <IonAlert
-        isOpen={showExitConfirm}
-        onDidDismiss={() => setShowExitConfirm(false)}
-        header="¿Cerrar sala?"
-        message="Se desconectará a todos los alumnos y deberás generar un nuevo PIN."
+        isOpen={showExit}
+        header="¿Salir?"
         buttons={[
-          { text: 'Volver', role: 'cancel' },
-          { text: 'Sí, cerrar', handler: handleExit }
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Sí', handler: onBack },
         ]}
+        onDidDismiss={() => setShowExit(false)}
       />
     </div>
   );

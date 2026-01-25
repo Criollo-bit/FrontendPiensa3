@@ -1,0 +1,61 @@
+.join-container {
+  background: #f5f3ff;
+  min-height: 100vh;
+  padding: 30px;
+  text-align: center;
+}
+
+.join-back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #6d28d9;
+}
+
+.join-header ion-icon {
+  font-size: 4rem;
+  color: #8b5cf6;
+}
+
+.join-header h1 {
+  font-weight: 900;
+  color: #4c1d95;
+}
+
+.join-header p {
+  color: #6b7280;
+}
+
+.join-form {
+  max-width: 320px;
+  margin: 40px auto 0;
+}
+
+.pin-inputs {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.pin-inputs input {
+  width: 55px;
+  height: 65px;
+  font-size: 1.6rem;
+  text-align: center;
+  border-radius: 15px;
+  border: 2px solid #ddd6fe;
+}
+
+.join-btn {
+  width: 100%;
+  background: #7c3aed;
+  color: white;
+  padding: 16px;
+  border-radius: 18px;
+  font-weight: 800;
+  border: none;
+}

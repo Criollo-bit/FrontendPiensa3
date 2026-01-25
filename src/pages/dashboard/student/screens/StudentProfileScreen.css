@@ -1,162 +1,235 @@
-/* ========================================= */
-/* --- GENERALES / CONTENEDOR PRINCIPAL --- */
-/* ========================================= */
-.profile-screen-container {
-    padding: 0;
-    background-color: #f4f5f8;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center; /* Centrado horizontal */
-    padding-bottom: 90px; /* Espacio para el menú de abajo */
+.profile-page-wrapper {
+  padding: 20px;
+  background: #fdfdfd;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.4s ease-out;
 }
 
-.profile-content {
-    width: 100%;
-    max-width: 450px; /* Ancho máximo estilo móvil */
-    padding: 0 10px;
+/* Tarjeta de Perfil Blanca */
+.profile-main-card {
+  background: white;
+  border-radius: 30px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
-/* ========================================= */
-/* --- TARJETA DE PERFIL (CARD) --- */
-/* ========================================= */
-.profile-card {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    position: relative;
-    text-align: center;
-    margin-top: 20px; 
+.profile-avatar-container {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 20px;
 }
 
-/* --- Encabezado (Gradiente Azul/Verde para estudiante) --- */
-.profile-header {
-    height: 120px;
-    /* Gradiente diferente al del profesor para distinguir */
-    background: linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+.main-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  position: relative;
+  z-index: 2;
+  border: 4px solid white;
 }
 
-/* --- AVATAR --- */
-.avatar-container {
-    position: relative;
-    z-index: 10;
-    margin-top: 55px; /* Para que quede mitad dentro mitad fuera del header */
-    display: flex;
-    justify-content: center;
+.avatar-ring {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, var(--ion-color-primary), #8e2de2);
+  z-index: 1;
 }
 
-.profile-avatar {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    border: 5px solid #ffffff; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    object-fit: cover; 
-    background-color: white;
+.profile-user-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-/* ========================================= */
-/* --- INFORMACIÓN DEL PERFIL --- */
-/* ========================================= */
-.profile-info {
-    padding: 20px;
-    padding-top: 10px; 
+.profile-user-email {
+  color: #8e8e93;
+  margin: 5px 0 20px;
+  font-size: 1rem;
 }
 
-.profile-name {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 5px;
-    text-transform: capitalize;
+.profile-badges-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
 }
 
-.profile-title {
-    color: #0ea5e9; /* Azul Sky */
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 10px;
+.badge-pill {
+  background: #f1f1f7;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
 }
 
-.profile-location {
-    font-size: 0.9rem;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 25px;
+/* Biografía */
+.profile-section-card {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
-.profile-location ion-icon {
-    margin-right: 5px;
-    font-size: 1.1rem;
-    color: #94a3b8;
+.section-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  margin-bottom: 12px;
 }
 
-/* --- Botón de Edición (Píldora Azul) --- */
-.btn-follow {
-    background: #0ea5e9;
-    color: white;
-    border: none;
-    padding: 12px 40px;
-    border-radius: 30px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.1s;
-    margin-bottom: 25px;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+.bio-content-text {
+  line-height: 1.6;
+  color: #4a4a4a;
+  margin: 0;
 }
 
-.btn-follow:active {
-    transform: scale(0.98);
+/* Botones */
+.edit-profile-btn {
+  --background: var(--ion-color-primary);
+  --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+  font-weight: 700;
+  height: 54px;
 }
 
-/* --- Sección About / Biografía --- */
-.about-section {
-    text-align: left;
-    margin-top: 10px;
-    padding-top: 20px;
-    border-top: 1px solid #f1f5f9;
+/* Modal de Edición */
+.modal-avatar-pick {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 20px auto 40px;
 }
 
-.about-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #334155;
-    margin-bottom: 8px;
+.modal-avatar-pick img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.about-text {
-    font-size: 0.95rem;
-    color: #64748b;
-    line-height: 1.6;
-    margin-bottom: 20px;
+.camera-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  border: 3px solid white;
 }
 
-/* --- Botón Logout --- */
-.btn-logout-bottom {
-    margin-top: 15px;
-    background: #fee2e2;
-    color: #ef4444;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    max-width: 200px;
-    text-transform: uppercase;
-    font-size: 0.85rem;
+.input-group {
+  margin-bottom: 25px;
 }
 
-.btn-logout-bottom:active {
-    transform: scale(0.98);
-    background: #fecaca;
+.custom-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.custom-input {
+  --background: #f9f9f9;
+  --border-radius: 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.profile-container {
+  padding: 20px;
+  background: #f4f6f9;
+  min-height: 100%;
+}
+
+.profile-card-main {
+  background: white;
+  border-radius: 24px;
+  padding: 30px 15px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+/* Contenedor de la foto en el modal */
+.edit-avatar-wrapper {
+  text-align: center;
+  margin: 20px 0 30px;
+}
+
+.avatar-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  display: inline-block;
+  pointer-events: auto !important; /* 🔥 Fuerza que reciba el clic */
+}
+
+.avatar-preview-box {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+}
+
+.avatar-preview-box img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--ion-color-primary);
+}
+
+.camera-overlay-icon {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: var(--ion-color-primary);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Fix para los inputs amontonados */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.custom-input-item {
+  --background: transparent;
+  --padding-start: 0;
+  --padding-end: 0;
+  --inner-padding-end: 0;
+}
+
+.styled-input {
+  --background: #f8f9fa;
+  --border-radius: 12px;
+  margin-top: 8px;
 }
