@@ -1,167 +1,226 @@
-/* ========================================= */
-/* --- GENERALES / CONTENEDOR PRINCIPAL --- */
-/* ========================================= */
-.profile-screen-container {
-    padding: 0; /* 💥 AJUSTE 1: Eliminado el padding lateral y superior del contenedor base */
-    background-color: #f4f5f8;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding-bottom: 40px; 
+/* Contenedor Principal */
+.profile-container {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-.profile-content {
-    width: 100%;
-    /* 💥 AJUSTE 2: Disminuye el padding lateral para que la tarjeta sea más ancha */
-    max-width: 450px; 
-    padding: 0 10px; /* Reducido a 10px de padding lateral */
+/* Tarjeta Principal del Profesor */
+.profile-card-main {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* ========================================= */
-/* --- TARJETA DE PERFIL (CARD) --- */
-/* ========================================= */
-.profile-card {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    position: relative;
-    text-align: center;
-    /* 💥 AJUSTE 3: Disminuye el margen superior. De 50px a 20px. */
-    margin-top: 20px; 
+.profile-card-main::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(90deg, #3880ff, #5260ff);
 }
 
-/* --- Encabezado y Patrón (Gradiente) --- */
-.profile-header {
-    height: 120px;
-    background: linear-gradient(135deg, #6c5ce7 0%, #00cec9 100%);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+/* Sección de Avatar */
+.avatar-section {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  padding: 6px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
 }
 
-/* --- AVATAR Y SOLUCIÓN DE RECORTE --- */
-.avatar-container {
-    position: relative;
-    z-index: 10;
-    /* Ajusta el margen superior del avatar para que se superponga */
-    margin-top: 50px; 
-    display: flex;
-    justify-content: center;
+.avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.profile-avatar {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    border: 6px solid #ffffff; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-
-    object-fit: cover; 
-    object-position: center top; 
+.user-full-name {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.025em;
 }
 
-/* ========================================= */
-/* --- INFORMACIÓN DEL PERFIL --- */
-/* ========================================= */
-.profile-info {
-    padding: 20px;
-    padding-top: 15px; 
+.user-email-text {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 8px 0 20px;
 }
 
-.profile-name {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 5px;
+.profile-badge {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.profile-title {
-    color: #6c5ce7;
-    font-size: 1rem;
-    font-weight: 500;
-    margin-bottom: 15px;
+/* Sección de Biografía Profesional */
+.bio-display-section {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
 
-.profile-location {
-    font-size: 0.9rem;
-    color: #777;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 25px;
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #3880ff;
+  margin-bottom: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.profile-location ion-icon {
-    margin-right: 5px;
-    font-size: 1.1rem;
-    color: #a29bfe;
+.bio-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #334155;
+  margin: 0;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 12px;
+  border-left: 4px solid #cbd5e1;
 }
 
-/* --- Botón de Edición (EDITAR PERFIL) --- */
-.btn-follow {
-    background: #00cec9;
-    color: white;
-    border: none;
-    padding: 12px 40px;
-    border-radius: 30px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.1s;
-    margin-bottom: 30px;
-    text-transform: uppercase;
-    box-shadow: 0 4px 8px rgba(0, 206, 201, 0.4);
+/* Botones de Acción */
+.profile-footer-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.btn-follow:hover {
-    background: #00b894;
-    transform: translateY(-1px);
+.edit-main-btn {
+  background: #1e293b;
+  color: white;
+  border: none;
+  padding: 18px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
 }
 
-.btn-follow:active {
-    transform: translateY(1px);
+.edit-main-btn:active {
+  transform: scale(0.98);
+  background: #0f172a;
 }
 
-/* --- Sección About / Biografía --- */
-.about-section {
-    text-align: left;
-    margin-top: 20px;
-    padding-top: 25px;
-    border-top: 1px solid #eeeeee;
+.logout-link-btn {
+  background: transparent;
+  color: #ef4444;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.about-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 10px;
+/* Estilos del Modal de Edición */
+.edit-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
 }
 
-.about-text {
-    font-size: 0.95rem;
-    color: #555;
-    line-height: 1.6;
-    margin-bottom: 20px;
+.avatar-preview-container {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  cursor: pointer;
 }
 
-/* --- Botón Logout --- */
-.btn-logout-bottom {
-    margin-top: 20px;
-    background: none;
-    color: #e74c3c;
-    border: 1px solid #e74c3c;
-    padding: 10px 25px;
-    border-radius: 25px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-    max-width: 250px;
-    text-transform: uppercase;
+.avatar-preview-container img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
-.btn-logout-bottom:hover {
-    background: #e74c3c;
-    color: white;
+.camera-badge-overlay {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background: #3880ff;
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+}
+
+/* Inputs del Modal */
+.custom-input-group {
+  margin-bottom: 20px;
+}
+
+.custom-input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+  margin-left: 4px;
+}
+
+.custom-input-group input, 
+.custom-input-group textarea {
+  width: 100%;
+  background: #f1f5f9;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.custom-input-group input:focus, 
+.custom-input-group textarea:focus {
+  outline: none;
+  border-color: #3880ff;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(56, 128, 255, 0.1);
+}
+
+/* Animación de entrada */
+.app-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

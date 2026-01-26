@@ -32,16 +32,26 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
   const [teachers, setTeachers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // 🔥 ESTADOS PARA NOTIFICACIONES
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifModal, setShowNotifModal] = useState(false);
-
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); 
   const [joinedClassData, setJoinedClassData] = useState<{id: string, name: string} | null>(null);
   
   const [toastConfig, setToastConfig] = useState<{isOpen: boolean, msg: string, color: string}>({
     isOpen: false, msg: '', color: 'success'
   }); 
+
+  // 🔥 NUEVA FUNCIÓN: Sincroniza los cambios del perfil con el Dashboard
+  const handleUserUpdate = (updatedUser: any) => {
+    console.log("Dashboard: Sincronizando datos...", updatedUser);
+    setUserProfile(prev => ({
+      ...prev,
+      ...updatedUser,
+      // Mapeamos los campos del backend a lo que espera tu UI
+      name: updatedUser.fullName || updatedUser.name || prev.name,
+      avatar: updatedUser.avatar || updatedUser.avatarUrl || prev.avatar
+    }));
+  };
   
   const fetchEnrollments = useCallback(async () => {
     try {
@@ -66,7 +76,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
   const refreshUserProfile = async () => {
     try {
         const { data } = await api.get('/users/me');
-        setUserProfile(prev => ({ ...prev, ...data }));
+        handleUserUpdate(data); // Usamos nuestra nueva función aquí también
     } catch (error) {
         console.error("Error actualizando perfil:", error);
     }
@@ -93,6 +103,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
       .finally(() => setLoading(false));
   });
 
+  // --- LÓGICA DE CAROUSEL ---
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [dragState, setDragState] = useState({ isDragging: false, startX: 0, currentX: 0 });
   const handleDragStart = (e: any) => {
@@ -154,7 +165,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
 
         <IonLoading isOpen={loading} message="Cargando..." />
         
-        {/* 🔥 AGREGADA CLASE DE ANIMACIÓN AQUÍ */}
         <div className="app-fade-in">
           {currentScreen === 'HOME' && (
             <div className="student-dashboard">
@@ -208,12 +218,19 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
             </div>
           )}
 
-          {/* --- PANTALLAS SECUNDARIAS CON ANIMACIÓN --- */}
           {currentScreen === 'BATTLE' && <JoinBattleScreen onBack={() => setCurrentScreen('HOME')} studentId={userProfile.id} studentName={userProfile.name} />}
           {currentScreen === 'ALLFORALL' && <JoinAllForAllScreen onBack={() => setCurrentScreen('HOME')} studentId={userProfile.id} studentName={userProfile.name} />}
           {currentScreen === 'MY_CLASSES' && <MyClassesScreen />} 
           {currentScreen === 'REWARDS' && <AchievementsScreen user={userProfile} onBack={() => setCurrentScreen('HOME')} />}
-          {currentScreen === 'PROFILE' && <StudentProfileScreen user={userProfile} onLogout={onLogout} />}
+          
+          {/* 🔥 SE PASA LA FUNCIÓN AL PERFIL AQUÍ */}
+          {currentScreen === 'PROFILE' && (
+            <StudentProfileScreen 
+              user={userProfile} 
+              onLogout={onLogout} 
+              onUserUpdate={handleUserUpdate} 
+            />
+          )}
         </div>
 
         {/* --- MODALES --- */}

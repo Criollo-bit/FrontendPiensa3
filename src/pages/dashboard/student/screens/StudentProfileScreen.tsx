@@ -1,333 +1,185 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   IonIcon, IonToast, IonSpinner, IonButton, IonModal, 
-  IonItem, IonLabel, IonInput, IonTextarea, IonHeader, 
-  IonToolbar, IonTitle, IonButtons, IonContent, IonAlert
+  IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonBadge 
 } from '@ionic/react';
-import { 
-  cameraOutline, closeOutline, checkmarkOutline, 
-  personOutline, locationOutline, logOutOutline, imageOutline
-} from 'ionicons/icons';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { Capacitor } from '@capacitor/core';
+import { cameraOutline, personOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { api } from '../../../../api/axios'; 
 import { User } from '../../../../AppTypes';
-
 import './StudentProfileScreen.css';
 
 interface StudentProfileScreenProps {
   user: User;
   onLogout: () => void;
+  onUserUpdate?: (updatedUser: any) => void;
 }
 
-const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLogout }) => {
-  // Estado inicial del perfil con datos del usuario
+const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLogout, onUserUpdate }) => {
+  // Claves únicas para este usuario
+  const STORAGE_KEY_NAME = `u_name_${user.id}`;
+  const STORAGE_KEY_BIO = `u_bio_${user.id}`;
+  const STORAGE_KEY_IMG = `u_img_${user.id}`;
+
   const [profileData, setProfileData] = useState({
-    name: user.name || '',
-    bio: (user as any).bio || '',
-    avatarUrl: (user as any).avatarUrl || (user as any).avatar || ''
+    fullName: localStorage.getItem(STORAGE_KEY_NAME) || (user as any).fullName || user.name || '',
+    bio: localStorage.getItem(STORAGE_KEY_BIO) || (user as any).bio || '',
+    avatarUrl: localStorage.getItem(STORAGE_KEY_IMG) || (user as any).avatar || (user as any).avatarUrl || ''
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
-  const isPickingImage = useRef(false);
-  
-  // Estados para manejo de archivos de imagen
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [toast, setToast] = useState({ show: false, msg: '', color: 'success' });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const hiddenFileInput = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Determinar qué imagen mostrar (Avatar actual, Previa seleccionada o Iniciales)
-  const displayImage = previewUrl || profileData.avatarUrl || `https://ui-avatars.com/api/?name=${profileData.name}&background=random`;
+  // Bloqueamos la sobrescritura si los datos del servidor vienen vacíos
+  useEffect(() => {
+    const savedName = localStorage.getItem(STORAGE_KEY_NAME);
+    const savedBio = localStorage.getItem(STORAGE_KEY_BIO);
+    const savedImg = localStorage.getItem(STORAGE_KEY_IMG);
+    
+    setProfileData(prev => ({
+      fullName: savedName || (user as any).fullName || user.name || prev.fullName,
+      bio: savedBio || (user as any).bio || prev.bio,
+      avatarUrl: savedImg || (user as any).avatar || (user as any).avatarUrl || prev.avatarUrl
+    }));
+  }, [user]);
 
-  // Función auxiliar para procesar imagen
-  const processImage = async (image: any) => {
-    if (image.webPath) {
-      console.log("WebPath disponible:", image.webPath);
-      setPreviewUrl(image.webPath); // Actualiza la vista previa inmediatamente
-      
-      // Convertir el path de la cámara en un archivo real para el servidor
-      try {
-        const response = await fetch(image.webPath);
-        const blob = await response.blob();
-        const file = new File([blob], `profile_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        setSelectedFile(file);
-        console.log("Archivo creado exitosamente");
-      } catch (fetchErr) {
-        console.error("Error al convertir imagen:", fetchErr);
-        setErrorMsg('Error al procesar la imagen');
-      }
-    }
-  };
+  const displayImage = previewUrl || profileData.avatarUrl || `https://ui-avatars.com/api/?name=${profileData.fullName}&background=random`;
 
-  // Procesar archivo desde input file
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+  // Función para convertir imagen a Base64 (hace que la foto sea permanente al recargar)
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        setPreviewUrl(dataUrl);
-        setSelectedFile(file);
-        console.log("Archivo seleccionado:", file.name);
-      };
       reader.readAsDataURL(file);
-      // Limpiar el input para poder seleccionar el mismo archivo nuevamente
-      e.target.value = '';
-    }
-    isPickingImage.current = false;
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
-  // Función para abrir la cámara
-  const pickFromCamera = async () => {
-    if (isPickingImage.current) return; // Evitar ejecuciones múltiples
-    isPickingImage.current = true;
-
-    // En web, usar directamente el input file
-    if (!Capacitor.isNativePlatform()) {
-      if (hiddenFileInput.current) {
-        hiddenFileInput.current.accept = "image/*";
-        (hiddenFileInput.current as any).capture = "environment";
-        setTimeout(() => hiddenFileInput.current?.click(), 100);
-      }
-      return;
-    }
-
-    // En nativo, usar Camera Plugin
-    try {
-      console.log("Abriendo cámara...");
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: true,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera
-      });
-
-      console.log("Imagen de cámara obtenida:", image);
-      await processImage(image);
-    } catch (e: any) {
-      console.log("Error de cámara:", e);
-      // Fallback a input file si Camera falla
-      if (hiddenFileInput.current) {
-        hiddenFileInput.current.accept = "image/*";
-        (hiddenFileInput.current as any).capture = "environment";
-        setTimeout(() => hiddenFileInput.current?.click(), 100);
-      }
-    } finally {
-      isPickingImage.current = false;
-    }
-  };
-
-  // Función para abrir la galería
-  const pickFromGallery = async () => {
-    if (isPickingImage.current) return; // Evitar ejecuciones múltiples
-    isPickingImage.current = true;
-
-    // En web, usar directamente el input file
-    if (!Capacitor.isNativePlatform()) {
-      if (hiddenFileInput.current) {
-        hiddenFileInput.current.accept = "image/*";
-        (hiddenFileInput.current as any).capture = "";
-        setTimeout(() => hiddenFileInput.current?.click(), 100);
-      }
-      return;
-    }
-
-    // En nativo, usar Camera Plugin
-    try {
-      console.log("Abriendo galería...");
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: true,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Photos
-      });
-
-      console.log("Imagen de galería obtenida:", image);
-      await processImage(image);
-    } catch (e: any) {
-      console.log("Error de galería:", e);
-      // Fallback a input file si Camera falla
-      if (hiddenFileInput.current) {
-        hiddenFileInput.current.accept = "image/*";
-        (hiddenFileInput.current as any).capture = "";
-        setTimeout(() => hiddenFileInput.current?.click(), 100);
-      }
-    } finally {
-      isPickingImage.current = false;
-    }
-  };
-
-  // Función para mostrar opciones
-  const handlePickImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowPhotoOptions(true);
-  };
-
-  // Función para enviar los cambios al backend
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append('fullName', profileData.name);
-      formData.append('bio', profileData.bio);
+      formData.append('fullName', profileData.fullName);
+      formData.append('bio', profileData.bio || ''); 
+      if (selectedFile) formData.append('avatar', selectedFile);
+
+      // 1. Intentamos guardar en el servidor
+      await api.patch('/auth/me', formData);
+      
+      // 2. GUARDADO LOCAL (Nuestra fuente de verdad)
+      localStorage.setItem(STORAGE_KEY_NAME, profileData.fullName);
+      localStorage.setItem(STORAGE_KEY_BIO, profileData.bio);
       
       if (selectedFile) {
-        formData.append('avatar', selectedFile);
+        const base64Img = await convertToBase64(selectedFile);
+        localStorage.setItem(STORAGE_KEY_IMG, base64Img);
+        setProfileData(prev => ({ ...prev, avatarUrl: base64Img }));
       }
 
-      // Ajusta este endpoint según tu API (/auth/me o /users/update)
-      const response = await api.patch('/auth/me', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      if (onUserUpdate) {
+        onUserUpdate({
+          ...user,
+          fullName: profileData.fullName,
+          bio: profileData.bio,
+          avatarUrl: selectedFile ? localStorage.getItem(STORAGE_KEY_IMG) : profileData.avatarUrl
+        });
+      }
 
-      const updatedUser = response.data;
-      setProfileData({
-        name: updatedUser.fullName || updatedUser.name,
-        bio: updatedUser.bio || '',
-        avatarUrl: updatedUser.avatarUrl,
-      });
-
-      setSelectedFile(null);
-      setPreviewUrl(null);
       setIsEditModalOpen(false);
+      setPreviewUrl(null);
+      setToast({ show: true, msg: '¡Perfil guardado correctamente!', color: 'success' });
     } catch (err) {
-      setErrorMsg('No se pudo actualizar el perfil. Revisa tu conexión.');
+      setToast({ show: true, msg: 'Error de conexión', color: 'danger' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="profile-container app-fade-in">
-      {/* TARJETA DE PERFIL PRINCIPAL */}
+    <div className="profile-page-wrapper">
       <div className="profile-card-main">
-        <div className="avatar-section">
-          <img src={displayImage} alt="Avatar" className="avatar-circle" />
+        <div className="profile-image-section">
+          <div className="avatar-ring">
+            <img src={displayImage} alt="Avatar" className="profile-avatar-img" key={displayImage} />
+          </div>
+          <h2 className="profile-name-text">{profileData.fullName}</h2>
+          <p className="profile-email-text">{user.email}</p>
+          <div className="badge-container">
+            <span className="student-badge"><IonIcon icon={personCircleOutline} /> Estudiante</span>
+          </div>
         </div>
-        <h2 className="user-full-name">{profileData.name}</h2>
-        <p className="user-email-text">{user.email}</p>
-        <div className="badge-container">
-          <span className="info-badge"><IonIcon icon={personOutline} /> Estudiante</span>
-          <span className="info-badge"><IonIcon icon={locationOutline} /> I.S. Sudamericano</span>
+
+        <div className="profile-info-section">
+          <label className="info-label">SOBRE MÍ</label>
+          <div className="bio-container-box">
+            {profileData.bio ? (
+              <p className="bio-content-text">{profileData.bio}</p>
+            ) : (
+              <p className="bio-content-empty">Sin biografía aún.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="profile-footer-actions">
+          <button className="edit-profile-btn" onClick={() => setIsEditModalOpen(true)}>
+            <IonIcon icon={cameraOutline} /> EDITAR PERFIL
+          </button>
+          <button className="sign-out-btn" onClick={() => { localStorage.clear(); onLogout(); }}>
+            <IonIcon icon={logOutOutline} /> Cerrar Sesión
+          </button>
         </div>
       </div>
 
-      <div className="bio-display-section">
-        <h3 className="section-title">Biografía</h3>
-        <p className="bio-text">{profileData.bio || 'Sin biografía añadida.'}</p>
-      </div>
-
-      <div className="profile-footer-actions">
-        <IonButton expand="block" shape="round" className="edit-main-btn" onClick={() => setIsEditModalOpen(true)}>
-          <IonIcon slot="start" icon={cameraOutline} /> Editar Perfil
-        </IonButton>
-        <IonButton expand="block" fill="clear" color="danger" onClick={onLogout}>
-          <IonIcon slot="start" icon={logOutOutline} /> Cerrar Sesión
-        </IonButton>
-      </div>
-
-      {/* MODAL DE EDICIÓN */}
-      <IonModal isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)} className="profile-edit-modal">
+      <IonModal isOpen={isEditModalOpen} onDidDismiss={() => setIsEditModalOpen(false)}>
         <IonHeader className="ion-no-border">
           <IonToolbar>
             <IonTitle>Editar Perfil</IonTitle>
-            <IonButtons slot="start">
-              <IonButton onClick={() => setIsEditModalOpen(false)}>
-                <IonIcon icon={closeOutline} color="medium" />
-              </IonButton>
-            </IonButtons>
             <IonButtons slot="end">
               <IonButton onClick={handleSaveProfile} disabled={isLoading} color="primary" strong>
-                {isLoading ? <IonSpinner name="crescent" /> : 'GUARDAR'}
+                {isLoading ? <IonSpinner name="dots" /> : 'GUARDAR'}
               </IonButton>
             </IonButtons>
           </IonToolbar>
         </IonHeader>
 
         <IonContent className="ion-padding">
-          {/* BOTÓN DE IMAGEN: Se usa un botón real para asegurar el clic */}
-          <div className="edit-avatar-wrapper">
-            <button type="button" className="avatar-interaction-btn" onClick={handlePickImage}>
-              <div className="avatar-preview-container">
-                <img src={displayImage} alt="Preview" />
-                <div className="camera-badge-overlay">
-                  <IonIcon icon={cameraOutline} />
-                </div>
-              </div>
-            </button>
-            <p className="tap-hint-text">Toca para cambiar foto</p>
+          <div className="modal-avatar-selector" onClick={() => fileInputRef.current?.click()}>
+            <img src={displayImage} alt="Preview" />
+            <div className="camera-icon-badge"><IonIcon icon={cameraOutline} /></div>
           </div>
 
-          <div className="edit-form-list">
-            <IonItem lines="none" className="custom-form-item">
-              <IonLabel position="stacked">Nombre Completo</IonLabel>
-              <IonInput 
-                fill="outline" 
-                mode="md"
-                placeholder="Ingresa tu nombre"
-                className="custom-styled-input"
-                value={profileData.name} 
-                onIonInput={e => setProfileData({...profileData, name: e.detail.value!})} 
-              />
-            </IonItem>
-
-            <IonItem lines="none" className="custom-form-item">
-              <IonLabel position="stacked">Acerca de ti (Bio)</IonLabel>
-              <IonTextarea 
-                fill="outline" 
-                mode="md"
-                rows={5}
-                placeholder="Cuéntanos algo sobre ti..."
-                className="custom-styled-input"
-                value={profileData.bio} 
-                onIonInput={e => setProfileData({...profileData, bio: e.detail.value!})} 
-              />
-            </IonItem>
+          <div className="ios-input-group">
+            <label>Nombre Completo</label>
+            <input 
+              type="text" 
+              value={profileData.fullName} 
+              onChange={e => setProfileData({...profileData, fullName: e.target.value})} 
+            />
           </div>
+
+          <div className="ios-input-group">
+            <label>Biografía</label>
+            <textarea 
+              rows={4} 
+              value={profileData.bio || ""} // Evita error de nulo
+              onChange={e => setProfileData({...profileData, bio: e.target.value})}
+            />
+          </div>
+
+          <input ref={fileInputRef} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setPreviewUrl(URL.createObjectURL(file));
+              setSelectedFile(file);
+            }
+          }} />
         </IonContent>
       </IonModal>
 
-      {/* INPUT FILE OCULTO COMO FALLBACK */}
-      <input
-        ref={hiddenFileInput}
-        type="file"
-        style={{ display: 'none' }}
-        accept="image/*"
-        onChange={handleFileChange}
-      />
-
-      {/* ALERT PARA SELECCIONAR CÁMARA O GALERÍA */}
-      <IonAlert
-        isOpen={showPhotoOptions}
-        onDidDismiss={() => setShowPhotoOptions(false)}
-        header="Cambiar foto"
-        message="¿De dónde deseas tomar la foto?"
-        buttons={[
-          {
-            text: 'Cámara',
-            handler: () => {
-              pickFromCamera();
-              setShowPhotoOptions(false);
-            }
-          },
-          {
-            text: 'Galería',
-            handler: () => {
-              pickFromGallery();
-              setShowPhotoOptions(false);
-            }
-          },
-          {
-            text: 'Cancelar',
-            role: 'cancel'
-          }
-        ]}
-      />
-      
-      <IonToast isOpen={!!errorMsg} message={errorMsg || ''} duration={3000} color="danger" />
+      <IonToast isOpen={toast.show} message={toast.msg} color={toast.color} duration={2000} onDidDismiss={() => setToast({...toast, show: false})} />
     </div>
   );
 };

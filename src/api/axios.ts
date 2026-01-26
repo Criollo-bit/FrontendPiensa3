@@ -16,4 +16,10 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
+  },
+  (error) => {
+    // ESTO ES NUEVO: Para ver errores de configuración de la petición
+    console.error("Error en el interceptor de petición:", error);
+    return Promise.reject(error);
+
 });
