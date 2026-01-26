@@ -1,27 +1,27 @@
-/* StudentBottomNav.css - ACTUALIZADO PARA ZONAS SEGURAS */
+/* StudentBottomNav.css - OPTIMIZADO PARA ALTURA Y ZONAS SEGURAS */
 
-/* Contenedor principal (fixed bottom) */
+/* Contenedor principal */
 .student-nav-wrapper {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  /* AJUSTE: Altura dinámica sumando la zona de gestos/botones de Android */
-  height: calc(80px + var(--ion-safe-area-bottom)); 
-  pointer-events: none; /* Permite clicks pasen por arriba */
+  /* 🔥 AJUSTE: Aumentamos altura base de 80px a 95px para subir los iconos */
+  height: calc(95px + var(--ion-safe-area-bottom)); 
+  pointer-events: none;
 }
 
-/* --- BOTÓN FLOTANTE (El círculo activo) --- */
+/* --- BOTÓN FLOTANTE (Círculo activo) --- */
 .floating-active-container {
   position: absolute;
-  /* AJUSTE: Lo subimos para que no choque con la barra inferior del sistema */
-  bottom: calc(32px + var(--ion-safe-area-bottom)); 
+  /* 🔥 AJUSTE: Subimos el círculo negro para que la curva sea más pronunciada */
+  bottom: calc(45px + var(--ion-safe-area-bottom)); 
   z-index: 1002;
-  transition: left 0.7s ease-in-out; /* Duración suave */
+  transition: left 0.7s ease-in-out;
   width: 60px;
   height: 60px;
-  margin-left: -30px; /* Centrar (mitad del ancho) */
+  margin-left: -30px; 
   pointer-events: none;
 }
 
@@ -30,7 +30,7 @@
   height: 60px;
   border-radius: 50%;
   background-color: white;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,31 +40,28 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background-color: black; /* El diseño original usa negro */
+  background-color: black;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
 }
 
-/* --- FONDO SVG (La barra blanca curvada) --- */
+/* --- FONDO SVG (Barra blanca curvada) --- */
 .nav-svg-layer {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  /* AJUSTE: El fondo blanco ahora cubre también la zona segura inferior */
-  height: calc(70px + var(--ion-safe-area-bottom)); 
-  pointer-events: auto; /* Reactivar clicks */
+  /* 🔥 AJUSTE: El fondo blanco ahora es más alto (85px) para dar aire a los iconos */
+  height: calc(85px + var(--ion-safe-area-bottom)); 
+  pointer-events: auto;
 }
 
 .nav-svg-layer svg {
-  height: 100%; /* Asegura que el color de fondo llene el espacio extra */
+  height: 100%;
+  width: 100%;
   display: block;
-}
-
-.nav-svg-path {
-  transition: d 0.7s ease-in-out; /* Anima la curva */
 }
 
 /* --- ITEMS DE NAVEGACIÓN --- */
@@ -73,14 +70,14 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  /* AJUSTE: El contenedor de botones crece para mantenerse arriba del sistema */
-  height: calc(70px + var(--ion-safe-area-bottom)); 
+  /* 🔥 AJUSTE: Sincronizado con el fondo SVG */
+  height: calc(85px + var(--ion-safe-area-bottom)); 
   z-index: 1001;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  /* AJUSTE: Añadimos padding inferior para separar etiquetas de los botones físicos */
-  padding: 0 10px var(--ion-safe-area-bottom) 10px; 
+  /* 🔥 AJUSTE: Más espacio abajo para separar las etiquetas del borde del sistema */
+  padding: 0 10px calc(15px + var(--ion-safe-area-bottom)) 10px; 
   pointer-events: none;
 }
 
@@ -92,26 +89,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-width: 50px; /* Ajustado para mejor distribución de 6 items */
-  padding-top: 10px;
+  gap: 6px; /* Más espacio entre icono y texto */
+  min-width: 55px;
+  /* 🔥 AJUSTE: Empujamos los botones un poco hacia arriba */
+  padding-bottom: 5px; 
   cursor: pointer;
 }
 
 .nav-icon {
-  font-size: 24px;
-  color: #4b5563; /* text-gray-600 */
+  font-size: 26px; /* Iconos un poco más grandes para mejor visibilidad */
+  color: #4b5563;
 }
 
-/* Etiquetas del menú */
 .nav-label {
-  font-size: 9px; 
-  font-weight: 500;
+  font-size: 10px; /* Texto ligeramente más legible */
+  font-weight: 600;
   color: #4b5563; 
   white-space: nowrap;
 }
 
-/* Utilidad para ocultar elementos cuando están activos */
 .hidden-element {
   visibility: hidden;
   opacity: 0;

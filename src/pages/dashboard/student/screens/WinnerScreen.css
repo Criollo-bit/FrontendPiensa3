@@ -1,0 +1,160 @@
+/* WinnerScreen.css */
+
+.winner-page-container {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  /* Degradado acorde al proyecto Sudamericano */
+  background: radial-gradient(circle at top, #34d399 0%, #10b981 50%, #064e3b 100%);
+  color: white;
+  padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom) 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- DECORACIONES --- */
+.star-decoration {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 2rem;
+  animation: pulse 2s infinite alternate;
+}
+.s1 { top: 15%; left: 10%; animation-delay: 0.2s; }
+.s2 { top: 10%; right: 15%; animation-delay: 0.5s; font-size: 1.2rem; }
+.s3 { bottom: 20%; left: 15%; animation-delay: 0.8s; }
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.winner-content-card {
+  width: 100%;
+  max-width: 400px;
+  animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* --- TROFEO Y BRILLO --- */
+.trophy-badge-container {
+  position: relative;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.main-trophy-icon {
+  font-size: 8rem;
+  color: #fbbf24; /* Color Oro */
+  filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4));
+  z-index: 2;
+}
+
+.trophy-glow {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  background: white;
+  filter: blur(50px);
+  opacity: 0.4;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* --- TEXTOS --- */
+.winner-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+.winner-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+/* --- CAJA DE PUNTOS (Glassmorphism) --- */
+.points-reward-box {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transform: rotate(-2deg); /* Efecto dinámico */
+}
+
+.points-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+  opacity: 0.8;
+}
+
+.points-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.points-plus {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fde047;
+}
+
+.points-number {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* --- BOTÓN FINAL --- */
+.btn-finish-battle {
+  margin-top: 40px;
+  background: white;
+  color: #065f46;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-finish-battle:active {
+  transform: scale(0.95);
+}
+
+/* --- ANIMACIONES --- */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  from { transform: scale(1); opacity: 0.3; }
+  to { transform: scale(1.2); opacity: 0.6; }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 3s infinite;
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
