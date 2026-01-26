@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   IonIcon, IonToast, IonSpinner, IonButton, IonModal, 
-  IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonBadge 
+  IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, 
 } from '@ionic/react';
-import { cameraOutline, personOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
+import { cameraOutline, logOutOutline, personCircleOutline } from 'ionicons/icons';
 import { api } from '../../../../api/axios'; 
 import { User } from '../../../../AppTypes';
 import './StudentProfileScreen.css';

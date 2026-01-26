@@ -51,20 +51,18 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
     { screen: TeacherScreen.Profile, label: 'Perfil', icon: personOutline },
   ];
 
-  // 2. Filtramos según módulos habilitados (si usas esa lógica, si no, muestra todos)
-  // Para probar, si enabledModules está vacío, mostramos todos por defecto o los filtramos.
-  // Asumiremos que queremos mostrar todos si el Set está vacío para desarrollo.
+  // 2. Filtramos según módulos habilitados
   const standardNavItems = enabledModules.size > 0 
     ? allStandardNavItems.filter(item => enabledModules.has(item.screen))
     : allStandardNavItems;
 
-  // 3. Módulos personalizados (si los hay)
+  // 3. Módulos personalizados
   const customNavItems = customModules
     .filter(module => module.role === AppRole.Teacher && enabledModules.has(module.id))
     .map(module => ({
         screen: module.id,
         label: module.name,
-        icon: module.icon // Asumiendo que el string del icono es compatible con IonIcon
+        icon: module.icon 
     }));
 
   const navItems = [...standardNavItems, ...customNavItems];
@@ -73,7 +71,6 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
   if (navItems.length === 0) return null;
 
   // 4. Cálculo matemático para la curva (Notch)
-  // Mueve la curva al centro del botón activo
   const notchCenterX = activeIndex !== -1
     ? (activeIndex / navItems.length) * 100 + (50 / navItems.length)
     : 50;
@@ -94,6 +91,7 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
       )}
 
       {/* Barra de Fondo con SVG Curvo */}
+      {/* Se mantiene viewBox 400 70 pero el path se extiende hacia abajo */}
       <svg className="nav-background-svg" viewBox="0 0 400 70" preserveAspectRatio="none">
         <defs>
           <linearGradient id="barGradientTeacher" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -114,8 +112,8 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
             Q ${notchCenterX * 4 + 32},12 ${notchCenterX * 4 + 38},16
             Q ${notchCenterX * 4 + 42},18 ${notchCenterX * 4 + 50},18
             L 400,18
-            L 400,70
-            L 0,70
+            L 400,100  /* 🔥 Extendido para cubrir Safe Area Bottom */
+            L 0,100    /* 🔥 Extendido para cubrir Safe Area Bottom */
             Z
           `}
         />

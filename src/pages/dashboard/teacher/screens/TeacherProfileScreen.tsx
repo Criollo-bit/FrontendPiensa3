@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   IonIcon, IonToast, IonSpinner, IonButton, IonModal, 
-  IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonBadge,
-  IonItem, IonLabel, IonInput, IonTextarea
+  IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonBadge, 
 } from '@ionic/react';
 import { cameraOutline, trophyOutline, logOutOutline } from 'ionicons/icons';
 import { api } from '../../../../api/axios'; 

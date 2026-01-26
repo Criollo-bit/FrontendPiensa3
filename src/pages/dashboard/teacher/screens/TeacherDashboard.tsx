@@ -22,8 +22,6 @@ import QuestionBankScreen from './QuestionBankScreen';
 // Modal de Asignar Puntos
 import AssignPointsModal from '../../../gamification/AssignPointsModal';
 
-
-
 interface TeacherDashboardProps {
   user: User;
   onLogout: () => void;
@@ -87,34 +85,39 @@ const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     }
   };
 
+  // 🔥 CONDICIÓN: ¿Estamos en la pantalla principal?
+  const isMainDashboard = activeScreen === TeacherScreen.Dashboard;
+
   return (
     <div className="teacher-dashboard-container">
       
-      {/* HEADER AJUSTADO PARA GANAR ESPACIO VERTICAL */}
-      <header className="dashboard-header-dark">
-        <div className="header-info-main">
-          <p className="welcome-label">Hola, <strong>{(user?.name || 'Juan').split(' ')[0]}</strong></p>
-          <h1 className="header-title-main">Panel de Docente</h1>
-          <p className="header-subtitle-main">Gestiona tus clases y actividades.</p>
-        </div>
-        
-        <div className="header-actions-main">
-          <button 
-            className="notif-bell-main" 
-            onClick={() => navigateTo('rewards' as any)}
-          >
-            <div className="bell-wrapper-main">
-              <IonIcon icon={notificationsOutline} />
-              {pendingCount > 0 && (
-                <span className="notif-badge-float-main">{pendingCount}</span>
-              )}
-            </div>
-          </button>
-        </div>
-      </header>
+      {/* 🔥 EL HEADER SOLO SE MUESTRA EN EL DASHBOARD PRINCIPAL */}
+      {isMainDashboard && (
+        <header className="dashboard-header-dark">
+          <div className="header-info-main">
+            <p className="welcome-label">Hola, <strong>{(user?.name || 'Juan').split(' ')[0]}</strong></p>
+            <h1 className="header-title-main">Panel de Docente</h1>
+            <p className="header-subtitle-main">Gestiona tus clases y actividades.</p>
+          </div>
+          
+          <div className="header-actions-main">
+            <button 
+              className="notif-bell-main" 
+              onClick={() => navigateTo('rewards' as any)}
+            >
+              <div className="bell-wrapper-main">
+                <IonIcon icon={notificationsOutline} />
+                {pendingCount > 0 && (
+                  <span className="notif-badge-float-main">{pendingCount}</span>
+                )}
+              </div>
+            </button>
+          </div>
+        </header>
+      )}
 
-      {/* ÁREA DE CONTENIDO CON OVERLAP AJUSTADO */}
-      <main className="teacher-content-area overlap-active">
+      {/* 🔥 AGREGAMOS CLASES DINÁMICAS AL CONTENEDOR DE CONTENIDO */}
+      <main className={`teacher-content-area ${isMainDashboard ? 'overlap-active' : 'full-screen-content'}`}>
         {renderContent()}
       </main>
       

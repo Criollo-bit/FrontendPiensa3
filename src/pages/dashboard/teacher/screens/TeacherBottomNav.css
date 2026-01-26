@@ -1,12 +1,16 @@
+/* TeacherBottomNav.css */
+
 .bottom-nav-container {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: env(safe-area-inset-bottom);
+  /* 🔥 AJUSTE: Quitamos el bottom: env(...) aquí para que el contenedor toque el borde físico */
+  bottom: 0;
+  /* 🔥 AJUSTE: Altura aumentada para dar espacio a los iconos y cubrir el área segura */
+  height: calc(85px + env(safe-area-inset-bottom));
   z-index: 100;
   pointer-events: none;
 }
-
 
 /* El SVG del fondo curvo */
 .nav-background-svg {
@@ -14,8 +18,9 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70px;
-  pointer-events: auto; /* El SVG sí captura clicks */
+  /* 🔥 AJUSTE: El fondo ahora cubre también la zona segura inferior */
+  height: calc(85px + env(safe-area-inset-bottom));
+  pointer-events: auto;
   filter: drop-shadow(0px -2px 4px rgba(0,0,0,0.1));
 }
 
@@ -26,7 +31,8 @@
 /* Botón Flotante Activo (El círculo negro) */
 .floating-active-btn {
   position: absolute;
- bottom: calc(32px + env(safe-area-inset-bottom));
+  /* 🔥 AJUSTE: Subimos el círculo para que la curva sea más pronunciada y libre */
+  bottom: calc(45px + env(safe-area-inset-bottom));
   width: 60px;
   height: 60px;
   background-color: white;
@@ -36,7 +42,7 @@
   align-items: center;
   justify-content: center;
   z-index: 30;
-  transition: left 0.7s ease-in-out; /* Animación suave al moverse */
+  transition: left 0.7s ease-in-out;
   pointer-events: none;
 }
 
@@ -61,11 +67,13 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  /* 🔥 AJUSTE: Sincronizado con la altura del SVG */
+  height: calc(85px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding-bottom: env(safe-area-inset-bottom);
+  /* 🔥 AJUSTE: Padding inferior para separar etiquetas de los gestos del sistema */
+  padding-bottom: calc(15px + env(safe-area-inset-bottom));
   z-index: 20;
   pointer-events: auto;
 }
@@ -79,9 +87,11 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-width: 60px; /* Ancho mínimo para touch target */
+  min-width: 60px;
   cursor: pointer;
-  padding: 10px 0;
+  /* 🔥 AJUSTE: Subimos ligeramente los botones */
+  padding-top: 10px;
+  padding-bottom: 5px;
 }
 
 /* Icono inactivo */
@@ -93,12 +103,11 @@
 /* Texto */
 .nav-item-label {
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600; /* Un poco más de peso para legibilidad */
   color: #4b5563; /* Gray-600 */
   white-space: nowrap;
 }
 
-/* Ocultar elementos cuando están activos (porque el botón flotante los muestra) */
 .nav-item-btn.active .nav-item-icon,
 .nav-item-btn.active .nav-item-label {
   visibility: hidden;
