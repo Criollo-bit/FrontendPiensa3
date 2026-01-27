@@ -1,4 +1,4 @@
-/* StudentBottomNav.css - OPTIMIZADO PARA ALTURA Y ZONAS SEGURAS */
+/* StudentBottomNav.css - OPTIMIZADO PARA PROPORCIÓN Y POSICIONAMIENTO */
 
 /* Contenedor principal */
 .student-nav-wrapper {
@@ -7,16 +7,16 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  /* 🔥 AJUSTE: Aumentamos altura base de 80px a 95px para subir los iconos */
-  height: calc(95px + var(--ion-safe-area-bottom)); 
+  /* 🔥 AJUSTE: Altura equilibrada para que los iconos no se desborden */
+  height: calc(75px + var(--ion-safe-area-bottom)); 
   pointer-events: none;
 }
 
 /* --- BOTÓN FLOTANTE (Círculo activo) --- */
 .floating-active-container {
   position: absolute;
-  /* 🔥 AJUSTE: Subimos el círculo negro para que la curva sea más pronunciada */
-  bottom: calc(45px + var(--ion-safe-area-bottom)); 
+  /* 🔥 AJUSTE: Sincronizado con la profundidad de la nueva curva */
+  bottom: calc(30px + var(--ion-safe-area-bottom)); 
   z-index: 1002;
   transition: left 0.7s ease-in-out;
   width: 60px;
@@ -53,8 +53,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  /* 🔥 AJUSTE: El fondo blanco ahora es más alto (85px) para dar aire a los iconos */
-  height: calc(85px + var(--ion-safe-area-bottom)); 
+  /* 🔥 AJUSTE: Altura de la franja blanca para contener los iconos perfectamente */
+  height: calc(65px + var(--ion-safe-area-bottom)); 
   pointer-events: auto;
 }
 
@@ -64,20 +64,25 @@
   display: block;
 }
 
+.nav-svg-path {
+  /* 🔥 Asegura que la curva se mueva suavemente en el cambio de pantalla */
+  transition: d 0.7s ease-in-out;
+}
+
 /* --- ITEMS DE NAVEGACIÓN --- */
 .nav-items-layer {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  /* 🔥 AJUSTE: Sincronizado con el fondo SVG */
-  height: calc(85px + var(--ion-safe-area-bottom)); 
+  /* 🔥 AJUSTE: Área de botones sincronizada con el fondo */
+  height: calc(55px + var(--ion-safe-area-bottom)); 
   z-index: 1001;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  /* 🔥 AJUSTE: Más espacio abajo para separar las etiquetas del borde del sistema */
-  padding: 0 10px calc(15px + var(--ion-safe-area-bottom)) 10px; 
+  /* Padding inferior para respetar los gestos del sistema */
+  padding: 0 10px var(--ion-safe-area-bottom) 10px; 
   pointer-events: none;
 }
 
@@ -89,21 +94,28 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px; /* Más espacio entre icono y texto */
+  gap: 2px; /* Espacio reducido para centrado óptimo */
   min-width: 55px;
-  /* 🔥 AJUSTE: Empujamos los botones un poco hacia arriba */
-  padding-bottom: 5px; 
+  /* 🔥 AJUSTE: Subimos los botones para que entren totalmente en la barra blanca */
+  margin-top: -5px; 
   cursor: pointer;
 }
 
+.nav-icon-box {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .nav-icon {
-  font-size: 26px; /* Iconos un poco más grandes para mejor visibilidad */
+  font-size: 26px; 
   color: #4b5563;
 }
 
 .nav-label {
-  font-size: 10px; /* Texto ligeramente más legible */
-  font-weight: 600;
+  font-size: 9px; 
+  font-weight: 700;
   color: #4b5563; 
   white-space: nowrap;
 }

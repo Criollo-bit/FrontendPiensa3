@@ -1,12 +1,12 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.app',
+  appId: 'com.sudamericano.piensa', // Asegúrate que este sea tu ID real
   appName: 'frontend-piensa',
-  webDir: 'dist',
-  /* 👇 AÑADE ESTO PARA EVITAR EL TIMEOUT */
+  webDir: 'build', // 🔥 CAMBIADO: De 'dist' a 'build'
   server: {
-    allowNavigation: ['backend-piensa-production.up.railway.app']
+    allowNavigation: ['backend-piensa-production.up.railway.app'],
+    cleartext: true
   }
 };
 

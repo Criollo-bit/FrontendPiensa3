@@ -1,16 +1,29 @@
 /* Contenedor Principal */
 .profile-container {
-  padding: 24px;
-  background-color: #f8fafc;
-  min-height: 100%;
+  /* 🔥 CENTRADO TOTAL: Alinea la tarjeta en el medio de la pantalla */
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  
+  background-color: #f8fafc;
+  min-height: 100vh; /* Asegura el alto total para el centrado */
+  padding: 24px;
   font-family: 'Inter', system-ui, sans-serif;
+  box-sizing: border-box;
+
+  /* 🔥 SAFE ZONES: Protege contra Notch e Islas Dinámicas */
+  padding-top: calc(20px + env(safe-area-inset-top));
+  /* Margen extra inferior para no chocar con la Navbar del docente */
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Tarjeta Principal del Profesor */
 .profile-card-main {
+  width: 100%;
+  max-width: 450px; /* Mantiene la consistencia con el perfil de estudiante */
   background: #ffffff;
   border-radius: 24px;
   padding: 40px 20px;
@@ -19,6 +32,7 @@
   border: 1px solid #e2e8f0;
   position: relative;
   overflow: hidden;
+  height: fit-content; /* Se ajusta al contenido */
 }
 
 .profile-card-main::before {
@@ -71,15 +85,20 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  background: rgba(56, 128, 255, 0.1);
+  color: #3880ff;
 }
 
 /* Sección de Biografía Profesional */
 .bio-display-section {
+  width: 100%;
+  max-width: 450px;
   background: #ffffff;
-  padding: 28px;
+  padding: 24px;
   border-radius: 24px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
+  margin-top: 16px; /* Espacio entre tarjeta y bio */
 }
 
 .section-title {
@@ -89,6 +108,7 @@
   margin-bottom: 16px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-align: left;
 }
 
 .bio-text {
@@ -100,11 +120,14 @@
   padding: 15px;
   border-radius: 12px;
   border-left: 4px solid #cbd5e1;
+  text-align: left;
 }
 
 /* Botones de Acción */
 .profile-footer-actions {
-  margin-top: auto;
+  width: 100%;
+  max-width: 450px;
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -123,6 +146,7 @@
   justify-content: center;
   gap: 10px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .edit-main-btn:active {
@@ -141,47 +165,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-}
-
-/* Estilos del Modal de Edición */
-.edit-avatar-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-}
-
-.avatar-preview-container {
-  position: relative;
-  width: 130px;
-  height: 130px;
   cursor: pointer;
 }
 
-.avatar-preview-container img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-
-.camera-badge-overlay {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  background: #3880ff;
-  color: white;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid white;
-}
-
-/* Inputs del Modal */
+/* Modal de Edición e Inputs */
 .custom-input-group {
   margin-bottom: 20px;
 }
@@ -205,14 +192,6 @@
   font-size: 1rem;
   color: #1e293b;
   transition: all 0.2s ease;
-}
-
-.custom-input-group input:focus, 
-.custom-input-group textarea:focus {
-  outline: none;
-  border-color: #3880ff;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(56, 128, 255, 0.1);
 }
 
 /* Animación de entrada */

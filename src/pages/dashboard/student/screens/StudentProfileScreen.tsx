@@ -15,7 +15,6 @@ interface StudentProfileScreenProps {
 }
 
 const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLogout, onUserUpdate }) => {
-  // Claves únicas para este usuario
   const STORAGE_KEY_NAME = `u_name_${user.id}`;
   const STORAGE_KEY_BIO = `u_bio_${user.id}`;
   const STORAGE_KEY_IMG = `u_img_${user.id}`;
@@ -33,7 +32,6 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Bloqueamos la sobrescritura si los datos del servidor vienen vacíos
   useEffect(() => {
     const savedName = localStorage.getItem(STORAGE_KEY_NAME);
     const savedBio = localStorage.getItem(STORAGE_KEY_BIO);
@@ -48,7 +46,6 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
 
   const displayImage = previewUrl || profileData.avatarUrl || `https://ui-avatars.com/api/?name=${profileData.fullName}&background=random`;
 
-  // Función para convertir imagen a Base64 (hace que la foto sea permanente al recargar)
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -66,10 +63,8 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
       formData.append('bio', profileData.bio || ''); 
       if (selectedFile) formData.append('avatar', selectedFile);
 
-      // 1. Intentamos guardar en el servidor
       await api.patch('/auth/me', formData);
       
-      // 2. GUARDADO LOCAL (Nuestra fuente de verdad)
       localStorage.setItem(STORAGE_KEY_NAME, profileData.fullName);
       localStorage.setItem(STORAGE_KEY_BIO, profileData.bio);
       
@@ -99,7 +94,7 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
   };
 
   return (
-    <div className="profile-page-wrapper">
+    <div className="profile-page-wrapper animate-fade-up">
       <div className="profile-card-main">
         <div className="profile-image-section">
           <div className="avatar-ring">
@@ -142,10 +137,14 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
                 {isLoading ? <IonSpinner name="dots" /> : 'GUARDAR'}
               </IonButton>
             </IonButtons>
+            {/* 🔥 Agregamos botón cerrar para mejor UX en móvil */}
+            <IonButtons slot="start">
+              <IonButton onClick={() => setIsEditModalOpen(false)}>Cancelar</IonButton>
+            </IonButtons>
           </IonToolbar>
         </IonHeader>
 
-        <IonContent className="ion-padding">
+        <IonContent className="ion-padding edit-modal-content">
           <div className="modal-avatar-selector" onClick={() => fileInputRef.current?.click()}>
             <img src={displayImage} alt="Preview" />
             <div className="camera-icon-badge"><IonIcon icon={cameraOutline} /></div>
@@ -164,7 +163,7 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
             <label>Biografía</label>
             <textarea 
               rows={4} 
-              value={profileData.bio || ""} // Evita error de nulo
+              value={profileData.bio || ""} 
               onChange={e => setProfileData({...profileData, bio: e.target.value})}
             />
           </div>

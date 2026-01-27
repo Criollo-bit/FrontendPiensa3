@@ -3,18 +3,28 @@
 /* Fondo general y CENTRADO */
 .bg-join-battle {
   background: radial-gradient(circle at top left, #e0f2fe, #f0f9ff);
-  min-height: 100%;       /* Ocupa todo el alto disponible */
+  min-height: 100vh; 
   width: 100%;
-  
-  /* 🔥 AGREGADO: Propiedades para centrar todo */
   display: flex;
   flex-direction: column;
-  align-items: center;    /* Centrado Horizontal */
-  justify-content: center;/* Centrado Vertical */
+  align-items: center;
+  justify-content: center;
   
-  /* 🔥 Importante: Espacio abajo para que el menú no tape el botón */
-  padding-bottom: 100px;  
+  /* 🔥 SAFE ZONES: Aumentamos el padding superior para prevenir el notch */
+  padding-top: calc(40px + env(safe-area-inset-top));
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   box-sizing: border-box;
+}
+
+/* 🔥 Wrapper interno para centrar contenido sin romper las safe zones */
+.join-battle-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 /* Contenedor del Título e Icono */
@@ -22,7 +32,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2.5rem; /* Un poco más de espacio */
+  margin-bottom: 2.5rem;
   text-align: center;
 }
 
@@ -38,29 +48,29 @@
 /* Inputs del Código (Cuadrados) */
 .code-inputs-container {
   display: flex;
-  gap: 12px; /* Un poco más de separación */
+  gap: 12px;
   justify-content: center;
-  margin-bottom: 2rem; /* Separar del botón */
+  margin-bottom: 2rem;
 }
 
 .code-input-glass {
-  width: 50px;  /* Ligeramente más grandes */
+  width: 50px;
   height: 60px;
   border-radius: 14px;
-  border: 2px solid #e2e8f0; /* Slate 200 */
+  border: 2px solid #e2e8f0;
   background: rgba(255, 255, 255, 0.8);
   font-size: 1.8rem;
   font-weight: 700;
   text-align: center;
-  color: #1e293b; /* Slate 800 */
+  color: #1e293b;
   outline: none;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  padding: 0; /* Asegura centrado del texto */
+  padding: 0;
 }
 
 .code-input-glass:focus {
-  border-color: #3b82f6; /* Blue 500 */
+  border-color: #3b82f6;
   transform: translateY(-4px);
   box-shadow: 0 8px 15px rgba(59, 130, 246, 0.25);
   background: white;

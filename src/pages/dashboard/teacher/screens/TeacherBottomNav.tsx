@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { IonIcon } from '@ionic/react';
 import { homeOutline, flashOutline, colorPaletteOutline, giftOutline, peopleOutline, personOutline } from 'ionicons/icons';
-import { TeacherScreen, Screen, CustomModule, AppRole } from '../../../../AppTypes'; // Ajusta la ruta a tus tipos
-import './TeacherBottomNav.css'; // Importamos los estilos CSS
+import { TeacherScreen, Screen, CustomModule, AppRole } from '../../../../AppTypes'; 
+import './TeacherBottomNav.css';
 
 interface TeacherBottomNavProps {
   activeScreen: TeacherScreen | string;
@@ -17,7 +17,6 @@ interface NavItemData {
   icon: string;
 }
 
-// Sub-componente NavItem (interno)
 const NavItem: React.FC<{
   item: NavItemData;
   isActive: boolean;
@@ -41,7 +40,25 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
   customModules = [] 
 }) => {
   
-  // 1. Definimos los ítems estándar
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const onShow = () => setIsKeyboardVisible(true);
+    const onHide = () => setIsKeyboardVisible(false);
+
+    window.addEventListener('keyboardWillShow', onShow);
+    window.addEventListener('keyboardWillHide', onHide);
+    window.addEventListener('focusin', onShow);
+    window.addEventListener('focusout', onHide);
+
+    return () => {
+      window.removeEventListener('keyboardWillShow', onShow);
+      window.removeEventListener('keyboardWillHide', onHide);
+      window.removeEventListener('focusin', onShow);
+      window.removeEventListener('focusout', onHide);
+    };
+  }, []);
+
   const allStandardNavItems: NavItemData[] = [
     { screen: TeacherScreen.Dashboard, label: 'Inicio', icon: homeOutline },
     { screen: TeacherScreen.BattleManager, label: 'Batallas', icon: flashOutline },
@@ -51,38 +68,43 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
     { screen: TeacherScreen.Profile, label: 'Perfil', icon: personOutline },
   ];
 
-  // 2. Filtramos según módulos habilitados
-  const standardNavItems = enabledModules.size > 0 
-    ? allStandardNavItems.filter(item => enabledModules.has(item.screen))
-    : allStandardNavItems;
+  const standardNavItems = useMemo(() => 
+    enabledModules.size > 0 
+      ? allStandardNavItems.filter(item => enabledModules.has(item.screen))
+      : allStandardNavItems
+  , [enabledModules]);
 
-  // 3. Módulos personalizados
-  const customNavItems = customModules
-    .filter(module => module.role === AppRole.Teacher && enabledModules.has(module.id))
-    .map(module => ({
-        screen: module.id,
-        label: module.name,
-        icon: module.icon 
-    }));
+  const customNavItems = useMemo(() => 
+    customModules
+      .filter(module => module.role === AppRole.Teacher && enabledModules.has(module.id))
+      .map(module => ({
+          screen: module.id,
+          label: module.name,
+          icon: module.icon 
+      }))
+  , [customModules, enabledModules]);
 
   const navItems = [...standardNavItems, ...customNavItems];
   const activeIndex = navItems.findIndex(item => item.screen === activeScreen);
 
   if (navItems.length === 0) return null;
 
-  // 4. Cálculo matemático para la curva (Notch)
   const notchCenterX = activeIndex !== -1
     ? (activeIndex / navItems.length) * 100 + (50 / navItems.length)
     : 50;
 
+  const nX = notchCenterX * 4;
+
+  // 🔥 SOLUCIÓN AL MOVIMIENTO: Usamos una clase para ocultar en lugar de 'return null'
+  const navClass = isKeyboardVisible ? 'teacher-nav-container keyboard-active' : 'teacher-nav-container';
+
   return (
-    <div className="bottom-nav-container">
-      
-      {/* Botón Flotante Activo (La bola negra) */}
+    <div className={navClass}>
+      {/* Botón Flotante Activo */}
       {activeIndex !== -1 && (
         <div 
           className="floating-active-btn"
-          style={{ left: `calc(${notchCenterX}% - 30px)` }}
+          style={{ left: `${notchCenterX}%` }}
         >
           <div className="floating-inner-circle">
             <IonIcon icon={navItems[activeIndex].icon} className="floating-icon" />
@@ -91,35 +113,33 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
       )}
 
       {/* Barra de Fondo con SVG Curvo */}
-      {/* Se mantiene viewBox 400 70 pero el path se extiende hacia abajo */}
-      <svg className="nav-background-svg" viewBox="0 0 400 70" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="barGradientTeacher" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#f8f9fa" />
-          </linearGradient>
-        </defs>
-        <path
-          className="nav-path"
-          fill="url(#barGradientTeacher)"
-          d={`
-            M 0,18
-            L ${notchCenterX * 4 - 50},18
-            Q ${notchCenterX * 4 - 42},18 ${notchCenterX * 4 - 38},16
-            Q ${notchCenterX * 4 - 32},12 ${notchCenterX * 4 - 28},9
-            Q ${notchCenterX * 4 - 20},3 ${notchCenterX * 4},0
-            Q ${notchCenterX * 4 + 20},3 ${notchCenterX * 4 + 28},9
-            Q ${notchCenterX * 4 + 32},12 ${notchCenterX * 4 + 38},16
-            Q ${notchCenterX * 4 + 42},18 ${notchCenterX * 4 + 50},18
-            L 400,18
-            L 400,100  /* 🔥 Extendido para cubrir Safe Area Bottom */
-            L 0,100    /* 🔥 Extendido para cubrir Safe Area Bottom */
-            Z
-          `}
-        />
-      </svg>
+      <div className="nav-background-svg-wrapper">
+        <svg width="100%" height="100%" viewBox="0 0 400 80" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="barGradientTeacher" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#f8f9fa" />
+            </linearGradient>
+          </defs>
+          <path
+            className="nav-path"
+            fill="url(#barGradientTeacher)"
+            d={`
+              M 0,22 
+              L ${nX - 55},22 
+              C ${nX - 45},22 ${nX - 40},20 ${nX - 35},15 
+              C ${nX - 25},5 ${nX - 15},0 ${nX},0 
+              C ${nX + 15},0 ${nX + 25},5 ${nX + 35},15 
+              C ${nX + 40},20 ${nX + 45},22 ${nX + 55},22 
+              L 400,22 
+              L 400,100 
+              L 0,100 
+              Z
+            `}
+          />
+        </svg>
+      </div>
 
-      {/* Ítems de Navegación */}
       <div className="nav-items-wrapper">
         {navItems.map((item) => (
           <NavItem
