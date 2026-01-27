@@ -1,14 +1,31 @@
 /* TeacherBottomNav.css */
 
-.bottom-nav-container {
+.teacher-nav-container {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   /* Altura optimizada para que los iconos no se corten */
-  height: calc(75px + env(safe-area-inset-bottom));
+  height: calc(85px + env(safe-area-inset-bottom));
   z-index: 1000;
   pointer-events: none;
+  /* Transición para ocultamiento suave */
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+/* 🔥 FORZAMOS VISIBILIDAD ESTÁTICA */
+/* Evita que la barra desaparezca por errores de renderizado al navegar entre módulos */
+.teacher-nav-container.nav-visible-static {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+/* 🔥 OCULTAMIENTO SOLO POR TECLADO */
+/* Usamos 150px para asegurar que salga de la pantalla incluso con el empuje de Android */
+.teacher-nav-container.keyboard-active {
+  transform: translateY(150px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .nav-background-svg-wrapper {
@@ -16,7 +33,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: calc(70px + env(safe-area-inset-bottom));
+  /* Aumentamos un poco la altura para contener mejor los iconos del docente */
+  height: calc(75px + env(safe-area-inset-bottom));
   pointer-events: auto;
   filter: drop-shadow(0px -2px 6px rgba(0,0,0,0.08));
 }
@@ -28,7 +46,8 @@
 /* Botón Flotante Activo */
 .floating-active-btn {
   position: absolute;
-  bottom: calc(32px + env(safe-area-inset-bottom));
+  /* Sincronizado con la profundidad de la curva ajustada */
+  bottom: calc(35px + env(safe-area-inset-bottom));
   width: 60px;
   height: 60px;
   background-color: white;
@@ -63,11 +82,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(55px + env(safe-area-inset-bottom));
+  height: calc(60px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 0 5px env(safe-area-inset-bottom) 5px;
+  padding: 0 5px calc(5px + env(safe-area-inset-bottom)) 5px;
   z-index: 20;
   pointer-events: auto;
 }
@@ -82,8 +101,8 @@
   gap: 2px;
   min-width: 50px;
   cursor: pointer;
-  /* Centrado vertical dentro de la barra blanca */
-  margin-top: -5px; 
+  /* Bajamos el margen para centrar los iconos en la barra blanca más alta */
+  margin-top: 5px; 
 }
 
 .nav-item-icon {

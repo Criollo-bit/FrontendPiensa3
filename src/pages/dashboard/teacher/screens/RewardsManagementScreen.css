@@ -4,14 +4,15 @@
   height: 100%;
   overflow-y: auto;
   background-color: #f8fafc;
-  padding: 16px; /* Reducido de 20px */
+  padding: 16px; 
   font-family: 'Inter', sans-serif;
 }
 
 .rewards-container-limit {
   max-width: 600px;
   margin: 0 auto;
-  padding-bottom: 80px; /* Espacio extra abajo para que no lo tape el menú */
+  /* Espacio extra abajo para que no lo tape la TeacherBottomNav */
+  padding-bottom: calc(100px + var(--ion-safe-area-bottom)); 
 }
 
 /* --- HEADER --- */
@@ -46,7 +47,7 @@
   margin-bottom: 20px;
 }
 .page-title {
-  font-size: 1.5rem; /* Más pequeño (antes 1.8) */
+  font-size: 1.5rem; 
   font-weight: 800;
   color: #1e293b;
   margin: 0 0 4px 0;
@@ -56,7 +57,7 @@
 /* --- BOTÓN CREAR --- */
 .btn-create-toggle {
   width: 100%;
-  padding: 14px; /* Más compacto */
+  padding: 14px; 
   border-radius: 12px;
   font-weight: 700;
   font-size: 0.95rem;
@@ -105,20 +106,19 @@
 
 .reward-card {
   background: white;
-  border-radius: 16px; /* Menos redondeado */
-  padding: 16px;       /* Menos padding (antes 20px) */
+  border-radius: 16px; 
+  padding: 16px;      
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
   border: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
-  gap: 12px;           /* Menos espacio entre elementos */
+  gap: 12px;          
   position: relative;
   overflow: hidden;
 }
 
 .reward-card.inactive { opacity: 0.6; filter: grayscale(100%); }
 
-/* 1. Header */
 .rc-header { display: flex; justify-content: space-between; align-items: center; }
 .rc-subject-badge {
   background: #e0f2fe;
@@ -134,16 +134,14 @@
   background: #fee2e2; color: #dc2626; font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 6px;
 }
 
-/* 2. Body */
 .rc-body { text-align: center; }
 .rc-title { margin: 0 0 4px 0; font-size: 1.1rem; color: #1e293b; font-weight: 700; }
 .rc-desc { margin: 0; font-size: 0.85rem; color: #64748b; line-height: 1.4; }
 
-/* 3. Hero: Puntos (Compacto) */
 .rc-points-hero {
   background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%);
   border-radius: 12px;
-  padding: 8px 15px; /* Mucho más delgado */
+  padding: 8px 15px; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,15 +151,14 @@
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.rc-star-icon { font-size: 1.6rem; /* Reducido de 2.5rem */ color: #d97706; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1)); }
-.rc-points-value { font-size: 1.8rem; /* Reducido de 2.5rem */ font-weight: 800; line-height: 1; }
+.rc-star-icon { font-size: 1.6rem; color: #d97706; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1)); }
+.rc-points-value { font-size: 1.8rem; font-weight: 800; line-height: 1; }
 .rc-points-label { font-size: 0.8rem; font-weight: 700; opacity: 0.8; margin-top: 6px; }
 
-/* 4. Actions: Botones abajo */
 .rc-actions { display: flex; gap: 8px; margin-top: 4px; }
 
 .rc-btn {
-  padding: 10px; /* Botones más delgados */
+  padding: 10px; 
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.85rem;
@@ -181,20 +178,17 @@
 .btn-delete {
   background: #fee2e2;
   color: #dc2626;
-  flex: 0 0 42px; /* Botón cuadrado más pequeño */
+  flex: 0 0 42px; 
   font-size: 1.1rem;
 }
 
-/* Empty State */
-.empty-state { padding: 40px; text-align: center; color: #94a3b8; }
-
-/* --- NUEVA SECCIÓN: SOLICITUDES PENDIENTES --- */
+/* --- SOLICITUDES PENDIENTES --- */
 .pending-rewards-section {
   margin-bottom: 30px;
   background: #fff;
   border-radius: 16px;
   padding: 16px;
-  border: 2px dashed #3b82f6; /* Azul para resaltar */
+  border: 2px dashed #3b82f6; 
 }
 
 .pending-title {
@@ -266,3 +260,8 @@
 .p-btn:active { transform: scale(0.9); }
 .p-btn.approve { color: #10b981; }
 .p-btn.reject { color: #ef4444; }
+
+/* --- ESTILOS PARA EL ION-ALERT PERSONALIZADO --- */
+.alert-destructive {
+  --color: #dc2626;
+}

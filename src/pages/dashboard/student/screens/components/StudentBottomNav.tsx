@@ -19,15 +19,25 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
   const history = useHistory();
   const location = useLocation();
 
-  // 🔥 DETECCIÓN DE TECLADO: Solo cambia visibilidad, no afecta la lógica de navegación
+  // 🔥 ESTADO INICIAL SIEMPRE EN FALSE: La barra es estática por defecto
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const onShow = () => setIsKeyboardVisible(true);
+    const onShow = () => {
+      // Validación de seguridad: Solo ocultar si el foco está en un campo de entrada
+      const activeEl = document.activeElement?.tagName;
+      if (activeEl === 'INPUT' || activeEl === 'TEXTAREA') {
+        setIsKeyboardVisible(true);
+      }
+    };
+    
     const onHide = () => setIsKeyboardVisible(false);
 
+    // Eventos de teclado (Capacitor/Nativo)
     window.addEventListener('keyboardWillShow', onShow);
     window.addEventListener('keyboardWillHide', onHide);
+    
+    // Soporte para navegadores y transiciones de pantalla
     window.addEventListener('focusin', onShow);
     window.addEventListener('focusout', onHide);
 
@@ -39,7 +49,7 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
     };
   }, []);
 
-  // 1. CONFIGURACIÓN DE SECCIONES (Se ha eliminado 'REWARDS')
+  // 1. CONFIGURACIÓN DE SECCIONES
   const navItems = useMemo(() => [
     { id: 'HOME', label: 'Inicio', icon: homeOutline, isRoute: false },
     { id: 'MY_CLASSES', label: 'Clases', icon: bookOutline, isRoute: false },
@@ -48,7 +58,7 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
     { id: 'PROFILE', label: 'Perfil', icon: personOutline, isRoute: false },
   ], []);
 
-  // 2. CÁLCULO DEL ÍTEM ACTIVO (Tu lógica original de movimiento)
+  // 2. CÁLCULO DEL ÍTEM ACTIVO
   const activeIndex = navItems.findIndex(item => item.id === activeScreen);
   const safeIndex = activeIndex === -1 ? 0 : activeIndex; 
 
@@ -56,7 +66,7 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
   const notchCenterX = (safeIndex / totalItems) * 100 + (50 / totalItems);
   const nX = notchCenterX * 4; 
 
-  // 3. MANEJADOR DE NAVEGACIÓN (Tu lógica original)
+  // 3. MANEJADOR DE NAVEGACIÓN
   const handleNavigation = (item: any) => {
     if (item.isRoute) {
         history.push(item.path);
@@ -70,9 +80,9 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
     }
   };
 
-  // 🔥 IMPORTANTE: Si el teclado es visible, ocultamos con CSS en lugar de 'return null' 
-  // para no destruir el componente y mantener el estado del movimiento.
-  const keyboardClass = isKeyboardVisible ? 'nav-hidden-keyboard' : '';
+  // 🔥 LÓGICA DE VISIBILIDAD REFORZADA
+  // 'nav-visible-static' asegura que la barra no se mueva al cambiar de sección
+  const keyboardClass = isKeyboardVisible ? 'nav-hidden-keyboard' : 'nav-visible-static';
 
   return (
     <div className={`student-nav-wrapper ${keyboardClass}`}>
@@ -90,7 +100,7 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
         </div>
       )}
 
-      {/* Barra SVG */}
+      {/* Barra SVG - Ajustada para cubrir iconos totalmente */}
       <div className="nav-svg-layer">
         <svg width="100%" height="100%" viewBox="0 0 400 80" preserveAspectRatio="none">
           <defs>
@@ -105,15 +115,15 @@ const StudentBottomNav: React.FC<StudentBottomNavProps> = ({ activeScreen, setAc
           <path 
             className="nav-svg-path"
             d={`
-              M 0,20 
-              L ${nX - 50},20 
-              Q ${nX - 40},20 ${nX - 35},15 
-              Q ${nX - 25},5 ${nX},0 
-              Q ${nX + 25},5 ${nX + 35},15 
-              Q ${nX + 40},20 ${nX + 50},20 
-              L 400,20 
-              L 400,80 
-              L 0,80 
+              M 0,25 
+              L ${nX - 52},25 
+              C ${nX - 42},25 ${nX - 38},22 ${nX - 32},15 
+              C ${nX - 22},5 ${nX - 12},0 ${nX},0 
+              C ${nX + 12},0 ${nX + 22},5 ${nX + 32},15 
+              C ${nX + 38},22 ${nX + 42},25 ${nX + 52},25 
+              L 400,25 
+              L 400,100 
+              L 0,100 
               Z`} 
             fill="url(#barGradient)" 
             filter="url(#shadow)" 

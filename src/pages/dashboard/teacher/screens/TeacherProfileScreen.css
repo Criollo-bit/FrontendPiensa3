@@ -1,29 +1,50 @@
 /* Contenedor Principal */
 .profile-container {
-  /* 🔥 CENTRADO TOTAL: Alinea la tarjeta en el medio de la pantalla */
+  /* 🔥 BLOQUEO DE SCROLL FANTASMA: El contenedor padre es fijo */
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   
   background-color: #f8fafc;
-  min-height: 100vh; /* Asegura el alto total para el centrado */
-  padding: 24px;
   font-family: 'Inter', system-ui, sans-serif;
   box-sizing: border-box;
 
-  /* 🔥 SAFE ZONES: Protege contra Notch e Islas Dinámicas */
-  padding-top: calc(20px + env(safe-area-inset-top));
-  /* Margen extra inferior para no chocar con la Navbar del docente */
-  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  /* 🔥 SAFE ZONES */
+  padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* 🔥 ÁREA DE SCROLL INTERNO: Solo lo que está aquí adentro se puede mover */
+.profile-scroll-wrapper {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centrado vertical del contenido interno */
+  justify-content: center; 
+  padding: 24px;
+  /* 🔥 Margen inferior para no chocar con la Navbar del docente */
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Tarjeta Principal del Profesor */
 .profile-card-main {
   width: 100%;
-  max-width: 450px; /* Mantiene la consistencia con el perfil de estudiante */
+  max-width: 450px; 
   background: #ffffff;
   border-radius: 24px;
   padding: 40px 20px;
@@ -32,7 +53,7 @@
   border: 1px solid #e2e8f0;
   position: relative;
   overflow: hidden;
-  height: fit-content; /* Se ajusta al contenido */
+  height: fit-content; 
 }
 
 .profile-card-main::before {
@@ -98,7 +119,7 @@
   border-radius: 24px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
-  margin-top: 16px; /* Espacio entre tarjeta y bio */
+  margin-top: 16px; 
 }
 
 .section-title {
@@ -147,11 +168,6 @@
   gap: 10px;
   transition: all 0.2s ease;
   cursor: pointer;
-}
-
-.edit-main-btn:active {
-  transform: scale(0.98);
-  background: #0f172a;
 }
 
 .logout-link-btn {

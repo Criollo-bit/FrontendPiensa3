@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonIcon, IonSpinner } from '@ionic/react';
+import { IonIcon, IonSpinner, IonToast } from '@ionic/react';
 import { 
   arrowBackOutline, 
   addCircleOutline, 
@@ -8,12 +8,11 @@ import {
   checkmarkCircle,
   closeCircleOutline,
   addOutline,
-  documentTextOutline
+  documentTextOutline,
+  checkmarkCircleOutline
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
 import './QuestionBankScreen.css';
-
-// 🔴 BORRADO: const TEACHER_ID = "profesor-demo"; 
 
 interface Question {
   question_text: string;
@@ -28,13 +27,11 @@ interface Subject {
   _count?: { questions: number };
 }
 
-// 🟢 AGREGADO: teacherId ahora es obligatorio
 interface QuestionBankScreenProps {
   onBack: () => void;
   teacherId: string; 
 }
 
-// 🟢 RECIBIMOS teacherId AQUÍ 👇
 const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacherId }) => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,10 +43,16 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacher
     { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }
   ]);
 
+  // 🔥 NUEVO ESTADO PARA ALERTAS ELEGANTES
+  const [toastConfig, setToastConfig] = useState<{isOpen: boolean, message: string, color: string}>({
+    isOpen: false,
+    message: '',
+    color: 'success'
+  });
+
   useEffect(() => {
     const socket = socketService.connectToBattle();
     
-    // 🟢 USAMOS EL ID REAL
     socket.emit('get-my-subjects', { teacherId: teacherId });
 
     socket.on('subjects-list', (data: Subject[]) => {
@@ -62,13 +65,21 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacher
     socket.on('subject-created-success', () => {
       setShowModal(false);
       resetForm();
-      // 🟢 USAMOS EL ID REAL
       socket.emit('get-my-subjects', { teacherId: teacherId });
-      alert("¡Banco de preguntas creado exitosamente!");
+      // 🔥 REEMPLAZO DE ALERT RÚSTICO
+      setToastConfig({
+        isOpen: true,
+        message: '¡Banco de preguntas creado exitosamente!',
+        color: 'success'
+      });
     });
 
     socket.on('error', (err) => {
-      alert("Error: " + err);
+      setToastConfig({
+        isOpen: true,
+        message: `Error: ${err}`,
+        color: 'danger'
+      });
       setIsSubmitting(false);
     });
 
@@ -77,9 +88,8 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacher
       socket.off('subject-created-success');
       socket.off('error');
     };
-  }, [teacherId]); // 🟢 Agregamos teacherId a las dependencias
+  }, [teacherId]);
 
-  // ... (El resto de las funciones handleAddQuestion, etc. siguen igual) ...
   const handleAddQuestion = () => {
     if (questions.length >= 20) return alert('Máximo 20 preguntas por set');
     setQuestions([...questions, { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]);
@@ -119,7 +129,6 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacher
     }
 
     setIsSubmitting(true);
-    // 🟢 USAMOS EL ID REAL AQUÍ TAMBIÉN 👇
     socketService.getBattleSocket()?.emit('create-full-subject', {
       name: setName,
       teacherId: teacherId, 
@@ -189,7 +198,9 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacher
           <div className="qbs-modal-content">
             <div className="qbs-modal-header">
               <h2>Nuevo Banco de Preguntas</h2>
-              <button onClick={() => setShowModal(false)} className="qbs-close-icon"><IonIcon icon={closeCircleOutline} /></button>
+              <button onClick={() => setShowModal(false)} className="qbs-close-icon">
+                <IonIcon icon={closeCircleOutline} />
+              </button>
             </div>
 
             <div className="qbs-modal-body">
@@ -267,6 +278,23 @@ const QuestionBankScreen: React.FC<QuestionBankScreenProps> = ({ onBack, teacher
           </div>
         </div>
       )}
+
+      {/* 🔥 COMPONENTE DE ÉXITO MEJORADO */}
+      <IonToast
+        isOpen={toastConfig.isOpen}
+        message={toastConfig.message}
+        color={toastConfig.color}
+        duration={3000}
+        position="top"
+        icon={toastConfig.color === 'success' ? checkmarkCircleOutline : closeCircleOutline}
+        onDidDismiss={() => setToastConfig({ ...toastConfig, isOpen: false })}
+        buttons={[
+          {
+            text: 'OK',
+            role: 'cancel'
+          }
+        ]}
+      />
     </div>
   );
 };

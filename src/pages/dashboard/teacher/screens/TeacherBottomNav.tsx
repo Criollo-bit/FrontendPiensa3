@@ -40,10 +40,18 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
   customModules = [] 
 }) => {
   
+  // 🔥 ESTADO INICIAL SIEMPRE EN FALSE: La barra es estática por defecto
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    const onShow = () => setIsKeyboardVisible(true);
+    const onShow = () => {
+      // Validación de seguridad: Solo ocultar si el foco está en un campo de entrada real
+      const activeEl = document.activeElement?.tagName;
+      if (activeEl === 'INPUT' || activeEl === 'TEXTAREA') {
+        setIsKeyboardVisible(true);
+      }
+    };
+    
     const onHide = () => setIsKeyboardVisible(false);
 
     window.addEventListener('keyboardWillShow', onShow);
@@ -95,8 +103,11 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
 
   const nX = notchCenterX * 4;
 
-  // 🔥 SOLUCIÓN AL MOVIMIENTO: Usamos una clase para ocultar en lugar de 'return null'
-  const navClass = isKeyboardVisible ? 'teacher-nav-container keyboard-active' : 'teacher-nav-container';
+  // 🔥 LÓGICA DE VISIBILIDAD REFORZADA: Solo aplica 'keyboard-active' si el teclado está arriba
+  // 'nav-visible-static' asegura que la barra no desaparezca al navegar
+  const navClass = isKeyboardVisible 
+    ? 'teacher-nav-container keyboard-active' 
+    : 'teacher-nav-container nav-visible-static';
 
   return (
     <div className={navClass}>
@@ -112,7 +123,7 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
         </div>
       )}
 
-      {/* Barra de Fondo con SVG Curvo */}
+      {/* Barra de Fondo con SVG Curvo - Ajustada para cubrir iconos totalmente */}
       <div className="nav-background-svg-wrapper">
         <svg width="100%" height="100%" viewBox="0 0 400 80" preserveAspectRatio="none">
           <defs>
@@ -125,13 +136,13 @@ const TeacherBottomNav: React.FC<TeacherBottomNavProps> = ({
             className="nav-path"
             fill="url(#barGradientTeacher)"
             d={`
-              M 0,22 
-              L ${nX - 55},22 
-              C ${nX - 45},22 ${nX - 40},20 ${nX - 35},15 
-              C ${nX - 25},5 ${nX - 15},0 ${nX},0 
-              C ${nX + 15},0 ${nX + 25},5 ${nX + 35},15 
-              C ${nX + 40},20 ${nX + 45},22 ${nX + 55},22 
-              L 400,22 
+              M 0,25 
+              L ${nX - 55},25 
+              C ${nX - 45},25 ${nX - 40},22 ${nX - 35},15 
+              C ${nX - 22},5 ${nX - 12},0 ${nX},0 
+              C ${nX + 12},0 ${nX + 22},5 ${nX + 32},15 
+              C ${nX + 38},22 ${nX + 42},25 ${nX + 55},25 
+              L 400,25 
               L 400,100 
               L 0,100 
               Z

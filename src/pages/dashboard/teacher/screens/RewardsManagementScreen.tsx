@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IonIcon, IonSpinner, IonToast } from '@ionic/react';
+import { IonIcon, IonSpinner, IonToast, IonAlert } from '@ionic/react';
 import { 
   arrowBackOutline, 
   giftOutline, 
@@ -7,9 +7,9 @@ import {
   closeOutline, 
   star, 
   trashOutline,
-  checkmarkCircleOutline, // 🔥 Nuevo: Icono Visto
-  closeCircleOutline,     // 🔥 Nuevo: Icono X
-  timeOutline             // 🔥 Nuevo: Icono tiempo
+  checkmarkCircleOutline, 
+  closeCircleOutline,     
+  timeOutline             
 } from 'ionicons/icons';
 import { api } from '../../../../api/axios'; 
 import './RewardsManagementScreen.css';
@@ -17,6 +17,7 @@ import './RewardsManagementScreen.css';
 interface Subject {
   id: string;
   name: string;
+  cycle?: string; // 🔥 Importante para filtrar
 }
 
 interface Reward {
@@ -28,7 +29,6 @@ interface Reward {
   subject?: { name: string };
 }
 
-// 🔥 Nueva Interfaz para solicitudes
 interface RedemptionRequest {
   id: string;
   status: string;
@@ -44,10 +44,16 @@ interface RewardsManagementScreenProps {
 const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teacherId, onBack }) => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [pendingRequests, setPendingRequests] = useState<RedemptionRequest[]>([]); // 🔥 Estado solicitudes
+  const [pendingRequests, setPendingRequests] = useState<RedemptionRequest[]>([]); 
   const [loading, setLoading] = useState(true);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   
+  // 🔥 Estado para el Alert de eliminación profesional
+  const [deleteAlert, setDeleteAlert] = useState<{isOpen: boolean, rewardId: string | null}>({
+    isOpen: false,
+    rewardId: null
+  });
+
   const [isCreating, setIsCreating] = useState(false);
   const [newReward, setNewReward] = useState({
     title: '',
@@ -66,15 +72,18 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
       const [subjectsRes, rewardsRes, pendingRes] = await Promise.all([
         api.get('/subjects'),
         api.get('/rewards/teacher'),
-        api.get('/rewards/teacher/pending') // 🔥 Endpoint de canjes pendientes
+        api.get('/rewards/teacher/pending') 
       ]);
 
-      setSubjects(subjectsRes.data);
+      // 🔥 FILTRO: Solo materias reales, excluimos bancos de preguntas (cycle === 'BANK')
+      const realSubjects = subjectsRes.data.filter((s: Subject) => s.cycle !== 'BANK');
+      
+      setSubjects(realSubjects);
       setRewards(rewardsRes.data);
       setPendingRequests(pendingRes.data);
       
-      if (subjectsRes.data.length > 0 && !newReward.subjectId) {
-          setNewReward(prev => ({ ...prev, subjectId: subjectsRes.data[0].id }));
+      if (realSubjects.length > 0 && !newReward.subjectId) {
+          setNewReward(prev => ({ ...prev, subjectId: realSubjects[0].id }));
       }
     } catch (error) {
       console.error("Error cargando datos", error);
@@ -83,7 +92,6 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
     }
   };
 
-  // 🔥 Lógica para Aprobar (Visto) o Rechazar (X)
   const handleRequest = async (requestId: string, status: 'APPROVED' | 'REJECTED') => {
     try {
       await api.patch(`/rewards/teacher/handle-request/${requestId}`, { status });
@@ -97,7 +105,7 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
 
   const handleCreateReward = async () => {
     if (!newReward.title.trim() || !newReward.subjectId) {
-      alert('Título y Materia son requeridos');
+      setToastMsg('Título y Materia son requeridos');
       return;
     }
 
@@ -117,9 +125,10 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
       });
       setIsCreating(false);
       loadData(); 
+      setToastMsg('Recompensa creada con éxito');
     } catch (error) {
       console.error('Error creando recompensa:', error);
-      alert('Error al crear. Verifica que tengas materias creadas.');
+      setToastMsg('Error al crear. Verifica tus materias.');
     }
   };
 
@@ -133,13 +142,17 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
     }
   };
 
-  const handleDeleteReward = async (rewardId: string) => {
-    if (!confirm('¿Eliminar esta recompensa?')) return;
+  const confirmDeleteReward = async () => {
+    if (!deleteAlert.rewardId) return;
     try {
-        await api.delete(`/rewards/${rewardId}`);
-        setRewards(prev => prev.filter(r => r.id !== rewardId));
+        await api.delete(`/rewards/${deleteAlert.rewardId}`);
+        setRewards(prev => prev.filter(r => r.id !== deleteAlert.rewardId));
+        setToastMsg('Recompensa eliminada');
     } catch (error) {
         console.error("Error eliminando", error);
+        setToastMsg('No se pudo eliminar la recompensa');
+    } finally {
+        setDeleteAlert({ isOpen: false, rewardId: null });
     }
   };
 
@@ -158,7 +171,6 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
           </button>
         </div>
 
-        {/* --- 🔥 NUEVA SECCIÓN: PREMIOS CANJEADOS (PENDIENTES) --- */}
         {pendingRequests.length > 0 && (
           <div className="pending-rewards-section">
             <h2 className="pending-title">
@@ -188,7 +200,7 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
 
         <div className="page-header-card">
           <h1 className="page-title">
-            <span role="img" aria-label="gift"></span> Gestión de Premios
+             Gestión de Premios
           </h1>
           <p className="page-subtitle">
             Crea recompensas que tus estudiantes pueden canjear con sus puntos.
@@ -244,8 +256,16 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
                 <label className="form-label">Costo en Puntos</label>
                 <input
                     type="number"
-                    value={newReward.points_required}
-                    onChange={(e) => setNewReward({ ...newReward, points_required: parseInt(e.target.value) || 0 })}
+                    /* 🔥 FIX: Evita que el '0' se muestre al borrar o escribir */
+                    value={newReward.points_required === 0 ? '' : newReward.points_required}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewReward({ 
+                        ...newReward, 
+                        points_required: val === '' ? 0 : parseInt(val, 10) 
+                      });
+                    }}
+                    placeholder="Ej: 100"
                     min="1"
                     className="form-input"
                 />
@@ -282,7 +302,7 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
                     <button onClick={() => handleToggleActive(reward.id, reward.isActive)} className={`rc-btn ${reward.isActive ? 'btn-disable' : 'btn-enable'}`}>
                       {reward.isActive ? 'Desactivar' : 'Activar'}
                     </button>
-                    <button onClick={() => handleDeleteReward(reward.id)} className="rc-btn btn-delete">
+                    <button onClick={() => setDeleteAlert({ isOpen: true, rewardId: reward.id })} className="rc-btn btn-delete">
                       <IonIcon icon={trashOutline} />
                     </button> 
                 </div>
@@ -291,7 +311,34 @@ const RewardsManagementScreen: React.FC<RewardsManagementScreenProps> = ({ teach
           )}
         </div>
       </div>
-      <IonToast isOpen={!!toastMsg} message={toastMsg || ''} duration={2000} color="dark" onDidDismiss={() => setToastMsg(null)} />
+
+      <IonToast 
+        isOpen={!!toastMsg} 
+        message={toastMsg || ''} 
+        duration={2000} 
+        color="dark" 
+        onDidDismiss={() => setToastMsg(null)} 
+      />
+
+      <IonAlert
+        isOpen={deleteAlert.isOpen}
+        header={'¿Eliminar Recompensa?'}
+        message={'Esta acción no se puede deshacer. Los estudiantes ya no podrán canjear este premio.'}
+        buttons={[
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+            cssClass: 'secondary',
+            handler: () => setDeleteAlert({ isOpen: false, rewardId: null })
+          },
+          {
+            text: 'Eliminar',
+            role: 'destructive',
+            handler: confirmDeleteReward
+          }
+        ]}
+        onDidDismiss={() => setDeleteAlert({ isOpen: false, rewardId: null })}
+      />
     </div>
   );
 };

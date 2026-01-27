@@ -69,6 +69,9 @@
   font-weight: 700;
   color: #334155; /* slate-700 */
   font-size: 0.9rem;
+  /* 🔥 FIX: Altura mínima para asegurar que los inputs de la fila estén alineados */
+  min-height: 1.2rem; 
+  display: block;
 }
 
 .clean-input, .clean-input-lg {
@@ -80,6 +83,8 @@
   color: #1e293b;
   transition: all 0.2s;
   background: #f8fafc;
+  /* 🔥 FIX: Asegura que el padding no afecte el alineamiento */
+  box-sizing: border-box; 
 }
 
 .clean-input-lg {
@@ -98,6 +103,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  /* 🔥 FIX: Alinea los elementos al inicio para consistencia visual */
+  align-items: start; 
 }
 
 .info-box {

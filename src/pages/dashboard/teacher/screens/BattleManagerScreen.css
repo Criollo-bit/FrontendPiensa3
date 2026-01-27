@@ -1,9 +1,13 @@
+/* BattleManagerScreen.css - CÓDIGO ORIGINAL CON FIX DE SCROLL */
+
 .bm-screen {
-  position: relative;
-  min-height: 100vh;
+  /* 🔥 FIX: Bloqueamos el scroll del contenedor padre para evitar el salto fantasma */
+  position: fixed; 
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; 
   background-color: #f8fafc;
-  padding: 20px;
-  padding-top: 60px; /* Espacio para el botón de atrás */
 }
 
 .bm-back-btn {
@@ -23,7 +27,7 @@
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   transition: all 0.2s;
-  z-index: 10;
+  z-index: 20; /* Subido para asegurar que no lo tape nada */
 }
 
 .bm-back-btn:hover {
@@ -32,8 +36,16 @@
 }
 
 .bm-content {
+  /* 🔥 FIX: El scroll ahora solo sucede aquí adentro */
+  height: 100%;
+  overflow-y: auto;
   max-width: 600px;
   margin: 0 auto;
+  padding: 20px;
+  padding-top: 60px; /* Espacio para el botón de atrás */
+  /* Protege contra la Navbar inferior del docente */
+  padding-bottom: calc(100px + var(--ion-safe-area-bottom)); 
+  box-sizing: border-box;
 }
 
 .bm-header {
@@ -156,7 +168,7 @@
 }
 
 .bm-code-box {
-  background: #fff7ed; /* Orange light */
+  background: #fff7ed; 
   border: 2px solid #fdba74;
   border-radius: 10px;
   padding: 15px;

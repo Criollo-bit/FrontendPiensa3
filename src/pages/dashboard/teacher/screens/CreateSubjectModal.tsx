@@ -89,7 +89,7 @@ const CreateSubjectModal: React.FC<CreateSubjectModalProps> = ({ isOpen, onClose
                    <option>Ciclo 1</option>
                    <option>Ciclo 2</option>
                    <option>Ciclo 3</option>
-                   <option>Verano</option>
+                   <option>Ciclo 4</option>
                  </select>
               </div>
             </div>

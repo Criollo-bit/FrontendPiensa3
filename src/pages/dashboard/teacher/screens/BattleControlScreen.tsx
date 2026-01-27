@@ -117,7 +117,11 @@ const BattleControlScreen: React.FC = () => {
       setRoomId(data.roomId);
       setCode(data.code); 
       setRoomName(data.name || storedName || `Sala ${data.code}`); 
-      setSubjects(data.mySubjects || []);
+      
+      // 🔥 FILTRO: Solo bancos de preguntas (cycle === 'BANK')
+      const banksOnly = (data.mySubjects || []).filter((s: any) => s.cycle === 'BANK');
+      setSubjects(banksOnly);
+      
       setPhase('LOBBY');
     });
 
@@ -130,8 +134,17 @@ const BattleControlScreen: React.FC = () => {
         showNiceAlert("¡Éxito!", "Banco guardado y seleccionado automáticamente.");
     });
 
-    socket.on('subjects-list', (data: any) => setSubjects(data));
-    socket.on('subjects-updated', (data: any) => setSubjects(data.mySubjects));
+    socket.on('subjects-list', (data: any) => {
+      // 🔥 FILTRO: Solo bancos de preguntas
+      const banksOnly = (data || []).filter((s: any) => s.cycle === 'BANK');
+      setSubjects(banksOnly);
+    });
+
+    socket.on('subjects-updated', (data: any) => {
+      // 🔥 FILTRO: Solo bancos de preguntas
+      const banksOnly = (data.mySubjects || []).filter((s: any) => s.cycle === 'BANK');
+      setSubjects(banksOnly);
+    });
 
     socket.on('room-update', (data: any) => {
       if (data.students) setStudents(data.students);
@@ -237,11 +250,17 @@ const BattleControlScreen: React.FC = () => {
   const handleRemoveQuestion = (idx: number) => { setNewQuestions(newQuestions.filter((_, i) => i !== idx)); };
   const handleQuestionChange = (idx: number, field: string, val: any) => { const updated = [...newQuestions]; if (field === 'text') updated[idx].question_text = val; if (field === 'correct') updated[idx].correct_answer_index = val; setNewQuestions(updated); };
   const handleAnswerChange = (qIdx: number, aIdx: number, val: string) => { const updated = [...newQuestions]; updated[qIdx].answers[aIdx] = val; setNewQuestions(updated); };
+  
   const handleSaveBank = () => {
     if (!newBankName.trim()) return showNiceAlert("Faltan datos", "El banco debe tener nombre");
     if (newQuestions.some(q => !q.question_text.trim() || q.answers.some(a => !a.trim()))) { return showNiceAlert("Faltan datos", "Completa todas las preguntas y respuestas"); }
     setIsSubmitting(true);
-    socketService.getBattleSocket()?.emit('create-full-subject', { name: newBankName, teacherId: TEACHER_ID, questions: newQuestions });
+    socketService.getBattleSocket()?.emit('create-full-subject', { 
+        name: newBankName, 
+        teacherId: TEACHER_ID, 
+        questions: newQuestions,
+        cycle: 'BANK' // 🔥 Aseguramos que se guarde como banco
+    });
   };
 
   const isLastQuestion = totalQuestionsCount > 0 && currentQuestionIndex >= totalQuestionsCount;
@@ -384,10 +403,9 @@ const BattleControlScreen: React.FC = () => {
                   <h2>Batalla Finalizada</h2>
                   
                   <p className="text-center text-white/90" style={{marginBottom: '20px', fontSize: '1rem'}}>
-                     Se han asignado los puntos correspondientes a los participantes ganadores.
+                      Se han asignado los puntos correspondientes a los participantes ganadores.
                   </p>
                   
-                  {/* Ambos botones usan la función de salida forzada */}
                   <button onClick={handleExitToMenu} className="btn-white-pill">
                       <IonIcon icon={homeOutline} /> Volver al Menú
                   </button>
@@ -409,25 +427,92 @@ const BattleControlScreen: React.FC = () => {
             )}
           </div>
 
-          <IonModal isOpen={showCreateModal} onDidDismiss={() => setShowCreateModal(false)} className="full-screen-modal">
-              <div className="modal-content-scroll">
-                  <div className="modal-header"><h2>Nuevo Banco</h2><button onClick={() => setShowCreateModal(false)}><IonIcon icon={closeCircleOutline} size="large"/></button></div>
-                  <div className="modal-body">
-                      <div className="input-group"><label className="input-label">Nombre del Banco</label><IonInput placeholder="Ej: Matemáticas" value={newBankName} onIonChange={e => setNewBankName(e.detail.value!)} className="clean-input"/></div>
-                      <div className="questions-header"><h3>Preguntas ({newQuestions.length})</h3><button className="btn-small-blue" onClick={handleAddQuestion} disabled={newQuestions.length >= 20}><IonIcon icon={addOutline} /> Agregar</button></div>
-                      <div className="questions-list">
-                          {newQuestions.map((q, qIdx) => (
-                              <div key={qIdx} className="question-card">
-                                  <div className="q-card-top"><span className="q-badge">#{qIdx + 1}</span>{newQuestions.length > 1 && <button onClick={() => handleRemoveQuestion(qIdx)} className="btn-trash"><IonIcon icon={trashOutline} /></button>}</div>
-                                  <IonInput placeholder="Pregunta..." value={q.question_text} onIonChange={e => handleQuestionChange(qIdx, 'text', e.detail.value!)} className="clean-input mb-3"/>
-                                  <div className="answers-grid-form">{q.answers.map((ans, aIdx) => (<div key={aIdx} className={`answer-row-form ${q.correct_answer_index === aIdx ? 'selected' : ''}`}><div onClick={() => handleQuestionChange(qIdx, 'correct', aIdx)} className="radio-circle">{q.correct_answer_index === aIdx && <div className="radio-inner" />}</div><IonInput placeholder={`Opción ${aIdx + 1}`} value={ans} onIonChange={e => handleAnswerChange(qIdx, aIdx, e.detail.value!)} className="clean-input-small"/></div>))}</div>
-                              </div>
-                          ))}
-                      </div>
+          {/* 🔥 MODAL UNIFICADO: Respeta Safe Zones y Centrado profesional */}
+          {showCreateModal && (
+            <div className="qbs-modal-overlay">
+              <div className="qbs-modal-content">
+                <div className="qbs-modal-header">
+                  <h2>Nuevo Banco de Preguntas</h2>
+                  <button onClick={() => setShowCreateModal(false)} className="qbs-close-icon">
+                    <IonIcon icon={closeCircleOutline} />
+                  </button>
+                </div>
+
+                <div className="qbs-modal-body">
+                  <div className="qbs-form-group">
+                    <label>Nombre del Banco</label>
+                    <input 
+                      type="text" 
+                      placeholder="Ej: Matemáticas"
+                      value={newBankName}
+                      onChange={e => setNewBankName(e.target.value)}
+                      className="qbs-input big"
+                    />
                   </div>
-                  <div className="modal-footer"><button className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cancelar</button><button className="btn-primary-green" onClick={handleSaveBank} disabled={isSubmitting}>{isSubmitting ? <IonSpinner name="dots" /> : 'Guardar y Usar'}</button></div>
+
+                  <div className="qbs-questions-list">
+                    <div className="qbs-list-header">
+                      <h3>Preguntas ({newQuestions.length})</h3>
+                      <button className="qbs-btn-small" onClick={handleAddQuestion} disabled={newQuestions.length >= 20}>
+                        <IonIcon icon={addOutline} /> Agregar
+                      </button>
+                    </div>
+
+                    {newQuestions.map((q, qIdx) => (
+                      <div key={qIdx} className="qbs-question-card">
+                        <div className="qbs-q-header">
+                          <span className="qbs-q-num">#{qIdx + 1}</span>
+                          {newQuestions.length > 1 && (
+                            <button onClick={() => handleRemoveQuestion(qIdx)} className="qbs-btn-trash">
+                              <IonIcon icon={trashOutline} />
+                            </button>
+                          )}
+                        </div>
+                        
+                        <input 
+                          className="qbs-input full" 
+                          placeholder="Escribe la pregunta aquí..."
+                          value={q.question_text}
+                          onChange={e => handleQuestionChange(qIdx, 'text', e.target.value)}
+                        />
+
+                        <div className="qbs-answers-grid">
+                          {q.answers.map((ans, aIdx) => (
+                            <div key={aIdx} className={`qbs-answer-row ${q.correct_answer_index === aIdx ? 'correct' : ''}`}>
+                              <div className="qbs-radio-wrapper">
+                                <input 
+                                  type="radio" 
+                                  checked={q.correct_answer_index === aIdx}
+                                  onChange={() => handleQuestionChange(qIdx, 'correct', aIdx)}
+                                />
+                              </div>
+                              <input 
+                                className="qbs-input small" 
+                                placeholder={`Opción ${aIdx + 1}`}
+                                value={ans}
+                                onChange={e => handleAnswerChange(qIdx, aIdx, e.target.value)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="qbs-modal-footer">
+                  <button className="qbs-btn-secondary" onClick={() => setShowCreateModal(false)}>Cancelar</button>
+                  <button 
+                    className="qbs-btn-primary" 
+                    onClick={handleSaveBank}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? <IonSpinner name="dots" /> : 'Guardar y Usar'}
+                  </button>
+                </div>
               </div>
-          </IonModal>
+            </div>
+          )}
 
           <IonAlert isOpen={alertConfig.isOpen} onDidDismiss={() => setAlertConfig({ ...alertConfig, isOpen: false })} header={alertConfig.header} message={alertConfig.message} buttons={alertConfig.buttons}/>
 

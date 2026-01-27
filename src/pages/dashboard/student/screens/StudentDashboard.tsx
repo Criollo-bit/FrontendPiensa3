@@ -41,13 +41,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
     isOpen: false, msg: '', color: 'success'
   }); 
 
-  // 🔥 NUEVA FUNCIÓN: Sincroniza los cambios del perfil con el Dashboard
   const handleUserUpdate = (updatedUser: any) => {
     console.log("Dashboard: Sincronizando datos...", updatedUser);
     setUserProfile(prev => ({
       ...prev,
       ...updatedUser,
-      // Mapeamos los campos del backend a lo que espera tu UI
       name: updatedUser.fullName || updatedUser.name || prev.name,
       avatar: updatedUser.avatar || updatedUser.avatarUrl || prev.avatar
     }));
@@ -76,7 +74,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
   const refreshUserProfile = async () => {
     try {
         const { data } = await api.get('/users/me');
-        handleUserUpdate(data); // Usamos nuestra nueva función aquí también
+        handleUserUpdate(data);
     } catch (error) {
         console.error("Error actualizando perfil:", error);
     }
@@ -103,7 +101,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
       .finally(() => setLoading(false));
   });
 
-  // --- LÓGICA DE CAROUSEL ---
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [dragState, setDragState] = useState({ isDragging: false, startX: 0, currentX: 0 });
   const handleDragStart = (e: any) => {
@@ -178,13 +175,16 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
                   />
                   <div className="welcome-text">
                     <h1>Hola, {userProfile.name.split(' ')[0]}</h1>
-                    <div className="id-badge">ID: <span className="id-value">{userProfile.studentCode || '...'}</span></div>
+                    {/* ID Badge comentado temporalmente */}
+                    {/* <div className="id-badge">ID: <span className="id-value">{userProfile.studentCode || '...'}</span></div> */}
                   </div>
                 </div>
                 
                 <div className="header-actions">
                   <button className="notif-btn" onClick={() => setShowNotifModal(true)}>
-                    <IonIcon icon={notificationsOutline} />
+                    <div className="notif-icon-wrapper">
+                      <IonIcon icon={notificationsOutline} />
+                    </div>
                     {notifications.length > 0 && <span className="notif-badge">{notifications.length}</span>}
                   </button>
                 </div>
@@ -223,7 +223,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
           {currentScreen === 'MY_CLASSES' && <MyClassesScreen />} 
           {currentScreen === 'REWARDS' && <AchievementsScreen user={userProfile} onBack={() => setCurrentScreen('HOME')} />}
           
-          {/* 🔥 SE PASA LA FUNCIÓN AL PERFIL AQUÍ */}
           {currentScreen === 'PROFILE' && (
             <StudentProfileScreen 
               user={userProfile} 
@@ -233,7 +232,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout }) =
           )}
         </div>
 
-        {/* --- MODALES --- */}
         <IonModal isOpen={showNotifModal} onDidDismiss={() => setShowNotifModal(false)} className="notif-modal">
           <div className="modal-notif-container">
             <div className="modal-notif-header">

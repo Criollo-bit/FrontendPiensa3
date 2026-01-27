@@ -20,30 +20,42 @@
 .student-dashboard {
   background-color: var(--color-slate-50);
   min-height: 100%;
-  /* AJUSTE: Sumamos el espacio del navbar + la zona de gestos de Android */
+  /* AJUSTE: Espacio para el navbar y gestos de Android */
   padding-bottom: calc(90px + var(--ion-safe-area-bottom)); 
 }
 
 /* --- HEADER COMPACTO --- */
 .welcome-header {
-  /* AJUSTE: Añadimos padding superior dinámico para el Notch */
-  padding: calc(10px + var(--ion-safe-area-top)) 15px 10px 15px; 
+  padding: calc(15px + var(--ion-safe-area-top)) 20px 15px 20px; 
   background: white;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--color-slate-200);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 🔥 Centra el texto verticalmente tras quitar el ID */
 }
 
 .welcome-text h1 {
-  margin: 0 0 2px 0;
-  font-size: 1.1rem;
+  margin: 0;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--color-slate-800);
+  line-height: 1.2;
 }
 
-/* Estilo para el ID */
+/* Estilo para el ID (Comentado en TSX, pero mantenemos estilo) */
 .id-badge {
   background: #f1f5f9;
   color: #64748b;
@@ -55,183 +67,144 @@
   align-items: center;
   gap: 4px;
   border: 1px solid #e2e8f0;
-}
-
-.id-value {
-  color: #334155;
-  font-family: monospace;
-  font-weight: 700;
+  margin-top: 4px;
 }
 
 .avatar-small {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px; /* Estilo más moderno, no tan circular */
   border: 2px solid var(--color-slate-200);
   object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* --- BOTÓN DE NOTIFICACIONES (Estilo Docente) --- */
+.notif-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.notif-btn:active {
+  background: #f1f5f9;
+  transform: scale(0.92);
+}
+
+.notif-icon-wrapper {
+  font-size: 24px; /* 🔥 Icono más grande y visible */
+  color: #64748b;
+  display: flex;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* --- ACCIONES (BOTONES) --- */
 .actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px; 
-  padding: 15px;
+  gap: 12px; 
+  padding: 20px 15px;
 }
 
 .action-card {
-  height: 90px;
-  border-radius: 16px !important;
+  height: 100px;
+  border-radius: 20px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center;
   justify-content: center;
   border: none;
   color: white;
-  box-shadow: 0 4px 10px -2px rgba(0,0,0,0.15);
+  box-shadow: 0 6px 15px -3px rgba(0,0,0,0.12);
   transition: transform 0.1s;
 }
 
 .action-card:active {
-    transform: scale(0.96);
+    transform: scale(0.95);
 }
 
 .action-icon-large {
-    font-size: 1.8rem;
-    margin-bottom: 4px;
+    font-size: 2rem;
+    margin-bottom: 6px;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
 }
 
-.btn-join { background: linear-gradient(135deg, var(--color-sky-500), var(--color-sky-600)); }
+.btn-join { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
 .btn-classes { background: linear-gradient(135deg, #f59e0b, #d97706); }
 
 .action-card h3 {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.3px;
 }
 
 /* --- CLASES RECIENTES --- */
 .section-title {
-  padding: 0 15px;
-  margin-top: 5px;
-  margin-bottom: 0;
-  font-size: 1rem;
+  padding: 0 20px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--color-slate-800);
 }
 
 .carousel-container {
   overflow: hidden;
-  padding: 10px 0 20px 0;
+  padding: 10px 0 30px 0;
   cursor: grab;
-  min-height: 330px; 
+  min-height: 340px; 
 }
-
-.carousel-container:active {
-  cursor: grabbing;
-}
-
-.empty-classes-state {
-    text-align: center;
-    padding: 20px;
-    color: #94a3b8;
-    font-size: 0.85rem;
-    font-style: italic;
-    background: white;
-    margin: 10px 15px;
-    border-radius: 16px;
-    border: 1px dashed #e2e8f0;
-} 
 
 /* --- MODAL DE NOTIFICACIONES --- */
 ion-modal.notif-modal {
   --height: auto;
-  --max-height: 70%;
-  --width: 90%;
-  --border-radius: 20px;
-  --box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  --max-height: 80%;
+  --width: 92%;
+  --border-radius: 24px;
 }
 
 .modal-notif-container {
   background: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-notif-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  padding: 24px 20px;
 }
 
 .modal-notif-header h2 {
-  margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: var(--color-slate-800);
 }
 
-.close-notif-btn {
-  background: #f1f5f9;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #64748b;
-}
-
 .notif-item {
   --background: #f8fafc;
-  --padding-start: 12px;
-  --padding-end: 12px;
-  margin-bottom: 8px;
-  border-radius: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-radius: 16px;
   border: 1px solid #e2e8f0;
-}
-
-.notif-status-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  margin-right: 12px;
-}
-
-.notif-status-icon.approved { background: #dcfce7; color: #166534; }
-.notif-status-icon.rejected { background: #fee2e2; color: #dc2626; }
-
-.notif-item h3 {
-  font-size: 0.95rem;
-  font-weight: 700;
-  margin-bottom: 2px;
-}
-
-.notif-item p {
-  font-size: 0.8rem;
-  color: #64748b;
-  white-space: normal;
-}
-
-.empty-notif {
-  text-align: center;
-  padding: 40px 20px;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-.modal-notif-footer {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
 }
