@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { IonIcon } from '@ionic/react';
 import { checkmarkCircle, closeCircle } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket';
@@ -29,22 +29,15 @@ const AllForAllStudentGame: React.FC = () => {
     const roomIdStored = localStorage.getItem('allForAllRoomId');
     const studentName = localStorage.getItem('studentName') || 'Alumno';
 
-    if (!roomIdStored) {
-      console.error('No hay roomId en localStorage');
-      return;
-    }
+    if (!roomIdStored) return;
 
-    // Unirse a la sala al entrar
     socket.emit('join-room', { roomId: roomIdStored, studentName });
-    console.log('Estudiante unido a la sala:', roomIdStored);
 
-    // Escuchar inicio de ronda
     socket.on('start-all-for-all', ({ roomId, config }) => {
-      console.log('Ronda recibida en estudiante:', config);
       setRoomId(roomId);
-      setWord(config.word || 'ROJO');
-      setColor(config.color || 'red');
-      setMode(config.mode || 'color');
+      setWord(config.word);
+      setColor(config.color);
+      setMode(config.mode);
       setAnswered(false);
       setIsCorrect(null);
       setGameOver(false);
@@ -55,15 +48,32 @@ const AllForAllStudentGame: React.FC = () => {
     };
   }, []);
 
-  const submitAnswer = (value: string) => {
+  /**
+   * 🔴 STROOP REAL:
+   * - Ningún botón repite color
+   * - Ningún botón coincide texto-color
+   * - El color VISUAL es el que se evalúa en modo "color"
+   */
+  const stroopOptions = useMemo(() => {
+    const shifted = COLORS.map((_, i) => COLORS[(i + 1) % COLORS.length]);
+
+    return COLORS.map((c, i) => ({
+      ...c,
+      displayColor: shifted[i].hex,     // color visual incorrecto
+      displayValue: shifted[i].value,   // valor real del color visual
+    }));
+  }, [word, color]);
+
+  const submitAnswer = (answer: string) => {
     if (answered) return;
 
     const correct =
-      mode === 'color' ? value === color : value.toLowerCase() === word.toLowerCase();
+      mode === 'color'
+        ? answer === color        // comparar color VISUAL
+        : answer === word;        // comparar TEXTO
 
     setAnswered(true);
     setIsCorrect(correct);
-
     setCorrectAnswers(prev => prev + (correct ? 1 : 0));
     setTotalQuestions(prev => prev + 1);
 
@@ -73,37 +83,35 @@ const AllForAllStudentGame: React.FC = () => {
       isCorrect: correct,
     });
 
-    // Mostrar resultado final tras 1s
     setTimeout(() => setGameOver(true), 1000);
   };
 
   return (
     <div className="afa-student-container">
       <h2 className="instruction">
-        {mode === 'color' ? 'Escoge el COLOR del texto' : 'Escoge el TEXTO'}
+        {mode === 'color'
+          ? 'Escoge el COLOR del texto'
+          : 'Escoge el TEXTO'}
       </h2>
 
-      {/* TEXTO STROOP */}
-      <div
-        className="stroop-word"
-        style={{ color: color }}
-      >
-        {word || '...'}
+      {/* ESTÍMULO STROOP */}
+      <div className="stroop-word" style={{ color }}>
+        {word}
       </div>
 
-      {/* OPCIONES */}
+      {/* OPCIONES INCONGRUENTES */}
       <div className="options">
-        {COLORS.map(c => (
+        {stroopOptions.map(c => (
           <button
             key={c.value}
             className={`option-btn ${mode}`}
-            style={
-              mode === 'color'
-                ? { backgroundColor: c.hex, color: 'white' }
-                : { backgroundColor: '#3b82f6', color: 'white' }
-            }
+            style={{ backgroundColor: c.displayColor, color: 'white' }}
             disabled={answered}
-            onClick={() => submitAnswer(c.value)}
+            onClick={() =>
+              submitAnswer(
+                mode === 'color' ? c.displayValue : c.name
+              )
+            }
           >
             {mode === 'text' ? c.name : ''}
           </button>
@@ -120,9 +128,21 @@ const AllForAllStudentGame: React.FC = () => {
 
       {/* RESULTADO FINAL */}
       {gameOver && (
-        <div className={`final-result ${correctAnswers / totalQuestions >= 0.7 ? 'correct' : 'incorrect'}`}>
-          <h2>{correctAnswers / totalQuestions >= 0.7 ? '🎉 Ganaste!' : '❌ Intenta de nuevo'}</h2>
-          <p>Acertaste {correctAnswers}/{totalQuestions} preguntas</p>
+        <div
+          className={`final-result ${
+            correctAnswers / totalQuestions >= 0.7
+              ? 'correct'
+              : 'incorrect'
+          }`}
+        >
+          <h2>
+            {correctAnswers / totalQuestions >= 0.7
+              ? '🎉 Ganaste!'
+              : '❌ Intenta de nuevo'}
+          </h2>
+          <p>
+            Acertaste {correctAnswers}/{totalQuestions}
+          </p>
         </div>
       )}
     </div>
