@@ -1,6 +1,6 @@
-import React, { useState, useRef, ChangeEvent, KeyboardEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, KeyboardEvent, useMemo } from 'react';
 import { IonIcon, IonSpinner, IonToast } from '@ionic/react';
-import { arrowBack, peopleOutline } from 'ionicons/icons';
+import { arrowBack, personCircleOutline } from 'ionicons/icons';
 import * as battleApi from '../../../../lib/battleApi'; 
 import StudentBattleScreen from './StudentBattleScreen'; 
 import './JoinBattleScreen.css'; 
@@ -19,19 +19,22 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
   const [joinedGroup, setJoinedGroup] = useState<{ groupId: string; battleId: string } | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // 🔥 NUEVO: Obtenemos el avatar actualizado del LocalStorage (el que arreglamos antes)
-  const getAvatarUrl = () => {
+  // ✅ LÓGICA DE RECUPERACIÓN UNIFICADA (Igual a tu Perfil)
+  const displayImage = useMemo(() => {
     try {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         const user = JSON.parse(userStr);
-        return user.avatarUrl || user.avatar || '';
+        // Buscamos en todas las propiedades posibles para máxima compatibilidad
+        const url = user.avatarUrl || user.avatar || user.avatar_url || '';
+        // Cache busting con timestamp para obligar a cargar la foto real de Railway
+        return url ? `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` : '';
       }
     } catch (e) {
       console.error("Error al obtener avatar del storage", e);
     }
     return '';
-  };
+  }, []);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value.toUpperCase();
@@ -77,15 +80,14 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     setErrorMsg(null);
 
     try {
-      const avatarUrl = getAvatarUrl();
+      // Enviamos la URL real procesada para que el servidor y el profesor la reciban
+      const avatarUrlToSend = displayImage;
       
-      // 🔥 FIX LÍNEA 86-87: Forzamos el tipado para que acepte los nuevos parámetros
-      // si es que battleApi no ha sido actualizado aún.
       const result = await (battleApi as any).joinBattleWithCode(
         fullCode, 
         studentName, 
         studentId, 
-        avatarUrl
+        avatarUrlToSend
       );
 
       if (result.success && result.group) {
@@ -123,6 +125,7 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     <div className="bg-join-battle">
       <button
         onClick={onBack}
+        className="back-btn-float"
         style={{
             position: 'absolute', 
             top: 'calc(20px + env(safe-area-inset-top))', 
@@ -139,16 +142,38 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
       <div className="join-battle-content-wrapper">
           <div className="animate-stagger" style={{ '--stagger-delay': '100ms' } as React.CSSProperties}>
             <div className="battle-portal">
+              {/* ✅ PREVISUALIZACIÓN REFORZADA: Foto real o iniciales */}
+              <div className="avatar-preview-container" style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {displayImage ? (
+                  <div style={{
+                    width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white',
+                    overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,0.15)', background: '#eee'
+                  }}>
+                    <img 
+                      src={displayImage} 
+                      alt="Tu perfil" 
+                      key={displayImage} // 🔥 Fuerza el re-renderizado si la URL cambia
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => {
+                        // Fallback automático si la imagen no carga
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${studentName}&background=random&color=fff`;
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ 
+                    width: '90px', height: '90px', borderRadius: '50%', 
+                    background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    backdropFilter: 'blur(5px)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <IonIcon icon={personCircleOutline} style={{ fontSize: '4rem', color: '#64748b' }} />
+                  </div>
+                )}
+                <span style={{ fontSize: '1rem', color: '#334155', marginTop: '0.8rem', fontWeight: '700' }}>{studentName}</span>
+              </div>
+
               <h1 style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.5rem' }}>Unirse a Batalla</h1>
               <p style={{ color: '#64748b' }}>Introduce el PIN de 4 dígitos</p>
-              
-              <div style={{ 
-                  marginTop: '1.5rem', width: '80px', height: '80px', borderRadius: '50%', 
-                  background: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  backdropFilter: 'blur(5px)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}>
-                <IonIcon icon={peopleOutline} style={{ fontSize: '3rem', color: '#3b82f6' }} />
-              </div>
             </div>
           </div>
 

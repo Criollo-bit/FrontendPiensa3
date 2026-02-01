@@ -4,7 +4,8 @@ import {
   checkmarkCircle, 
   closeCircle, 
   pause, 
-  arrowBackOutline
+  arrowBackOutline,
+  hourglassOutline
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
 import PodiumScreen from './PodiumScreen';
@@ -60,7 +61,6 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
   const [finalRanking, setFinalRanking] = useState<any[]>([]);
   const [amIWinner, setAmIWinner] = useState(false);
 
-  // 🔥 NUEVO: Obtener la foto real del storage para el Lobby
   const [myAvatar, setMyAvatar] = useState<string>('');
 
   useEffect(() => {
@@ -75,7 +75,6 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
     }
   }, []);
 
-  // Timer de Feedback (8 segundos)
   useEffect(() => {
     if (viewState === 'FEEDBACK') {
         const timer = setTimeout(() => {
@@ -118,7 +117,7 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
           position: index + 1, 
           name: w.name, 
           score: w.score, 
-          avatarUrl: w.avatarUrl, // 🔥 Ahora recibimos el avatar del servidor para el podio
+          avatarUrl: w.avatarUrl, 
           color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
       }));
       setFinalRanking(podiumWinners);
@@ -131,7 +130,7 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
       socket.off('new-question'); socket.off('answer-received'); socket.off('round-result');
       socket.off('game-over'); socket.off('disconnect'); socket.off('connect');
     };
-  }, [studentName]);
+  }, [studentName, battleId]);
 
   useEffect(() => {
     if (viewState === 'QUESTION' && !showTransition && localTimer > 0) {
@@ -160,7 +159,6 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
                 <IonIcon icon={arrowBackOutline} />
              </button>
              
-             {/* 🔥 AVATAR REAL: Muestra la foto del perfil o el fallback de iniciales */}
              <img 
                 src={myAvatar || `https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
                 alt="Avatar" 
@@ -214,14 +212,15 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
 
       case 'LOCKED':
         return (
-          <div className="locked-container">
-             <div className="custom-waiting-animation">
-                 <div style={{width:100, height:100, borderRadius:'50%', border:'4px solid #e2e8f0', display:'flex', alignItems:'center', justifyContent:'center', animation:'pulse 2s infinite'}}>
-                    <IonIcon icon={pause} style={{fontSize: '3rem', color:'#64748b'}} />
-                 </div>
+          <div className="kahoot-waiting-screen">
+             <div className="waiting-central-icon">
+                <IonIcon icon={hourglassOutline} className="pulse-animation" />
              </div>
-             <h2 className="locked-title">Respuesta Enviada</h2>
-             <p className="locked-subtitle">Prepárate para la siguiente pregunta...</p>
+             <h2 className="waiting-title">Respuesta Enviada</h2>
+             <div className="waiting-status-pill">
+                Esperando a los demás jugadores...
+             </div>
+             <p className="waiting-hint">¿Serás el más rápido de la clase?</p>
           </div>
         );
 
@@ -236,11 +235,20 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
                  </div>
                  
                  <h1 className="feedback-title">{isCorrect ? '¡CORRECTO!' : 'INCORRECTO'}</h1>
-                 <div className="points-pill">+{feedback.pointsEarned} Pts</div>
                  
-                 <div className="rank-display">
-                    <span className="rank-label">Tu Posición</span>
-                    <span className="rank-value">#{feedback.rank}</span>
+                 <div className="feedback-stats-row">
+                    <div className="stat-pill-kahoot">
+                        <span className="pill-label">PUNTOS</span>
+                        <span className="pill-value">+{feedback.pointsEarned || 0}</span>
+                    </div>
+                    <div className="stat-pill-kahoot">
+                        <span className="pill-label">POSICIÓN</span>
+                        <span className="pill-value">#{feedback.rank || '1'}</span>
+                    </div>
+                 </div>
+
+                 <div className="feedback-quote">
+                    {isCorrect ? "¡Estás en racha! Sigue así." : "¡No te rindas, la próxima es tuya!"}
                  </div>
              </div>
              <div className="feedback-timer-bar"><div className="feedback-progress"></div></div>

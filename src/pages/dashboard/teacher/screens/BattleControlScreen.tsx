@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { 
   IonIcon, 
   IonSpinner, 
   IonSelect, 
   IonSelectOption, 
-  IonPage,  
+  IonPage,   
   IonContent,
-  IonAlert 
+  IonAlert,
+  IonAvatar 
 } from '@ionic/react';
 import { 
   arrowBackOutline, 
@@ -23,7 +24,7 @@ import {
   homeOutline 
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
-// Asegúrate de que esta ruta sea correcta
+import { api } from '../../../../api/axios'; 
 import PodiumScreen from '../../student/screens/PodiumScreen'; 
 
 import './BattleControlScreen.css';
@@ -50,15 +51,13 @@ interface QuestionDraft {
   correct_answer_index: number;
 }
 
-// 1. Tipo definido fuera para evitar errores de TypeScript
 type BattlePhase = 'INIT' | 'LOBBY' | 'QUESTION' | 'RESULTS' | 'PODIUM_ANIMATION' | 'SUMMARY';
 
 const BattleControlScreen: React.FC = () => {
-  // const history = useHistory(); // Ya no usamos history para salir, usamos window.location
   const TEACHER_ID = getTeacherId();
+  const hasCreatedRoom = useRef(false); // 🔥 Control para que el código NO cambie
 
   const [phase, setPhase] = useState<BattlePhase>('INIT');
-  
   const [roomId, setRoomId] = useState<string>('');
   const [code, setCode] = useState<string>('...'); 
   
@@ -102,24 +101,21 @@ const BattleControlScreen: React.FC = () => {
     }
 
     const socket = socketService.connectToBattle();
-    
     const storedName = localStorage.getItem('tempBattleName');
-    localStorage.removeItem('currentBattleId');
 
-    socket.emit('create-room', { 
-        teacherId: TEACHER_ID,
-        name: storedName 
-    });
+    // 🔥 SOLO CREAR SALA SI NO SE HA CREADO YA
+    if (!hasCreatedRoom.current) {
+        localStorage.removeItem('currentBattleId');
+        socket.emit('create-room', { teacherId: TEACHER_ID, name: storedName });
+        hasCreatedRoom.current = true;
+    }
 
     socket.on('room-created', (data: any) => {
       setRoomId(data.roomId);
       setCode(data.code); 
       setRoomName(data.name || storedName || `Sala ${data.code}`); 
-      
-      // 🔥 FILTRO: Solo bancos de preguntas (cycle === 'BANK')
       const banksOnly = (data.mySubjects || []).filter((s: any) => s.cycle === 'BANK');
       setSubjects(banksOnly);
-      
       setPhase('LOBBY');
     });
 
@@ -133,14 +129,7 @@ const BattleControlScreen: React.FC = () => {
     });
 
     socket.on('subjects-list', (data: any) => {
-      // 🔥 FILTRO: Solo bancos de preguntas
       const banksOnly = (data || []).filter((s: any) => s.cycle === 'BANK');
-      setSubjects(banksOnly);
-    });
-
-    socket.on('subjects-updated', (data: any) => {
-      // 🔥 FILTRO: Solo bancos de preguntas
-      const banksOnly = (data.mySubjects || []).filter((s: any) => s.cycle === 'BANK');
       setSubjects(banksOnly);
     });
 
@@ -158,24 +147,27 @@ const BattleControlScreen: React.FC = () => {
       if (data.totalQuestions) setTotalQuestionsCount(data.totalQuestions);
     });
 
-    socket.on('no-more-questions', () => {
-        handleEndGame();
-    });
-
     socket.on('round-finished', (data: any) => {
       setPhase('RESULTS');
       setRoundStats({ correct: data.correctCount, incorrect: data.incorrectCount, ranking: data.ranking });
     });
 
-    socket.on('game-over', (data: { winners: any[] }) => {
+    socket.on('game-over', async (data: { winners: any[] }) => {
         const winners = data.winners || [];
+        try {
+          await api.post('/points/assign-battle-points', {
+            winners: winners.map(w => ({ id: w.id, score: w.score })),
+            roomId: roomId
+          });
+        } catch (e) { console.error("Error asignando puntos:", e); }
+
         const podiumWinners = winners.slice(0, 3).map((w: any, index: number) => ({
             position: index + 1,
             name: w.name,
             score: w.score,
+            avatarUrl: w.avatarUrl,
             color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
         }));
-        
         setFinalWinners(podiumWinners);
         setPhase('PODIUM_ANIMATION');
     });
@@ -184,12 +176,10 @@ const BattleControlScreen: React.FC = () => {
 
     return () => {
       socket.off('room-created'); socket.off('subjects-list'); 
-      socket.off('subjects-updated'); socket.off('subject-created-success'); 
-      socket.off('room-update'); socket.off('new-question'); socket.off('no-more-questions');
+      socket.off('room-update'); socket.off('new-question'); 
       socket.off('round-finished'); socket.off('game-over'); socket.off('error');
     };
-  }, []);
-
+  }, []); // Array vacío para que solo se ejecute al montar
   useEffect(() => {
     if (phase === 'QUESTION' && timeLeft > 0) {
       const timer = setInterval(() => setTimeLeft(p => p - 1), 1000);
@@ -211,19 +201,15 @@ const BattleControlScreen: React.FC = () => {
   
   const handleEndGame = () => socketService.getBattleSocket()?.emit('end-battle', { roomId });
   
-  // 🔥 CORRECCIÓN CRÍTICA DE NAVEGACIÓN 🔥
   const handleExitToMenu = () => {
       try {
-        // 1. Limpieza de datos temporales
         localStorage.removeItem('tempBattleName');
         localStorage.removeItem('currentBattleId');
         
-        // 2. Destruir sala en servidor
         if (roomId && socketService.getBattleSocket()?.connected) {
             socketService.getBattleSocket()?.emit('end-battle', { roomId });
         }
 
-        // 3. Limpiar la sala de la lista local (para que no salga el botón reconectar en Dashboard)
         const listKey = `battles_${TEACHER_ID}`;
         const savedBattles = localStorage.getItem(listKey);
         if (savedBattles) {
@@ -236,34 +222,51 @@ const BattleControlScreen: React.FC = () => {
       } catch (e) {
         console.error("Error limpiando:", e);
       }
-
-      // 4. FUERZA BRUTA: Recargar la página hacia /home
-      // Esto elimina cualquier "vista zombi" y limpia la memoria de la batalla
       window.location.href = '/home';
   };
 
-  // Handlers Modal
-  const resetForm = () => { setNewBankName(''); setNewQuestions([{ question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]); };
-  const handleAddQuestion = () => { if (newQuestions.length >= 20) return showNiceAlert("Límite", "Máximo 20 preguntas"); setNewQuestions([...newQuestions, { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]); };
-  const handleRemoveQuestion = (idx: number) => { setNewQuestions(newQuestions.filter((_, i) => i !== idx)); };
-  const handleQuestionChange = (idx: number, field: string, val: any) => { const updated = [...newQuestions]; if (field === 'text') updated[idx].question_text = val; if (field === 'correct') updated[idx].correct_answer_index = val; setNewQuestions(updated); };
-  const handleAnswerChange = (qIdx: number, aIdx: number, val: string) => { const updated = [...newQuestions]; updated[qIdx].answers[aIdx] = val; setNewQuestions(updated); };
+  const resetForm = () => { 
+    setNewBankName(''); 
+    setNewQuestions([{ question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]); 
+  };
+
+  const handleAddQuestion = () => { 
+    if (newQuestions.length >= 20) return showNiceAlert("Límite", "Máximo 20 preguntas"); 
+    setNewQuestions([...newQuestions, { question_text: '', answers: ['', '', '', ''], correct_answer_index: 0 }]); 
+  };
+
+  const handleRemoveQuestion = (idx: number) => { 
+    setNewQuestions(newQuestions.filter((_, i) => i !== idx)); 
+  };
+
+  const handleQuestionChange = (idx: number, field: string, val: any) => { 
+    const updated = [...newQuestions]; 
+    if (field === 'text') updated[idx].question_text = val; 
+    if (field === 'correct') updated[idx].correct_answer_index = val; 
+    setNewQuestions(updated); 
+  };
+
+  const handleAnswerChange = (qIdx: number, aIdx: number, val: string) => { 
+    const updated = [...newQuestions]; 
+    updated[qIdx].answers[aIdx] = val; 
+    setNewQuestions(updated); 
+  };
   
   const handleSaveBank = () => {
     if (!newBankName.trim()) return showNiceAlert("Faltan datos", "El banco debe tener nombre");
-    if (newQuestions.some(q => !q.question_text.trim() || q.answers.some(a => !a.trim()))) { return showNiceAlert("Faltan datos", "Completa todas las preguntas y respuestas"); }
+    if (newQuestions.some(q => !q.question_text.trim() || q.answers.some(a => !a.trim()))) { 
+      return showNiceAlert("Faltan datos", "Completa todas las preguntas y respuestas"); 
+    }
     setIsSubmitting(true);
     socketService.getBattleSocket()?.emit('create-full-subject', { 
         name: newBankName, 
         teacherId: TEACHER_ID, 
         questions: newQuestions,
-        cycle: 'BANK' // 🔥 Aseguramos que se guarde como banco
+        cycle: 'BANK' 
     });
   };
 
   const isLastQuestion = totalQuestionsCount > 0 && currentQuestionIndex >= totalQuestionsCount;
-  
-  // 2. Calculamos la lista antes del return para evitar error TS
   const shouldShowRanking = phase === 'RESULTS' || phase === 'PODIUM_ANIMATION' || phase === 'SUMMARY';
   const usersListToRender = shouldShowRanking ? roundStats.ranking : students;
 
@@ -282,19 +285,15 @@ const BattleControlScreen: React.FC = () => {
     <IonPage>
       <IonContent fullscreen className="battle-bg-clean">
         <div className="relative-container">
-          
           <button onClick={() => setShowExitConfirm(true)} className="float-back-btn">
             <IonIcon icon={arrowBackOutline} />
           </button>
 
           <div className="main-content">
-            
             <div className="header-clean">
               <h1 className="header-title">{roomName}</h1>
               {phase !== 'LOBBY' && phase !== 'INIT' && totalQuestionsCount > 0 && (
-                  <div className="progress-badge">
-                      Pregunta {currentQuestionIndex} / {totalQuestionsCount}
-                  </div>
+                  <div className="progress-badge">Pregunta {currentQuestionIndex} / {totalQuestionsCount}</div>
               )}
               <div className="badges-row">
                 <span className={`status-badge ${phase === 'LOBBY' ? 'bg-yellow' : phase === 'QUESTION' ? 'bg-green' : 'bg-slate'}`}>
@@ -343,16 +342,25 @@ const BattleControlScreen: React.FC = () => {
                             </div>
                         </div>
                         <div className="text-center mb-separated">
-                            <button onClick={() => setShowCreateModal(true)} className="btn-text-link">
-                                + Crear nuevo banco
-                            </button>
+                            <button onClick={() => setShowCreateModal(true)} className="btn-text-link">+ Crear nuevo banco</button>
                         </div>
                         <div className="students-status-bar">
                             <IonIcon icon={playOutline} className="text-sky-600"/> 
                             <span>{students.length} Estudiantes unidos</span>
                         </div>
                         <div className="students-chips-grid">
-                            {students.length === 0 ? <p className="text-slate-400 text-sm">Esperando alumnos...</p> : students.map((s, i) => <div key={i} className="student-chip">{s.name}</div>)}
+                            {students.length === 0 ? (
+                              <p className="text-slate-400 text-sm">Esperando alumnos...</p>
+                            ) : (
+                              students.map((s, i) => (
+                                <div key={i} className="student-chip-avatar">
+                                  <IonAvatar className="mini-avatar">
+                                    <img src={s.avatarUrl || `https://ui-avatars.com/api/?name=${s.name}&background=random`} alt="avatar" />
+                                  </IonAvatar>
+                                  <span>{s.name}</span>
+                                </div>
+                              ))
+                            )}
                         </div>
                         <button onClick={handleStartBattle} disabled={!selectedSubjectId || students.length === 0} className="btn-primary-green full-width">
                           <IonIcon icon={playOutline} style={{marginRight: 8}}/> INICIAR BATALLA
@@ -382,15 +390,12 @@ const BattleControlScreen: React.FC = () => {
                      <div className="stat-row"><div className="stat-label correct">Correctos ({roundStats.correct})</div><div className="stat-track"><div className="stat-fill correct" style={{width: `${(roundStats.correct / (students.length || 1)) * 100}%`}}></div></div></div>
                      <div className="stat-row"><div className="stat-label incorrect">Incorrectos ({roundStats.incorrect})</div><div className="stat-track"><div className="stat-fill incorrect" style={{width: `${(roundStats.incorrect / (students.length || 1)) * 100}%`}}></div></div></div>
                   </div>
-                  
                   {isLastQuestion ? (
                       <button onClick={handleEndGame} className="btn-finish-red full-width">
                           <IonIcon icon={stopCircleOutline} style={{marginRight:8}}/> Finalizar y Ver Podio
                       </button>
                   ) : (
-                      <button onClick={handleNextQuestion} className="btn-primary-blue full-width">
-                          Siguiente <IonIcon icon={arrowForwardOutline}/>
-                      </button>
+                      <button onClick={handleNextQuestion} className="btn-primary-blue full-width">Siguiente <IonIcon icon={arrowForwardOutline}/></button>
                   )}
                </div>
             )}
@@ -399,14 +404,8 @@ const BattleControlScreen: React.FC = () => {
                <div className="hero-card-green">
                   <IonIcon icon={trophy} className="trophy-icon-lg"/>
                   <h2>Batalla Finalizada</h2>
-                  
-                  <p className="text-center text-white/90" style={{marginBottom: '20px', fontSize: '1rem'}}>
-                      Se han asignado los puntos correspondientes a los participantes ganadores.
-                  </p>
-                  
-                  <button onClick={handleExitToMenu} className="btn-white-pill">
-                      <IonIcon icon={homeOutline} /> Volver al Menú
-                  </button>
+                  <p className="text-center text-white/90" style={{marginBottom: '20px'}}>Se han asignado los puntos correspondientes a los participantes ganadores.</p>
+                  <button onClick={handleExitToMenu} className="btn-white-pill"><IonIcon icon={homeOutline} /> Volver al Menú</button>
                </div>
             )}
 
@@ -416,7 +415,13 @@ const BattleControlScreen: React.FC = () => {
                   <div className="ranking-list-clean">
                      {usersListToRender.map((s: any, idx: number) => (
                         <div key={idx} className={`ranking-row-clean rank-${idx + 1}`}>
-                           <div className="rank-left"><div className="rank-badge">{idx + 1}</div><p className="rank-name">{s.name}</p></div>
+                           <div className="rank-left">
+                             <div className="rank-badge">{idx + 1}</div>
+                             <IonAvatar className="ranking-avatar">
+                                <img src={s.avatarUrl || `https://ui-avatars.com/api/?name=${s.name}&background=random`} alt="avatar" />
+                             </IonAvatar>
+                             <p className="rank-name">{s.name}</p>
+                           </div>
                            <p className="rank-score">{s.score} pts</p>
                         </div>
                      ))}
@@ -425,71 +430,39 @@ const BattleControlScreen: React.FC = () => {
             )}
           </div>
 
-          {/* 🔥 MODAL UNIFICADO: Respeta Safe Zones y Centrado profesional */}
           {showCreateModal && (
             <div className="qbs-modal-overlay">
               <div className="qbs-modal-content">
                 <div className="qbs-modal-header">
                   <h2>Nuevo Banco de Preguntas</h2>
-                  <button onClick={() => setShowCreateModal(false)} className="qbs-close-icon">
-                    <IonIcon icon={closeCircleOutline} />
-                  </button>
+                  <button onClick={() => setShowCreateModal(false)} className="qbs-close-icon"><IonIcon icon={closeCircleOutline} /></button>
                 </div>
-
                 <div className="qbs-modal-body">
                   <div className="qbs-form-group">
                     <label>Nombre del Banco</label>
-                    <input 
-                      type="text" 
-                      placeholder="Ej: Matemáticas"
-                      value={newBankName}
-                      onChange={e => setNewBankName(e.target.value)}
-                      className="qbs-input big"
-                    />
+                    <input type="text" placeholder="Ej: Matemáticas" value={newBankName} onChange={e => setNewBankName(e.target.value)} className="qbs-input big" />
                   </div>
-
                   <div className="qbs-questions-list">
                     <div className="qbs-list-header">
                       <h3>Preguntas ({newQuestions.length})</h3>
-                      <button className="qbs-btn-small" onClick={handleAddQuestion} disabled={newQuestions.length >= 20}>
-                        <IonIcon icon={addOutline} /> Agregar
-                      </button>
+                      <button className="qbs-btn-small" onClick={handleAddQuestion} disabled={newQuestions.length >= 20}><IonIcon icon={addOutline} /> Agregar</button>
                     </div>
-
                     {newQuestions.map((q, qIdx) => (
                       <div key={qIdx} className="qbs-question-card">
                         <div className="qbs-q-header">
                           <span className="qbs-q-num">#{qIdx + 1}</span>
                           {newQuestions.length > 1 && (
-                            <button onClick={() => handleRemoveQuestion(qIdx)} className="qbs-btn-trash">
-                              <IonIcon icon={trashOutline} />
-                            </button>
+                            <button onClick={() => handleRemoveQuestion(qIdx)} className="qbs-btn-trash"><IonIcon icon={trashOutline} /></button>
                           )}
                         </div>
-                        
-                        <input 
-                          className="qbs-input full" 
-                          placeholder="Escribe la pregunta aquí..."
-                          value={q.question_text}
-                          onChange={e => handleQuestionChange(qIdx, 'text', e.target.value)}
-                        />
-
+                        <input className="qbs-input full" placeholder="Escribe la pregunta aquí..." value={q.question_text} onChange={e => handleQuestionChange(qIdx, 'text', e.target.value)} />
                         <div className="qbs-answers-grid">
                           {q.answers.map((ans, aIdx) => (
                             <div key={aIdx} className={`qbs-answer-row ${q.correct_answer_index === aIdx ? 'correct' : ''}`}>
                               <div className="qbs-radio-wrapper">
-                                <input 
-                                  type="radio" 
-                                  checked={q.correct_answer_index === aIdx}
-                                  onChange={() => handleQuestionChange(qIdx, 'correct', aIdx)}
-                                />
+                                <input type="radio" checked={q.correct_answer_index === aIdx} onChange={() => handleQuestionChange(qIdx, 'correct', aIdx)} />
                               </div>
-                              <input 
-                                className="qbs-input small" 
-                                placeholder={`Opción ${aIdx + 1}`}
-                                value={ans}
-                                onChange={e => handleAnswerChange(qIdx, aIdx, e.target.value)}
-                              />
+                              <input className="qbs-input small" placeholder={`Opción ${aIdx + 1}`} value={ans} onChange={e => handleAnswerChange(qIdx, aIdx, e.target.value)} />
                             </div>
                           ))}
                         </div>
@@ -497,23 +470,15 @@ const BattleControlScreen: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
                 <div className="qbs-modal-footer">
                   <button className="qbs-btn-secondary" onClick={() => setShowCreateModal(false)}>Cancelar</button>
-                  <button 
-                    className="qbs-btn-primary" 
-                    onClick={handleSaveBank}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? <IonSpinner name="dots" /> : 'Guardar y Usar'}
-                  </button>
+                  <button className="qbs-btn-primary" onClick={handleSaveBank} disabled={isSubmitting}>{isSubmitting ? <IonSpinner name="dots" /> : 'Guardar y Usar'}</button>
                 </div>
               </div>
             </div>
           )}
 
           <IonAlert isOpen={alertConfig.isOpen} onDidDismiss={() => setAlertConfig({ ...alertConfig, isOpen: false })} header={alertConfig.header} message={alertConfig.message} buttons={alertConfig.buttons}/>
-
           <IonAlert
             isOpen={showExitConfirm}
             onDidDismiss={() => setShowExitConfirm(false)}
@@ -521,17 +486,9 @@ const BattleControlScreen: React.FC = () => {
             message="Al salir, la sala se perderá definitivamente y todos los estudiantes serán desconectados."
             buttons={[
               { text: 'Cancelar', role: 'cancel', cssClass: 'secondary' },
-              {
-                text: 'Salir y Cerrar',
-                cssClass: 'danger-button',
-                handler: () => {
-                    handleExitToMenu(); 
-                    return true;
-                }
-              }
+              { text: 'Salir y Cerrar', cssClass: 'danger-button', handler: () => { handleExitToMenu(); return true; } }
             ]}
           />
-
         </div>
       </IonContent>
     </IonPage>

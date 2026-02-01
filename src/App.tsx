@@ -1,5 +1,5 @@
 import React from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, useLocation } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 
@@ -17,6 +17,7 @@ import RewardsManagementScreen from './pages/dashboard/teacher/screens/RewardsMa
 // --- IMPORTS DE ESTUDIANTE ---
 import MyClassesScreen from './pages/dashboard/student/screens/MyClassesScreen';
 import StudentClassDetailScreen from './pages/dashboard/student/screens/StudentClassDetailScreen'; 
+import JoinBattleScreen from './pages/dashboard/student/screens/JoinBattleScreen'; // ✅ Importamos la pantalla de batalla
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -39,11 +40,42 @@ import './theme/variables.css';
 
 setupIonicReact();
 
-const App: React.FC = () => {
+// ✅ COMPONENTE DE CONTROL DE NAVEGACIÓN
+const NavigationManager: React.FC = () => {
+  const location = useLocation();
 
+  // Definimos las rutas donde la Navbar DEBE ocultarse
+  const hideNavbarPaths = [
+    '/teacher/battle',
+    '/student/battle-arena' // ✅ Ahora ocultamos la navbar en la nueva ruta de batalla
+  ];
+
+  const shouldHide = hideNavbarPaths.some(path => location.pathname.startsWith(path));
+
+  return (
+    <>
+      <style>
+        {`
+          ion-tab-bar {
+            --height: 80px !important; /* Ajuste para evitar iconos cortados en móviles */
+            padding-bottom: env(safe-area-inset-bottom) !important;
+            border-top: 1px solid rgba(0,0,0,0.05) !important;
+            display: ${shouldHide ? 'none' : 'flex'} !important;
+          }
+          ion-tab-button {
+            margin-bottom: 8px !important;
+          }
+        `}
+      </style>
+    </>
+  );
+};
+
+const App: React.FC = () => {
   return (
     <IonApp>
       <IonReactRouter>
+        <NavigationManager />
          
         <IonRouterOutlet>
           
@@ -60,9 +92,6 @@ const App: React.FC = () => {
           {/* --- DOCENTE --- */}
           <Route exact path="/teacher/battle" component={BattleControlScreen} />
           
-          {/* 🔥 CORRECCIÓN AQUÍ (Línea 65) 🔥 
-              Ahora recuperamos el usuario y pasamos 'teacherId' 
-          */}
           <Route 
             exact 
             path="/teacher/questions" 
@@ -72,7 +101,7 @@ const App: React.FC = () => {
               return (
                 <QuestionBankScreen 
                    onBack={() => props.history.goBack()}
-                   teacherId={user.id} // 👈 ¡ESTO FALTABA!
+                   teacherId={user.id} 
                 />
               );
             }} 
@@ -104,6 +133,24 @@ const App: React.FC = () => {
             exact 
             path="/student/class/:subjectId" 
             component={StudentClassDetailScreen} 
+          />
+
+          {/* ✅ RUTA INDEPENDIENTE PARA LA BATALLA ✅ */}
+          {/* Esto soluciona el fondo blanco y permite que la imagen del auto cargue correctamente */}
+          <Route 
+            exact 
+            path="/student/battle-arena" 
+            render={(props) => {
+              const userStr = localStorage.getItem('user');
+              const user = userStr ? JSON.parse(userStr) : { id: '', fullName: '', name: '' };
+              return (
+                <JoinBattleScreen 
+                  studentId={user.id} 
+                  studentName={user.fullName || user.name} 
+                  onBack={() => props.history.push('/home')} 
+                />
+              );
+            }} 
           />
 
           {/* --- REDIRECCIÓN --- */}
