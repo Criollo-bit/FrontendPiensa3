@@ -1,7 +1,6 @@
-import React, { useState, useRef, ChangeEvent, KeyboardEvent } from 'react';
+import React, { useState, useRef, ChangeEvent, KeyboardEvent, useMemo } from 'react';
 import { IonIcon, IonSpinner, IonToast } from '@ionic/react';
-import { arrowBack, peopleOutline } from 'ionicons/icons';
-// Asegúrate de que la ruta de importación sea correcta según tu estructura
+import { arrowBack, personCircleOutline } from 'ionicons/icons';
 import * as battleApi from '../../../../lib/battleApi'; 
 import StudentBattleScreen from './StudentBattleScreen'; 
 import './JoinBattleScreen.css'; 
@@ -13,13 +12,29 @@ interface JoinBattleScreenProps {
 }
 
 const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, studentName }) => {
-  // 1. CAMBIO: Inicializamos con 4 espacios en lugar de 6
   const [code, setCode] = useState<string[]>(Array(4).fill(''));
   const [isJoining, setIsJoining] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const [joinedGroup, setJoinedGroup] = useState<{ groupId: string; battleId: string } | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // ✅ LÓGICA DE RECUPERACIÓN UNIFICADA (Igual a tu Perfil)
+  const displayImage = useMemo(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        // Buscamos en todas las propiedades posibles para máxima compatibilidad
+        const url = user.avatarUrl || user.avatar || user.avatar_url || '';
+        // Cache busting con timestamp para obligar a cargar la foto real de Railway
+        return url ? `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` : '';
+      }
+    } catch (e) {
+      console.error("Error al obtener avatar del storage", e);
+    }
+    return '';
+  }, []);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value.toUpperCase();
@@ -28,7 +43,6 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
       newCode[index] = value;
       setCode(newCode);
 
-      // 2. CAMBIO: El índice máximo ahora es 3 (porque 0,1,2,3 son 4 elementos)
       if (value !== '' && index < 3) {
         inputRefs.current[index + 1]?.focus();
       }
@@ -43,15 +57,12 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    // 3. CAMBIO: Cortamos a 4 caracteres
     const pastedData = e.clipboardData.getData('text').toUpperCase().slice(0, 4);
     const newCode = [...code];
-    // 4. CAMBIO: Iteramos hasta 4
     for (let i = 0; i < 4; i++) {
       newCode[i] = pastedData[i] || '';
     }
     setCode(newCode);
-    // 5. CAMBIO: El último índice válido es 3
     const lastFullIndex = Math.min(pastedData.length, 3);
     inputRefs.current[lastFullIndex]?.focus();
   };
@@ -60,7 +71,6 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     e.preventDefault();
     const fullCode = code.join('');
     
-    // 6. CAMBIO: Validación de longitud 4
     if (fullCode.length !== 4) {
       setErrorMsg('El código debe tener 4 caracteres.');
       return;
@@ -70,7 +80,15 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     setErrorMsg(null);
 
     try {
-      const result = await battleApi.joinBattleWithCode(fullCode, studentName);
+      // Enviamos la URL real procesada para que el servidor y el profesor la reciban
+      const avatarUrlToSend = displayImage;
+      
+      const result = await (battleApi as any).joinBattleWithCode(
+        fullCode, 
+        studentName, 
+        studentId, 
+        avatarUrlToSend
+      );
 
       if (result.success && result.group) {
         setJoinedGroup({
@@ -97,7 +115,7 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
         studentName={studentName}
         onBack={() => {
           setJoinedGroup(null);
-          setCode(Array(4).fill('')); // Limpiar código al volver
+          setCode(Array(4).fill('')); 
         }}
       />
     );
@@ -107,30 +125,55 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     <div className="bg-join-battle">
       <button
         onClick={onBack}
+        className="back-btn-float"
         style={{
-            position: 'absolute', top: '20px', left: '20px', zIndex: 50,
+            position: 'absolute', 
+            top: 'calc(20px + env(safe-area-inset-top))', 
+            left: 'calc(20px + env(safe-area-inset-left))', 
+            zIndex: 50,
             background: 'white', border: 'none', borderRadius: '50%',
-            width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)', cursor: 'pointer'
+            width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)', cursor: 'pointer'
         }}
       >
-        <IonIcon icon={arrowBack} style={{ fontSize: '1.5rem', color: '#334155' }} />
+        <IonIcon icon={arrowBack} style={{ fontSize: '1.6rem', color: '#334155' }} />
       </button>
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-          
+      <div className="join-battle-content-wrapper">
           <div className="animate-stagger" style={{ '--stagger-delay': '100ms' } as React.CSSProperties}>
             <div className="battle-portal">
+              {/* ✅ PREVISUALIZACIÓN REFORZADA: Foto real o iniciales */}
+              <div className="avatar-preview-container" style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {displayImage ? (
+                  <div style={{
+                    width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white',
+                    overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,0.15)', background: '#eee'
+                  }}>
+                    <img 
+                      src={displayImage} 
+                      alt="Tu perfil" 
+                      key={displayImage} // 🔥 Fuerza el re-renderizado si la URL cambia
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => {
+                        // Fallback automático si la imagen no carga
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${studentName}&background=random&color=fff`;
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ 
+                    width: '90px', height: '90px', borderRadius: '50%', 
+                    background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    backdropFilter: 'blur(5px)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <IonIcon icon={personCircleOutline} style={{ fontSize: '4rem', color: '#64748b' }} />
+                  </div>
+                )}
+                <span style={{ fontSize: '1rem', color: '#334155', marginTop: '0.8rem', fontWeight: '700' }}>{studentName}</span>
+              </div>
+
               <h1 style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.5rem' }}>Unirse a Batalla</h1>
               <p style={{ color: '#64748b' }}>Introduce el PIN de 4 dígitos</p>
-              
-              <div style={{ 
-                  marginTop: '1.5rem', width: '80px', height: '80px', borderRadius: '50%', 
-                  background: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  backdropFilter: 'blur(5px)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}>
-                <IonIcon icon={peopleOutline} style={{ fontSize: '3rem', color: '#3b82f6' }} />
-              </div>
             </div>
           </div>
 
@@ -158,7 +201,6 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
             <div className="animate-stagger" style={{ '--stagger-delay': '300ms', marginTop: '2.5rem' } as React.CSSProperties}>
               <button
                 type="submit"
-                // 7. CAMBIO: Botón se habilita con 4 caracteres
                 disabled={isJoining || code.join('').length < 4}
                 style={{
                     width: '100%', padding: '16px', borderRadius: '12px', border: 'none',

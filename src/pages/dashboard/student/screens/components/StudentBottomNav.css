@@ -1,4 +1,4 @@
-/* StudentBottomNav.css - OPTIMIZADO PARA ALTURA Y ZONAS SEGURAS */
+/* StudentBottomNav.css - OPTIMIZADO PARA PROPORCIÓN Y POSICIONAMIENTO */
 
 /* Contenedor principal */
 .student-nav-wrapper {
@@ -7,18 +7,39 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  /* 🔥 AJUSTE: Aumentamos altura base de 80px a 95px para subir los iconos */
-  height: calc(95px + var(--ion-safe-area-bottom)); 
+  /* 🔥 Altura aumentada para dar más margen de dibujo al SVG */
+  height: calc(85px + var(--ion-safe-area-bottom)); 
   pointer-events: none;
+  /* Transición para ocultamiento suave */
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  /* 🔥 ESTADO INICIAL: Aseguramos que sea visible por defecto */
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 🔥 NUEVO: FORZAMOS VISIBILIDAD ESTÁTICA */
+/* Esta clase evita que la barra desaparezca por errores de renderizado al navegar */
+.student-nav-wrapper.nav-visible-static {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: none;
+}
+
+/* 🔥 FUERZA BRUTA PARA OCULTAR CON TECLADO */
+/* Usamos 150px para asegurar que incluso con el empuje de Android, la barra salga de la pantalla */
+.student-nav-wrapper.nav-hidden-keyboard {
+  transform: translateY(150px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* --- BOTÓN FLOTANTE (Círculo activo) --- */
 .floating-active-container {
   position: absolute;
-  /* 🔥 AJUSTE: Subimos el círculo negro para que la curva sea más pronunciada */
-  bottom: calc(45px + var(--ion-safe-area-bottom)); 
+  /* 🔥 Sincronizado con la profundidad de la nueva curva */
+  bottom: calc(35px + var(--ion-safe-area-bottom)); 
   z-index: 1002;
-  transition: left 0.7s ease-in-out;
+  transition: left 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67);
   width: 60px;
   height: 60px;
   margin-left: -30px; 
@@ -53,8 +74,8 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  /* 🔥 AJUSTE: El fondo blanco ahora es más alto (85px) para dar aire a los iconos */
-  height: calc(85px + var(--ion-safe-area-bottom)); 
+  /* 🔥 Altura de la franja blanca aumentada para que los iconos no se salgan */
+  height: calc(75px + var(--ion-safe-area-bottom)); 
   pointer-events: auto;
 }
 
@@ -64,20 +85,25 @@
   display: block;
 }
 
+.nav-svg-path {
+  /* 🔥 Asegura que la curva se mueva suavemente en el cambio de pantalla */
+  transition: d 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
 /* --- ITEMS DE NAVEGACIÓN --- */
 .nav-items-layer {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  /* 🔥 AJUSTE: Sincronizado con el fondo SVG */
-  height: calc(85px + var(--ion-safe-area-bottom)); 
+  /* 🔥 Área de botones sincronizada con el fondo */
+  height: calc(60px + var(--ion-safe-area-bottom)); 
   z-index: 1001;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  /* 🔥 AJUSTE: Más espacio abajo para separar las etiquetas del borde del sistema */
-  padding: 0 10px calc(15px + var(--ion-safe-area-bottom)) 10px; 
+  /* Padding inferior para respetar los gestos del sistema */
+  padding: 0 10px calc(5px + var(--ion-safe-area-bottom)) 10px; 
   pointer-events: none;
 }
 
@@ -89,21 +115,40 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px; /* Más espacio entre icono y texto */
+  gap: 2px;
   min-width: 55px;
-  /* 🔥 AJUSTE: Empujamos los botones un poco hacia arriba */
-  padding-bottom: 5px; 
+  /* 🔥 Bajamos el margen para que el icono y texto queden centrados en lo blanco */
+  margin-top: 5px; 
   cursor: pointer;
 }
 
+.nav-icon-box {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .nav-icon {
-  font-size: 26px; /* Iconos un poco más grandes para mejor visibilidad */
+  font-size: 26px; 
   color: #4b5563;
 }
 
+.notif-btn {
+  background: #f8fafc; /* */
+  border: 1px solid #e2e8f0; /* */
+  border-radius: 12px; /* */
+  width: 42px; /* */
+  height: 42px; /* */
+  display: flex; /* */
+  align-items: center; /* */
+  justify-content: center; /* */
+  position: relative; /* */
+}
+
 .nav-label {
-  font-size: 10px; /* Texto ligeramente más legible */
-  font-weight: 600;
+  font-size: 9px; 
+  font-weight: 700;
   color: #4b5563; 
   white-space: nowrap;
 }

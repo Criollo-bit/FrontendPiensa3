@@ -1,9 +1,13 @@
+/* BattleManagerScreen.css - CÓDIGO ORIGINAL CON FIX DE SCROLL */
+
 .bm-screen {
-  position: relative;
-  min-height: 100vh;
+  /* 🔥 FIX: Bloqueamos el scroll del contenedor padre para evitar el salto fantasma */
+  position: fixed; 
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; 
   background-color: #f8fafc;
-  padding: 20px;
-  padding-top: 60px; /* Espacio para el botón de atrás */
 }
 
 .bm-back-btn {
@@ -23,7 +27,7 @@
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   transition: all 0.2s;
-  z-index: 10;
+  z-index: 20; /* Subido para asegurar que no lo tape nada */
 }
 
 .bm-back-btn:hover {
@@ -32,8 +36,16 @@
 }
 
 .bm-content {
+  /* 🔥 FIX: El scroll ahora solo sucede aquí adentro */
+  height: 100%;
+  overflow-y: auto;
   max-width: 600px;
   margin: 0 auto;
+  padding: 20px;
+  padding-top: 60px; /* Espacio para el botón de atrás */
+  /* Protege contra la Navbar inferior del docente */
+  padding-bottom: calc(100px + var(--ion-safe-area-bottom)); 
+  box-sizing: border-box;
 }
 
 .bm-header {
@@ -141,6 +153,19 @@
   margin: 5px 0 0 0;
 }
 
+/* 🔥 ESTILO NUEVO: Insignia de materia vinculada */
+.bm-subject-badge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
 .bm-control-btn {
   background: #0ea5e9;
   color: white;
@@ -156,11 +181,12 @@
 }
 
 .bm-code-box {
-  background: #fff7ed; /* Orange light */
+  background: #fff7ed; 
   border: 2px solid #fdba74;
   border-radius: 10px;
   padding: 15px;
   text-align: center;
+  position: relative;
 }
 
 .bm-code-label {
@@ -178,6 +204,25 @@
   color: #c2410c;
   margin: 5px 0;
   letter-spacing: 3px;
+}
+
+/* 🔥 ESTILO NUEVO: Información de puntos recompensados */
+.bm-reward-summary {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(253, 186, 116, 0.3);
+}
+
+.bm-reward-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9a3412;
 }
 
 .bm-code-hint {

@@ -1,12 +1,32 @@
+/* AllForAllControlScreen.css - ORIGINAL CON FIX DE SCROLL */
+
 .afa-container {
+  /* 🔥 FIX: Bloqueamos el scroll del contenedor principal */
+  position: fixed; 
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; 
   background: #f4f7fe;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🔥 ÁREA DE SCROLL INTERNO: Mantiene tu diseño intacto */
+.afa-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Espacio para la Navbar del docente */
+  padding-bottom: calc(100px + env(safe-area-inset-bottom)); 
 }
 
 .afa-header {
   background: #1e293b;
   color: white;
   padding: 40px 20px;
+  /* 🔥 Ajuste para Notch */
+  padding-top: calc(20px + env(safe-area-inset-top)); 
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
 }
@@ -16,11 +36,12 @@
   border: none;
   color: white;
   font-size: 1.5rem;
+  cursor: pointer;
 }
 
 .afa-card {
   background: white;
-  margin: -30px 20px;
+  margin: -30px 20px 20px 20px; /* Ajustado el margen inferior */
   padding: 25px;
   border-radius: 25px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -80,12 +101,14 @@
   border-radius: 15px;
   margin-top: 8px;
 }
+
 .podium-container {
   display: flex;
   justify-content: center;
   align-items: flex-end;
   gap: 20px;
   margin-top: 40px;
+  padding-bottom: 20px;
 }
 
 .podium-item {
@@ -103,7 +126,7 @@
   border-radius: 15px 15px 0 0;
   font-weight: bold;
   font-size: 1rem;
-  transition: all 0.5s ease; /* animación suave al cambiar altura */
+  transition: all 0.5s ease;
 }
 
 /* Podio con gradientes y colores claros */
@@ -135,6 +158,8 @@
 .ranking-list {
   margin-top: 30px;
   width: 100%;
+  padding: 0 20px; /* Añadido padding para que no choque con bordes */
+  box-sizing: border-box;
 }
 
 .ranking-list .rank-item {
@@ -145,5 +170,5 @@
   border-radius: 12px;
   margin-top: 10px;
   font-weight: bold;
-  transition: all 0.3s ease; /* animación al cambiar ranking */
+  transition: all 0.3s ease;
 }

@@ -15,15 +15,15 @@ interface StudentProfileScreenProps {
 }
 
 const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLogout, onUserUpdate }) => {
-  // Claves únicas para este usuario
+  // Llaves de referencia para compatibilidad
   const STORAGE_KEY_NAME = `u_name_${user.id}`;
   const STORAGE_KEY_BIO = `u_bio_${user.id}`;
   const STORAGE_KEY_IMG = `u_img_${user.id}`;
 
   const [profileData, setProfileData] = useState({
-    fullName: localStorage.getItem(STORAGE_KEY_NAME) || (user as any).fullName || user.name || '',
-    bio: localStorage.getItem(STORAGE_KEY_BIO) || (user as any).bio || '',
-    avatarUrl: localStorage.getItem(STORAGE_KEY_IMG) || (user as any).avatar || (user as any).avatarUrl || ''
+    fullName: (user as any).fullName || user.name || '',
+    bio: (user as any).bio || '',
+    avatarUrl: (user as any).avatar || (user as any).avatarUrl || ''
   });
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -33,73 +33,81 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Bloqueamos la sobrescritura si los datos del servidor vienen vacíos
+  // Sincronización: Si el prop 'user' cambia desde App.tsx, actualizamos el estado local
   useEffect(() => {
-    const savedName = localStorage.getItem(STORAGE_KEY_NAME);
-    const savedBio = localStorage.getItem(STORAGE_KEY_BIO);
-    const savedImg = localStorage.getItem(STORAGE_KEY_IMG);
-    
-    setProfileData(prev => ({
-      fullName: savedName || (user as any).fullName || user.name || prev.fullName,
-      bio: savedBio || (user as any).bio || prev.bio,
-      avatarUrl: savedImg || (user as any).avatar || (user as any).avatarUrl || prev.avatarUrl
-    }));
+    setProfileData({
+      fullName: (user as any).fullName || user.name || '',
+      bio: (user as any).bio || '',
+      avatarUrl: (user as any).avatar || (user as any).avatarUrl || ''
+    });
   }, [user]);
 
   const displayImage = previewUrl || profileData.avatarUrl || `https://ui-avatars.com/api/?name=${profileData.fullName}&background=random`;
 
-  // Función para convertir imagen a Base64 (hace que la foto sea permanente al recargar)
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
-  };
-
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
+      /**
+       * 🔥 PERSISTENCIA REAL: 
+       * Enviamos FormData para que el backend procese el archivo 'avatar' y los campos de texto.
+       */
       const formData = new FormData();
       formData.append('fullName', profileData.fullName);
       formData.append('bio', profileData.bio || ''); 
-      if (selectedFile) formData.append('avatar', selectedFile);
-
-      // 1. Intentamos guardar en el servidor
-      await api.patch('/auth/me', formData);
-      
-      // 2. GUARDADO LOCAL (Nuestra fuente de verdad)
-      localStorage.setItem(STORAGE_KEY_NAME, profileData.fullName);
-      localStorage.setItem(STORAGE_KEY_BIO, profileData.bio);
       
       if (selectedFile) {
-        const base64Img = await convertToBase64(selectedFile);
-        localStorage.setItem(STORAGE_KEY_IMG, base64Img);
-        setProfileData(prev => ({ ...prev, avatarUrl: base64Img }));
+        formData.append('avatar', selectedFile);
       }
 
+      // 1. Petición al servidor (Railway)
+      const response = await api.patch('/auth/me', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      const updatedUserFromBackend = response.data;
+
+      // 2. GESTIÓN SEGURA DEL LOCALSTORAGE
+      // Combinamos lo que ya tenemos con lo que devuelve el servidor (incluyendo la nueva URL de imagen)
+      const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
+      const newUserObj = { ...currentUserData, ...updatedUserFromBackend };
+
+      try {
+        // Guardamos el objeto actualizado (Ligero, solo strings de URL)
+        localStorage.setItem('user', JSON.stringify(newUserObj));
+        
+        /**
+         * 🧹 LIMPIEZA DE SEGURIDAD: 
+         * Eliminamos residuos de Base64 que puedan causar el QuotaExceededError.
+         */
+        localStorage.removeItem(STORAGE_KEY_IMG);
+        localStorage.removeItem(STORAGE_KEY_NAME);
+        localStorage.removeItem(STORAGE_KEY_BIO);
+      } catch (storageError) {
+        console.warn("⚠️ LocalStorage saturado. Aplicando reseteo de emergencia...");
+        localStorage.clear(); 
+        localStorage.setItem('user', JSON.stringify(newUserObj));
+      }
+
+      // 3. ACTUALIZACIÓN GLOBAL: 
+      // Notificamos a App.tsx para que el cambio se vea en toda la app inmediatamente.
       if (onUserUpdate) {
-        onUserUpdate({
-          ...user,
-          fullName: profileData.fullName,
-          bio: profileData.bio,
-          avatarUrl: selectedFile ? localStorage.getItem(STORAGE_KEY_IMG) : profileData.avatarUrl
-        });
+        onUserUpdate(newUserObj);
       }
 
       setIsEditModalOpen(false);
       setPreviewUrl(null);
-      setToast({ show: true, msg: '¡Perfil guardado correctamente!', color: 'success' });
+      setSelectedFile(null); 
+      setToast({ show: true, msg: '¡Perfil actualizado correctamente!', color: 'success' });
     } catch (err) {
-      setToast({ show: true, msg: 'Error de conexión', color: 'danger' });
+      console.error("Error al guardar perfil:", err);
+      setToast({ show: true, msg: 'No se pudieron guardar los cambios', color: 'danger' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="profile-page-wrapper">
+    <div className="profile-page-wrapper animate-fade-up">
       <div className="profile-card-main">
         <div className="profile-image-section">
           <div className="avatar-ring">
@@ -142,10 +150,13 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
                 {isLoading ? <IonSpinner name="dots" /> : 'GUARDAR'}
               </IonButton>
             </IonButtons>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setIsEditModalOpen(false)}>Cancelar</IonButton>
+            </IonButtons>
           </IonToolbar>
         </IonHeader>
 
-        <IonContent className="ion-padding">
+        <IonContent className="ion-padding edit-modal-content">
           <div className="modal-avatar-selector" onClick={() => fileInputRef.current?.click()}>
             <img src={displayImage} alt="Preview" />
             <div className="camera-icon-badge"><IonIcon icon={cameraOutline} /></div>
@@ -164,7 +175,7 @@ const StudentProfileScreen: React.FC<StudentProfileScreenProps> = ({ user, onLog
             <label>Biografía</label>
             <textarea 
               rows={4} 
-              value={profileData.bio || ""} // Evita error de nulo
+              value={profileData.bio || ""} 
               onChange={e => setProfileData({...profileData, bio: e.target.value})}
             />
           </div>

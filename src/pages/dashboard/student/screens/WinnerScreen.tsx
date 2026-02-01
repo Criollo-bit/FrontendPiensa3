@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IonIcon } from '@ionic/react';
-import { trophy } from 'ionicons/icons';
+import { trophy, star, arrowForwardOutline, checkmarkDoneCircle } from 'ionicons/icons';
+import './WinnerScreen.css';
 
 interface WinnerScreenProps {
   points: number;
@@ -8,20 +9,59 @@ interface WinnerScreenProps {
 }
 
 const WinnerScreen: React.FC<WinnerScreenProps> = ({ points, onContinue }) => {
+  const [userAvatar, setUserAvatar] = useState<string>('');
+  const [userName, setUserName] = useState<string>('');
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      setUserAvatar(user.avatarUrl || user.avatar || '');
+      setUserName(user.fullName || user.name || 'Estudiante');
+    }
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-screen text-center p-8 bg-gradient-to-br from-green-400 to-teal-500 text-white">
-      <div className="animate-bounce mb-6 text-7xl">
-        <IonIcon icon={trophy} />
+    <div className="winner-page-container">
+      {/* Elementos decorativos de fondo */}
+      <IonIcon icon={star} className="star-decoration s1" />
+      <IonIcon icon={star} className="star-decoration s2" />
+      <IonIcon icon={star} className="star-decoration s3" />
+
+      <div className="winner-content-card">
+        <div className="trophy-badge-container">
+          <div className="trophy-glow"></div>
+          <div className="winner-avatar-mini">
+            <img 
+              src={userAvatar || `https://ui-avatars.com/api/?name=${userName}&background=random`} 
+              alt="Tú" 
+            />
+          </div>
+          <IonIcon icon={trophy} className="main-trophy-icon animate-bounce-slow" />
+        </div>
+
+        <h1 className="winner-title">¡Victoria!</h1>
+        <p className="winner-subtitle">Felicidades {userName.split(' ')[0]}, has dominado la batalla.</p>
+
+        <div className="points-reward-box">
+          <span className="points-label">PUNTOS CARGADOS A TU CUENTA</span>
+          <div className="points-value-row">
+            <span className="points-plus">+</span>
+            <span className="points-number">{points}</span>
+          </div>
+          <div className="real-points-notice">
+            <IonIcon icon={checkmarkDoneCircle} />
+            <span>Puntos de materia actualizados</span>
+          </div>
+        </div>
+
+        <button onClick={onContinue} className="btn-finish-battle">
+          VOLVER AL INICIO
+          <IonIcon icon={arrowForwardOutline} />
+        </button>
       </div>
-      <h1 className="text-4xl font-extrabold mb-2">¡Felicitaciones!</h1>
-      <p className="text-xl opacity-90 mb-8">Has completado la batalla.</p>
-      <div className="bg-white/30 rounded-xl px-6 py-3 backdrop-blur-sm">
-        <p className="text-2xl font-bold">Puntaje Final: {points}</p>
-      </div>
-       <button onClick={onContinue} className="mt-10 bg-white text-teal-600 px-6 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
-        Volver al Menú
-      </button>
     </div>
   );
 };
+
 export default WinnerScreen;

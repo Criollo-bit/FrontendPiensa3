@@ -1,18 +1,45 @@
+/* src/pages/dashboard/student/screens/JoinAllForAllScreen.css */
+
 .join-container {
   background: #f5f3ff;
   min-height: 100vh;
-  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  /* 🔥 SAFE ZONES: Protección contra Notch y barra de gestos */
+  padding-top: calc(20px + env(safe-area-inset-top));
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  
   text-align: center;
+  box-sizing: border-box;
 }
 
 .join-back {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  background: none;
+  /* 🔥 Posicionamiento corregido para Safe Zones */
+  top: calc(20px + env(safe-area-inset-top));
+  left: calc(20px + env(safe-area-inset-left));
+  background: white;
   border: none;
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: #6d28d9;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  z-index: 50;
+  cursor: pointer;
+}
+
+.join-header {
+  margin-bottom: 2rem;
 }
 
 .join-header ion-icon {
@@ -21,41 +48,67 @@
 }
 
 .join-header h1 {
+  font-size: 2.2rem;
   font-weight: 900;
   color: #4c1d95;
+  margin: 10px 0 5px;
 }
 
 .join-header p {
   color: #6b7280;
+  font-size: 1.1rem;
 }
 
 .join-form {
+  width: 100%;
   max-width: 320px;
-  margin: 40px auto 0;
+  margin: 0 auto;
 }
 
 .pin-inputs {
   display: flex;
   gap: 12px;
   justify-content: center;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  margin-top: 10px;
 }
 
 .pin-inputs input {
   width: 55px;
   height: 65px;
-  font-size: 1.6rem;
+  font-size: 1.8rem;
+  font-weight: 700;
   text-align: center;
   border-radius: 15px;
   border: 2px solid #ddd6fe;
+  background: white;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.pin-inputs input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+  transform: translateY(-2px);
 }
 
 .join-btn {
   width: 100%;
+  max-width: 300px;
   background: #7c3aed;
   color: white;
-  padding: 16px;
+  padding: 18px;
   border-radius: 18px;
   font-weight: 800;
+  font-size: 1rem;
   border: none;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.join-btn:active {
+  transform: scale(0.96);
+  background: #6d28d9;
 }

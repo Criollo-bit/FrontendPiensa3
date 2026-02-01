@@ -22,14 +22,12 @@ interface BattleManagerScreenProps {
   students: User[]; 
   teacherId: string;
   onBack: () => void;
-  // 👇 NUEVA PROP: Para navegar al banco
   onOpenBank: () => void;
 }
 
 const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, onBack, onOpenBank }) => { 
   const history = useHistory();
   
-  // Carga segura
   const [rooms, setRooms] = useState<BattleRoom[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
 
@@ -77,29 +75,43 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, on
       tempBattleName.current = '';
       setIsLoading(false);
       setIsCreateBattleModalOpen(false); 
-      // Aquí podrías navegar a la sala creada si tienes la ruta configurada
-      // history.push('/teacher/battle'); 
     };
 
     socket.on('room-created', handleRoomCreated);
     return () => { socket.off('room-created', handleRoomCreated); };
   }, [teacherId, history]);
 
-  const handleCreateBattle = (name: string) => {
+  // 🔥 ACTUALIZADO: Ahora recibe subjectId y la configuración de puntos del modal
+  const handleCreateBattle = (
+    name: string, 
+    subjectId: string, 
+    pointsConfig: { p1: number, p2: number, p3: number },
+    groupCount: number,
+    studentsPerGroup: number
+  ) => {
       localStorage.removeItem('currentBattleId');
       localStorage.setItem('tempBattleName', name);
+      
       const socket = socketService.getBattleSocket();
       if(socket) {
           setIsLoading(true);
           tempBattleName.current = name;
-          socket.emit('create-room', { teacherId, name });
+          
+          // Enviamos toda la configuración al servidor de Railway
+          socket.emit('create-room', { 
+            teacherId, 
+            name,
+            subjectId,
+            rewardPoints: pointsConfig, // { p1, p2, p3 }
+            groupCount,
+            studentsPerGroup
+          });
       }
   };
 
   const handleOpenBattle = (battleId: string, battleName: string) => {
     localStorage.setItem('currentBattleId', battleId);
     localStorage.setItem('tempBattleName', battleName);
-    // Asumiendo que esta ruta existe en tu App.tsx principal
     history.push(`/teacher/battle`); 
   };
 
@@ -123,7 +135,6 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, on
         </div>
 
         <div className="bm-actions-grid">
-          {/* 👇 CORRECCIÓN: Usamos onOpenBank en lugar del history.push indirecto */}
           <button onClick={() => setShowBankOptions(true)} className="bm-action-btn btn-green">
             <IonIcon icon={bookOutline} className="bm-icon" /> Banco de Preguntas
           </button>
@@ -166,7 +177,13 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, on
       </div>
       
       {isCreateBattleModalOpen && (
-         <CreateBattleModal isOpen={isCreateBattleModalOpen} onClose={() => setIsCreateBattleModalOpen(false)} onCreate={handleCreateBattle} teacherId={teacherId} isLoading={isLoading} />
+         <CreateBattleModal 
+            isOpen={isCreateBattleModalOpen} 
+            onClose={() => setIsCreateBattleModalOpen(false)} 
+            onCreate={handleCreateBattle} 
+            teacherId={teacherId} 
+            isLoading={isLoading} 
+         />
       )}
 
       {isLoading && (
@@ -176,7 +193,6 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, on
         </div>
       )}
 
-      {/* Menú de opciones de Banco */}
       <IonActionSheet 
         isOpen={showBankOptions} 
         onDidDismiss={() => setShowBankOptions(false)} 
@@ -185,12 +201,12 @@ const BattleManagerScreen: React.FC<BattleManagerScreenProps> = ({ teacherId, on
           { 
             text: 'Ver mis bancos', 
             icon: list, 
-            handler: onOpenBank // 🟢 Usamos la prop aquí
+            handler: onOpenBank 
           }, 
           { 
             text: 'Crear banco', 
             icon: create, 
-            handler: onOpenBank // 🟢 Y aquí también
+            handler: onOpenBank 
           }, 
           { 
             text: 'Cancelar', 

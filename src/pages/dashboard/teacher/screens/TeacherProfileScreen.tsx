@@ -11,21 +11,28 @@ import './TeacherProfileScreen.css';
 interface TeacherProfileScreenProps {
   user: User;
   onLogout: () => void;
-  onUserUpdate?: (updatedUser: any) => void; // Añadido para avisar al Dashboard
+  onUserUpdate?: (updatedUser: any) => void; 
 }
 
 const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLogout, onUserUpdate }) => {
-  // Claves únicas para que el Profe no pierda sus datos
   const T_NAME = `t_name_${user.id}`;
   const T_BIO = `t_bio_${user.id}`;
   const T_IMG = `t_img_${user.id}`;
 
-  const [profileData, setProfileData] = useState({
-    fullName: localStorage.getItem(T_NAME) || (user as any).fullName || user.name || '',
-    bio: localStorage.getItem(T_BIO) || (user as any).bio || '',
-    avatarUrl: localStorage.getItem(T_IMG) || (user as any).avatarUrl || (user as any).avatar || ''
-  });
+  // ✅ LÓGICA DE EXTRACCIÓN REFORZADA: 
+  // Si el objeto 'u' (props) viene vacío al recargar, rescatamos del localStorage
+  const getFreshData = (u: any) => {
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    return {
+      fullName: u.fullName || storedUser.fullName || u.name || '',
+      // Priorizamos u.bio, pero si el Dashboard lo borró al recargar, usamos storedUser.bio
+      bio: u.bio || storedUser.bio || (u as any).description || '',
+      avatarUrl: u.avatarUrl || storedUser.avatarUrl || u.avatar || ''
+    };
+  };
 
+  const [profileData, setProfileData] = useState(getFreshData(user));
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({show: false, msg: '', color: 'success'});
@@ -33,72 +40,55 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Sincronización: Si el Dashboard manda datos, priorizamos los nuestros si los del Dashboard vienen vacíos
+  // ✅ SINCRONIZACIÓN FORZADA: 
+  // Al recargar la página, este efecto asegura que profileData tenga los datos del storage
   useEffect(() => {
-    const savedName = localStorage.getItem(T_NAME);
-    const savedBio = localStorage.getItem(T_BIO);
-    const savedImg = localStorage.getItem(T_IMG);
-    
-    setProfileData(prev => ({
-      fullName: savedName || (user as any).fullName || user.name || prev.fullName,
-      bio: savedBio || (user as any).bio || prev.bio,
-      avatarUrl: savedImg || (user as any).avatarUrl || (user as any).avatar || prev.avatarUrl
-    }));
+    setProfileData(getFreshData(user));
   }, [user]);
 
-  const displayImage = previewUrl || profileData.avatarUrl || `https://ui-avatars.com/api/?name=${profileData.fullName}&background=random`;
-
-  // Convierte la foto a Base64 para que sea inmortal al recargar
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
-  };
+  const displayImage = previewUrl || 
+    (profileData.avatarUrl 
+      ? (profileData.avatarUrl.includes('?') ? profileData.avatarUrl : `${profileData.avatarUrl}?t=${new Date().getTime()}`)
+      : `https://ui-avatars.com/api/?name=${profileData.fullName}&background=random`);
 
   const handleSaveProfile = async () => {
     setIsLoading(true);
     try {
       const formData = new FormData();
-      formData.append('fullName', profileData.fullName);
-      formData.append('bio', profileData.bio || '');
-      if (selectedFile) formData.append('avatar', selectedFile);
-
-      // Enviamos al servidor
-      await api.patch('/auth/me', formData);
+      formData.append('fullName', profileData.fullName.trim());
+      formData.append('bio', profileData.bio ? profileData.bio.trim() : '');
       
-      // PERSISTENCIA LOCAL: Guardamos antes de que la sincronización nos borre nada
-      localStorage.setItem(T_NAME, profileData.fullName);
-      localStorage.setItem(T_BIO, profileData.bio);
-      
-      let finalImg = profileData.avatarUrl;
       if (selectedFile) {
-        finalImg = await convertToBase64(selectedFile);
-        localStorage.setItem(T_IMG, finalImg);
+        formData.append('avatar', selectedFile);
       }
 
-      const updatedUser = {
-        ...user,
-        fullName: profileData.fullName,
-        bio: profileData.bio,
-        avatarUrl: finalImg
-      };
-
-      setProfileData({
-        fullName: updatedUser.fullName,
-        bio: updatedUser.bio,
-        avatarUrl: updatedUser.avatarUrl
+      const response = await api.patch('/auth/me', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      if (onUserUpdate) onUserUpdate(updatedUser);
+      const updatedUserFromBackend = response.data;
+
+      const currentUserData = JSON.parse(localStorage.getItem('user') || '{}');
+      const newUserObj = { ...currentUserData, ...updatedUserFromBackend };
+
+      localStorage.setItem('user', JSON.stringify(newUserObj));
+      
+      // Limpieza de residuos antiguos
+      localStorage.removeItem(T_NAME);
+      localStorage.removeItem(T_BIO);
+      localStorage.removeItem(T_IMG);
+
+      if (onUserUpdate) {
+        onUserUpdate(newUserObj);
+      }
 
       setIsEditModalOpen(false);
       setPreviewUrl(null);
+      setSelectedFile(null);
       setToast({show: true, msg: '¡Perfil docente actualizado!', color: 'success'});
     } catch (err: any) {
-      setToast({show: true, msg: 'Error al actualizar perfil', color: 'danger'});
+      console.error("Error al guardar:", err);
+      setToast({show: true, msg: 'No se pudo guardar', color: 'danger'});
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +98,9 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
     <div className="profile-container app-fade-in">
       <div className="profile-card-main shadow-soft">
         <div className="avatar-section">
-          <img src={displayImage} alt="Avatar" className="avatar-circle" key={displayImage} />
+          <div className="avatar-ring">
+            <img src={displayImage} alt="Avatar" className="avatar-circle" key={displayImage} />
+          </div>
         </div>
         <h2 className="user-full-name">{profileData.fullName}</h2>
         <p className="user-email-text">{user.email}</p>
@@ -119,9 +111,15 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
         </div>
       </div>
 
-      <div className="bio-display-section" key={profileData.bio}>
+      <div className="bio-display-section">
         <h3 className="section-title">PERFIL PROFESIONAL</h3>
-        <p className="bio-text">{profileData.bio || 'Sin biografía docente.'}</p>
+        <div className="bio-box">
+          {profileData.bio ? (
+            <p className="bio-text">{profileData.bio}</p>
+          ) : (
+            <p className="bio-text-empty">Sin biografía registrada.</p>
+          )}
+        </div>
       </div>
 
       <div className="profile-footer-actions">
@@ -142,9 +140,12 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
                 {isLoading ? <IonSpinner name="crescent" /> : 'GUARDAR'}
               </IonButton>
             </IonButtons>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setIsEditModalOpen(false)}>Cancelar</IonButton>
+            </IonButtons>
           </IonToolbar>
         </IonHeader>
-        <IonContent className="ion-padding">
+        <IonContent className="ion-padding edit-modal-content">
           <div className="edit-avatar-wrapper" onClick={() => fileInputRef.current?.click()}>
             <div className="avatar-preview-container">
               <img src={displayImage} alt="Preview" />
@@ -162,7 +163,7 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
           </div>
 
           <div className="custom-input-group">
-            <label>Biografía</label>
+            <label>Biografía Profesional</label>
             <textarea 
               rows={4} 
               value={profileData.bio || ""} 
@@ -170,16 +171,17 @@ const TeacherProfileScreen: React.FC<TeacherProfileScreenProps> = ({ user, onLog
               placeholder="Escribe tu trayectoria..."
             />
           </div>
+
+          <input ref={fileInputRef} type="file" style={{display:'none'}} accept="image/*" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              setPreviewUrl(URL.createObjectURL(file));
+              setSelectedFile(file);
+            }
+          }} />
         </IonContent>
       </IonModal>
 
-      <input ref={fileInputRef} type="file" style={{display:'none'}} accept="image/*" onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          setPreviewUrl(URL.createObjectURL(file));
-          setSelectedFile(file);
-        }
-      }} />
       <IonToast isOpen={toast.show} message={toast.msg} color={toast.color} duration={2000} onDidDismiss={() => setToast({...toast, show: false})} />
     </div>
   );

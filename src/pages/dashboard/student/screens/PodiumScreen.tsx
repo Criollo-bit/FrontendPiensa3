@@ -5,6 +5,7 @@ interface Winner {
   name: string;
   score: number;
   position: number; // 1, 2, o 3
+  avatarUrl?: string; // 🔥 RECIBIDO DESDE EL SOCKET
   color?: string;
 }
 
@@ -19,7 +20,6 @@ const PodiumScreen: React.FC<PodiumScreenProps> = ({ winners, onContinue }) => {
   useEffect(() => {
     // Iniciar animación al montar
     setTimeout(() => setAnimated(true), 100);
-    // ELIMINADO: Ya no hay temporizador automático
   }, []);
 
   const getPodiumHeight = (position: number) => {
@@ -66,50 +66,72 @@ const PodiumScreen: React.FC<PodiumScreenProps> = ({ winners, onContinue }) => {
       </div>
 
       <div className="podium-stage">
-        {winners.map((winner, index) => (
-          <div 
-            key={index}
-            className={`podium-wrapper pos-${winner.position}`}
-            // Orden visual: 2 (izq), 1 (centro), 3 (der)
-            style={{ order: winner.position === 1 ? 2 : winner.position === 2 ? 1 : 3 }}
-          >
-            {/* Avatar y Datos (Flotan encima de la barra) */}
-            <div 
-              className="avatar-group"
-              style={{ 
-                opacity: animated ? 1 : 0,
-                transform: animated ? 'translateY(0)' : 'translateY(20px)',
-                transitionDelay: `${index * 0.2}s`
-              }}
-            >
-              <div className="medal-badge" style={{ backgroundColor: getBarColor(winner.position) }}>
-                {getMedalEmoji(winner.position)}
-              </div>
-              
-              <div className="podium-avatar-circle">
-                {winner.name.substring(0, 2).toUpperCase()}
-              </div>
-              
-              <div className="info-card">
-                <div className="p-name">{winner.name}</div>
-                <div className="p-score">{winner.score} pts</div>
-              </div>
-            </div>
+        {winners.map((winner, index) => {
+          // ✅ MEJORADO: Generamos la URL con timestamp para evitar que la imagen salga corrupta
+          const finalAvatarUrl = winner.avatarUrl 
+            ? (winner.avatarUrl.includes('?') ? winner.avatarUrl : `${winner.avatarUrl}?t=${new Date().getTime()}`)
+            : null;
 
-            {/* Barra del Podio */}
+          return (
             <div 
-              className="podium-bar"
-              style={{
-                height: animated ? getPodiumHeight(winner.position) : '0px',
-                backgroundColor: getBarColor(winner.position),
-                transitionDelay: `${index * 0.1}s`,
-                boxShadow: `0 0 20px ${getBarColor(winner.position)}66`
-              }}
+              key={index}
+              className={`podium-wrapper pos-${winner.position}`}
+              // Orden visual: 2 (izq), 1 (centro), 3 (der)
+              style={{ order: winner.position === 1 ? 2 : winner.position === 2 ? 1 : 3 }}
             >
-              <span className="rank-number">{winner.position}</span>
+              {/* Avatar y Datos (Flotan encima de la barra) */}
+              <div 
+                className="avatar-group"
+                style={{ 
+                  opacity: animated ? 1 : 0,
+                  transform: animated ? 'translateY(0)' : 'translateY(20px)',
+                  transitionDelay: `${index * 0.2}s`
+                }}
+              >
+                <div className="medal-badge" style={{ backgroundColor: getBarColor(winner.position) }}>
+                  {getMedalEmoji(winner.position)}
+                </div>
+                
+                {/* 🔥 AVATAR ACTUALIZADO: Con fallback automático si la imagen falla */}
+                <div className="podium-avatar-circle" style={{ overflow: 'hidden', border: `3px solid ${getBarColor(winner.position)}` }}>
+                  {finalAvatarUrl ? (
+                    <img 
+                      src={finalAvatarUrl} 
+                      alt={winner.name} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => {
+                        // Si la imagen de Railway falla, ponemos un avatar de respaldo con el nombre
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${winner.name}&background=random`;
+                      }}
+                    />
+                  ) : (
+                    <span className="initials-fallback">
+                        {winner.name.substring(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="info-card">
+                  <div className="p-name">{winner.name}</div>
+                  <div className="p-score">{winner.score} pts</div>
+                </div>
+              </div>
+
+              {/* Barra del Podio */}
+              <div 
+                className="podium-bar"
+                style={{
+                  height: animated ? getPodiumHeight(winner.position) : '0px',
+                  backgroundColor: getBarColor(winner.position),
+                  transitionDelay: `${index * 0.1}s`,
+                  boxShadow: `0 0 20px ${getBarColor(winner.position)}66`
+                }}
+              >
+                <span className="rank-number">{winner.position}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="celebration-footer">

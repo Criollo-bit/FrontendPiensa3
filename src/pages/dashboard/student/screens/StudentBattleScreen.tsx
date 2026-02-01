@@ -4,7 +4,8 @@ import {
   checkmarkCircle, 
   closeCircle, 
   pause, 
-  arrowBackOutline
+  arrowBackOutline,
+  hourglassOutline
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
 import PodiumScreen from './PodiumScreen';
@@ -60,7 +61,20 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
   const [finalRanking, setFinalRanking] = useState<any[]>([]);
   const [amIWinner, setAmIWinner] = useState(false);
 
-  // Timer de Feedback (8 segundos)
+  const [myAvatar, setMyAvatar] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setMyAvatar(user.avatarUrl || user.avatar || '');
+      }
+    } catch (e) {
+      console.error("Error cargando avatar en lobby", e);
+    }
+  }, []);
+
   useEffect(() => {
     if (viewState === 'FEEDBACK') {
         const timer = setTimeout(() => {
@@ -100,7 +114,11 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
       setShowTransition(false);
       const winners = data.winners || [];
       const podiumWinners = winners.slice(0, 3).map((w: any, index: number) => ({
-          position: index + 1, name: w.name, score: w.score, color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
+          position: index + 1, 
+          name: w.name, 
+          score: w.score, 
+          avatarUrl: w.avatarUrl, 
+          color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
       }));
       setFinalRanking(podiumWinners);
       const myRankIndex = winners.findIndex((w: any) => w.name === studentName);
@@ -112,7 +130,7 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
       socket.off('new-question'); socket.off('answer-received'); socket.off('round-result');
       socket.off('game-over'); socket.off('disconnect'); socket.off('connect');
     };
-  }, [studentName]);
+  }, [studentName, battleId]);
 
   useEffect(() => {
     if (viewState === 'QUESTION' && !showTransition && localTimer > 0) {
@@ -135,18 +153,17 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
 
     switch (viewState) {
       case 'WAITING':
-        // 🔥 RESTAURADO EL ESTILO DE LOBBY QUE QUERÍAS 🔥
         return (
           <div className="lobby-container">
              <button onClick={onBack} className="absolute top-4 left-4 p-2 bg-white rounded-full shadow border">
                 <IonIcon icon={arrowBackOutline} />
              </button>
              
-             {/* Avatar Generado */}
              <img 
-                src={`https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
+                src={myAvatar || `https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
                 alt="Avatar" 
                 className="lobby-avatar-large"
+                style={{ objectFit: 'cover', border: '5px solid white' }}
              />
              
              <h1 className="lobby-title">¡Hola, {studentName}!</h1>
@@ -195,15 +212,15 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
 
       case 'LOCKED':
         return (
-          <div className="locked-container">
-             <div className="custom-waiting-animation">
-                 {/* Animación personalizada (puedes reemplazar con tu componente si prefieres) */}
-                 <div style={{width:100, height:100, borderRadius:'50%', border:'4px solid #e2e8f0', display:'flex', alignItems:'center', justifyContent:'center', animation:'pulse 2s infinite'}}>
-                    <IonIcon icon={pause} style={{fontSize: '3rem', color:'#64748b'}} />
-                 </div>
+          <div className="kahoot-waiting-screen">
+             <div className="waiting-central-icon">
+                <IonIcon icon={hourglassOutline} className="pulse-animation" />
              </div>
-             <h2 className="locked-title">Respuesta Enviada</h2>
-             <p className="locked-subtitle">Prepárate para la siguiente pregunta...</p>
+             <h2 className="waiting-title">Respuesta Enviada</h2>
+             <div className="waiting-status-pill">
+                Esperando a los demás jugadores...
+             </div>
+             <p className="waiting-hint">¿Serás el más rápido de la clase?</p>
           </div>
         );
 
@@ -211,7 +228,6 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
         const isCorrect = feedback?.correct;
         const iconClass = isCorrect ? 'checkmark-animation' : 'x-animation';
         return (
-          // 🔥 CLASE IMPORTANTE: sb-feedback-overlay para cubrir todo 🔥
           <div className={`sb-feedback-overlay ${isCorrect ? 'bg-correct' : 'bg-wrong'}`}>
              <div className="feedback-content-centered">
                  <div className={iconClass} style={{fontSize: '8rem', marginBottom: 20}}>
@@ -219,11 +235,20 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
                  </div>
                  
                  <h1 className="feedback-title">{isCorrect ? '¡CORRECTO!' : 'INCORRECTO'}</h1>
-                 <div className="points-pill">+{feedback.pointsEarned} Pts</div>
                  
-                 <div className="rank-display">
-                    <span className="rank-label">Tu Posición</span>
-                    <span className="rank-value">#{feedback.rank}</span>
+                 <div className="feedback-stats-row">
+                    <div className="stat-pill-kahoot">
+                        <span className="pill-label">PUNTOS</span>
+                        <span className="pill-value">+{feedback.pointsEarned || 0}</span>
+                    </div>
+                    <div className="stat-pill-kahoot">
+                        <span className="pill-label">POSICIÓN</span>
+                        <span className="pill-value">#{feedback.rank || '1'}</span>
+                    </div>
+                 </div>
+
+                 <div className="feedback-quote">
+                    {isCorrect ? "¡Estás en racha! Sigue así." : "¡No te rindas, la próxima es tuya!"}
                  </div>
              </div>
              <div className="feedback-timer-bar"><div className="feedback-progress"></div></div>

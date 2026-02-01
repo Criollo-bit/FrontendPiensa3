@@ -1,7 +1,9 @@
+/* CreateBattleModal.css */
+
 /* MODAL CONTAINER */
 .clean-battle-modal {
   --height: auto;
-  --max-height: 90%;
+  --max-height: 95%; /* 🔥 Aumentado ligeramente para los nuevos campos */
   --width: 90%;
   --max-width: 500px;
   --border-radius: 20px;
@@ -51,7 +53,11 @@
 .btn-close-icon:hover { color: #ef4444; }
 
 /* BODY & FORM */
-.modal-body-clean { padding: 24px; }
+.modal-body-clean { 
+  padding: 24px; 
+  max-height: 70vh; /* Permite scroll interno si hay muchas materias */
+  overflow-y: auto;
+}
 
 .clean-form {
   display: flex;
@@ -69,6 +75,10 @@
   font-weight: 700;
   color: #334155; /* slate-700 */
   font-size: 0.9rem;
+  min-height: 1.2rem; 
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .clean-input, .clean-input-lg {
@@ -80,6 +90,7 @@
   color: #1e293b;
   transition: all 0.2s;
   background: #f8fafc;
+  box-sizing: border-box; 
 }
 
 .clean-input-lg {
@@ -98,6 +109,23 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  align-items: start; 
+}
+
+/* 🔥 NUEVA SECCIÓN: CONFIGURACIÓN DE PUNTOS (PODIO) */
+.points-config-section {
+  background: #f1f5f9; /* slate-100 */
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.p-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #475569;
+  letter-spacing: 0.025em;
 }
 
 .info-box {

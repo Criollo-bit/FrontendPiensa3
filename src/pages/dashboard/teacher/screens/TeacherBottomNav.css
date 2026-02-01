@@ -1,54 +1,70 @@
 /* TeacherBottomNav.css */
 
-.bottom-nav-container {
+.teacher-nav-container {
   position: fixed;
   left: 0;
   right: 0;
-  /* 🔥 AJUSTE: Quitamos el bottom: env(...) aquí para que el contenedor toque el borde físico */
   bottom: 0;
-  /* 🔥 AJUSTE: Altura aumentada para dar espacio a los iconos y cubrir el área segura */
+  /* Altura optimizada para que los iconos no se corten */
   height: calc(85px + env(safe-area-inset-bottom));
-  z-index: 100;
+  z-index: 1000;
   pointer-events: none;
+  /* Transición para ocultamiento suave */
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
 
-/* El SVG del fondo curvo */
-.nav-background-svg {
+/* 🔥 FORZAMOS VISIBILIDAD ESTÁTICA */
+/* Evita que la barra desaparezca por errores de renderizado al navegar entre módulos */
+.teacher-nav-container.nav-visible-static {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+/* 🔥 OCULTAMIENTO SOLO POR TECLADO */
+/* Usamos 150px para asegurar que salga de la pantalla incluso con el empuje de Android */
+.teacher-nav-container.keyboard-active {
+  transform: translateY(150px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.nav-background-svg-wrapper {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  /* 🔥 AJUSTE: El fondo ahora cubre también la zona segura inferior */
-  height: calc(85px + env(safe-area-inset-bottom));
+  /* Aumentamos un poco la altura para contener mejor los iconos del docente */
+  height: calc(75px + env(safe-area-inset-bottom));
   pointer-events: auto;
-  filter: drop-shadow(0px -2px 4px rgba(0,0,0,0.1));
+  filter: drop-shadow(0px -2px 6px rgba(0,0,0,0.08));
 }
 
 .nav-path {
-  transition: d 0.7s ease-in-out;
+  transition: d 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
 }
 
-/* Botón Flotante Activo (El círculo negro) */
+/* Botón Flotante Activo */
 .floating-active-btn {
   position: absolute;
-  /* 🔥 AJUSTE: Subimos el círculo para que la curva sea más pronunciada y libre */
-  bottom: calc(45px + env(safe-area-inset-bottom));
+  /* Sincronizado con la profundidad de la curva ajustada */
+  bottom: calc(35px + env(safe-area-inset-bottom));
   width: 60px;
   height: 60px;
   background-color: white;
   border-radius: 50%;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 30;
-  transition: left 0.7s ease-in-out;
+  transition: left 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  margin-left: -30px; 
   pointer-events: none;
 }
 
 .floating-inner-circle {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   background-color: black;
   border-radius: 50%;
   display: flex;
@@ -61,24 +77,20 @@
   color: white;
 }
 
-/* Contenedor de los ítems de navegación */
 .nav-items-wrapper {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  /* 🔥 AJUSTE: Sincronizado con la altura del SVG */
-  height: calc(85px + env(safe-area-inset-bottom));
+  height: calc(60px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-around;
   align-items: center;
-  /* 🔥 AJUSTE: Padding inferior para separar etiquetas de los gestos del sistema */
-  padding-bottom: calc(15px + env(safe-area-inset-bottom));
+  padding: 0 5px calc(5px + env(safe-area-inset-bottom)) 5px;
   z-index: 20;
   pointer-events: auto;
 }
 
-/* Estilo de cada botón individual */
 .nav-item-btn {
   background: none;
   border: none;
@@ -86,25 +98,22 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-width: 60px;
+  gap: 2px;
+  min-width: 50px;
   cursor: pointer;
-  /* 🔥 AJUSTE: Subimos ligeramente los botones */
-  padding-top: 10px;
-  padding-bottom: 5px;
+  /* Bajamos el margen para centrar los iconos en la barra blanca más alta */
+  margin-top: 5px; 
 }
 
-/* Icono inactivo */
 .nav-item-icon {
   font-size: 24px;
-  color: #4b5563; /* Gray-600 */
+  color: #4b5563;
 }
 
-/* Texto */
 .nav-item-label {
-  font-size: 10px;
-  font-weight: 600; /* Un poco más de peso para legibilidad */
-  color: #4b5563; /* Gray-600 */
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748b;
   white-space: nowrap;
 }
 

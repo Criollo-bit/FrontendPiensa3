@@ -1,161 +1,159 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  IonIcon, 
-  IonSpinner, 
-  IonPage, 
-  IonContent 
-} from '@ionic/react';
-import { 
-  arrowBackOutline, 
-  peopleOutline, 
-  gameControllerOutline,
-  checkmarkCircle
-} from 'ionicons/icons';
-import { socketService } from '../../../../api/socket'; 
-import './StudentWaitingScreen.css';
+import React, { useState, useRef, ChangeEvent, KeyboardEvent, useMemo } from 'react';
+import { IonIcon, IonSpinner, IonToast, IonContent, IonPage } from '@ionic/react';
+import { arrowBack, personCircleOutline } from 'ionicons/icons';
+import * as battleApi from '../../../../lib/battleApi'; 
+import StudentBattleScreen from './StudentBattleScreen'; 
+import './JoinBattleScreen.css'; 
 
-interface Player {
-  id: string;
-  name: string;
-  avatar?: string;
-  isMe?: boolean;
-}
-
-interface StudentWaitingScreenProps {
-  joinCode: string;
-  studentName: string;
+interface JoinBattleScreenProps {
   onBack: () => void;
+  studentId: string;
+  studentName: string;
 }
 
-const StudentWaitingScreen: React.FC<StudentWaitingScreenProps> = ({ joinCode, studentName, onBack }) => {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [statusText, setStatusText] = useState('Conectando a la sala...');
+const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, studentName }) => {
+  const [code, setCode] = useState<string[]>(Array(4).fill(''));
+  const [isJoining, setIsJoining] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  const [joinedGroup, setJoinedGroup] = useState<{ groupId: string; battleId: string } | null>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  useEffect(() => {
-    // 1. Conexión al Socket
-    const socket = socketService.connectToBattle();
+  // ✅ RECUPERACIÓN RADICAL: Obtenemos el avatar real del storage local
+  const displayImage = useMemo(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const url = user.avatarUrl || user.avatar || user.avatar_url || '';
+        return url ? `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` : '';
+      }
+    } catch (e) { console.error(e); }
+    return '';
+  }, []);
 
-    // 2. Unirse a la sala (IMPORTANTE: roomId es el código)
-    // Nota: Asegúrate que el backend espera 'roomId' y 'studentName' en este evento
-    socket.emit('join-room', { 
-        roomId: joinCode, 
-        studentName: studentName 
-    });
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
+    const value = e.target.value.toUpperCase();
+    if (/^[A-Z0-9]$/.test(value) || value === '') {
+      const newCode = [...code];
+      newCode[index] = value;
+      setCode(newCode);
+      if (value !== '' && index < 3) inputRefs.current[index + 1]?.focus();
+    }
+  };
 
-    // 3. Listeners
-    socket.on('connect', () => {
-        setIsConnected(true);
-        setStatusText('Esperando al profesor...');
-    });
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === 'Backspace' && code[index] === '' && index > 0) inputRefs.current[index - 1]?.focus();
+  };
 
-    socket.on('room-update', (data: any) => {
-        console.log('Room Update:', data);
-        if (data.students) {
-            // Mapeamos los estudiantes que vienen del server
-            const mappedPlayers = data.students.map((s: any) => ({
-                id: s.id || s.socketId,
-                name: s.name,
-                // Generamos avatar con iniciales si no tiene foto
-                avatar: s.avatar || `https://ui-avatars.com/api/?name=${s.name}&background=random&color=fff&size=128`,
-                isMe: s.name === studentName
-            }));
-            setPlayers(mappedPlayers);
-        }
-        
-        // Si el estado cambia a 'active', el juego empezó (aquí podrías redirigir a la pantalla de juego)
-        if (data.status === 'active') {
-            setStatusText('¡La batalla ha comenzado!');
-            // TODO: Redirigir a StudentGameScreen
-        }
-    });
+  const handleJoinWithCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const fullCode = code.join('');
+    if (fullCode.length !== 4) {
+      setErrorMsg('El código debe tener 4 caracteres.');
+      return;
+    }
+    setIsJoining(true);
+    try {
+      const result = await (battleApi as any).joinBattleWithCode(fullCode, studentName, studentId, displayImage);
+      if (result.success && result.group) {
+        setJoinedGroup({ groupId: result.group.id, battleId: result.group.battle_id });
+      } else {
+        setErrorMsg(result.message || 'Error al unirse.');
+      }
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Error de conexión.');
+    } finally { setIsJoining(false); }
+  };
 
-    socket.on('error', (msg: string) => {
-        alert(msg);
-        onBack();
-    });
+  if (joinedGroup) {
+    return (
+      <StudentBattleScreen
+        groupId={joinedGroup.groupId}
+        battleId={joinedGroup.battleId}
+        studentId={studentId}
+        studentName={studentName}
+        onBack={() => { setJoinedGroup(null); setCode(Array(4).fill('')); }}
+      />
+    );
+  }
 
-    // Cleanup
-    return () => {
-        socket.off('connect');
-        socket.off('room-update');
-        socket.off('error');
-        // Opcional: socket.disconnect() si quieres desconectar al salir
-    };
-  }, [joinCode, studentName, onBack]);
-
+  // ✅ SOLUCIÓN AL FONDO BLANCO: Envolvemos en IonPage e IonContent propios con estilos inline
   return (
-    <IonPage>
-      <IonContent fullscreen className="sw-bg">
-        <div className="sw-container">
-            
-            {/* Header con botón atrás */}
-            <button onClick={onBack} className="sw-back-button">
-                <IonIcon icon={arrowBackOutline} />
-            </button>
+    <IonPage style={{ zIndex: 1000 }}>
+      <IonContent fullscreen style={{ '--background': '#f1f5f9' }}>
+        <div className="bg-join-battle" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+          <button
+            onClick={onBack}
+            style={{
+                position: 'absolute', 
+                top: 'calc(20px + env(safe-area-inset-top))', 
+                left: '20px', 
+                zIndex: 50,
+                background: 'white', border: 'none', borderRadius: '50%',
+                width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+          >
+            <IonIcon icon={arrowBack} style={{ fontSize: '1.6rem', color: '#334155' }} />
+          </button>
 
-            <div className="sw-main-content">
-                
-                {/* Título y Código */}
-                <div className="sw-header-section animate-slide-down">
-                    <div className="sw-icon-wrapper">
-                        <IonIcon icon={gameControllerOutline} />
+          <div className="join-battle-content-wrapper" style={{ flex: 1, paddingTop: '80px' }}>
+              <div className="battle-portal">
+                <div className="avatar-preview-container" style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{
+                        width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white',
+                        overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,0.15)', background: 'white'
+                    }}>
+                        <img 
+                          src={displayImage || `https://ui-avatars.com/api/?name=${studentName}&background=random`} 
+                          alt="Tu perfil" 
+                          key={displayImage} // 🔥 Fuerza el refresco visual para ver el auto
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${studentName}&background=random`; }}
+                        />
                     </div>
-                    <h1 className="sw-title">Sala de Batalla</h1>
-                    <div className="sw-code-pill">
-                        <span className="sw-code-label">CÓDIGO:</span>
-                        <span className="sw-code-value">{joinCode}</span>
-                    </div>
-                    <p className="sw-status">
-                        {isConnected ? (
-                            <>
-                                <IonSpinner name="dots" className="sw-spinner-small"/> {statusText}
-                            </>
-                        ) : (
-                            'Conectando...'
-                        )}
-                    </p>
+                    <span style={{ fontSize: '1rem', color: '#334155', marginTop: '0.8rem', fontWeight: '700' }}>{studentName}</span>
                 </div>
+                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.5rem' }}>Unirse a Batalla</h1>
+                <p style={{ color: '#64748b' }}>Introduce el PIN de 4 dígitos</p>
+              </div>
 
-                {/* Lista de Jugadores (Grid) */}
-                <div className="sw-players-section animate-fade-in delay-100">
-                    <div className="sw-players-header">
-                        <IonIcon icon={peopleOutline} />
-                        <span>Jugadores ({players.length})</span>
-                    </div>
-
-                    {players.length === 0 ? (
-                        <div className="sw-empty-state">
-                            <IonSpinner name="crescent" />
-                            <p>Esperando compañeros...</p>
-                        </div>
-                    ) : (
-                        <div className="sw-players-grid">
-                            {players.map((player, index) => (
-                                <div key={index} className={`sw-player-card ${player.isMe ? 'is-me' : ''}`}>
-                                    <div className="sw-avatar-container">
-                                        <img src={player.avatar} alt={player.name} className="sw-avatar-img"/>
-                                        {player.isMe && <div className="sw-me-badge"><IonIcon icon={checkmarkCircle}/></div>}
-                                    </div>
-                                    <p className="sw-player-name">{player.name}</p>
-                                    {player.isMe && <p className="sw-me-text">(Tú)</p>}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+              <form onSubmit={handleJoinWithCode} style={{ width: '100%', maxWidth: '400px', padding: '0 20px', margin: '0 auto' }}>
+                <div className="code-inputs-container">
+                  {code.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => { inputRefs.current[index] = el; }}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleInputChange(e, index)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      className="code-input-glass"
+                      disabled={isJoining}
+                    />
+                  ))}
                 </div>
-
-            </div>
-
-            {/* Footer Decorativo */}
-            <div className="sw-footer">
-                <p>Prepárate, la batalla comenzará pronto.</p>
-            </div>
-
+                <button
+                    type="submit"
+                    disabled={isJoining || code.join('').length < 4}
+                    style={{
+                        width: '100%', padding: '18px', borderRadius: '14px', border: 'none',
+                        background: '#0f172a', color: 'white', fontWeight: 'bold', fontSize: '1.1rem',
+                        marginTop: '2.5rem', boxShadow: '0 10px 15px rgba(0,0,0,0.1)',
+                        opacity: (isJoining || code.join('').length < 4) ? 0.7 : 1
+                    }}
+                >
+                    {isJoining ? 'Conectando...' : 'Entrar al Grupo'}
+                </button>
+              </form>
+          </div>
         </div>
       </IonContent>
+      <IonToast isOpen={!!errorMsg} message={errorMsg || ''} duration={3000} color="danger" position="top" />
     </IonPage>
   );
 };
 
-export default StudentWaitingScreen;
+export default JoinBattleScreen;

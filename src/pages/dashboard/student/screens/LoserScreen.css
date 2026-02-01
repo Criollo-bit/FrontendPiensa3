@@ -7,10 +7,9 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  /* Gradiente de calidez para motivar al alumno */
-  background: radial-gradient(circle at top, #f87171 0%, #ef4444 50%, #7f1d1d 100%);
+  /* Gradiente rojizo-naranja motivador */
+  background: linear-gradient(180deg, #ef4444 0%, #7f1d1d 100%);
   color: white;
-  /* 🔥 Safe Area para el Notch */
   padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom) 24px;
   position: relative;
   overflow: hidden;
@@ -29,107 +28,143 @@
 .loser-content-card {
   width: 100%;
   max-width: 400px;
-  animation: scaleIn 0.5s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- ICONO TRISTE --- */
+/* --- ICONO Y AVATAR --- */
 .sad-icon-container {
   position: relative;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .main-sad-icon {
   font-size: 7.5rem;
-  color: rgba(255, 255, 255, 0.95);
-  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.2));
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.2));
   z-index: 2;
+}
+
+.loser-avatar-frame {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  z-index: 3;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.loser-avatar-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.3); /* Un toque sutil de sobriedad por no ganar */
 }
 
 .sad-glow {
   position: absolute;
-  width: 100px;
-  height: 100px;
-  background: #fbbf24; /* Un toque naranja para el brillo */
-  filter: blur(60px);
-  opacity: 0.3;
+  width: 140px;
+  height: 140px;
+  background: #f87171;
+  filter: blur(50px);
+  opacity: 0.4;
   border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }
 
 /* --- TEXTOS --- */
 .loser-title {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 900;
   margin: 0;
   text-transform: uppercase;
+  letter-spacing: -1px;
 }
 
 .loser-subtitle {
   font-size: 1rem;
-  opacity: 0.9;
+  opacity: 0.85;
+  margin-top: 8px;
   margin-bottom: 35px;
   font-weight: 500;
+  line-height: 1.4;
 }
 
 /* --- CAJA DE PUNTAJE (Glassmorphism) --- */
 .score-summary-box {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  padding: 24px;
+  width: 100%;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
 .score-label {
   display: block;
   font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 1.5px;
-  margin-bottom: 4px;
-  opacity: 0.7;
-}
-
-.score-value-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 6px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  color: #fecaca;
 }
 
 .score-number {
-  font-size: 2.8rem;
+  font-size: 3.5rem;
   font-weight: 900;
+  line-height: 1;
 }
 
 .score-pts {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  opacity: 0.9;
+  margin-left: 5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.motivation-tag {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #fecaca;
+  font-weight: 600;
 }
 
 /* --- BOTÓN --- */
 .btn-retry-exit {
-  margin-top: 45px;
-  background: white;
-  color: #b91c1c; /* Rojo intenso */
+  margin-top: 40px;
+  background: #ffffff;
+  color: #991b1b; /* Rojo oscuro */
   border: none;
-  padding: 15px 30px;
-  border-radius: 50px;
+  padding: 18px 32px;
+  border-radius: 18px;
   font-size: 1.1rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-retry-exit:hover {
+  transform: translateY(-3px);
+  background: #fff5f5;
 }
 
 .btn-retry-exit:active {
@@ -138,15 +173,15 @@
 
 /* --- ANIMACIONES --- */
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .animate-pulse-slow {
-  animation: pulseSlow 4s infinite ease-in-out;
+  animation: pulseSlow 3s infinite ease-in-out;
 }
 
 @keyframes pulseSlow {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }

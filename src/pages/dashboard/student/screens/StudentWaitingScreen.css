@@ -1,6 +1,9 @@
-/* FONDO GENERAL */
-.sw-bg {
-    --background: #f8fafc; /* slate-50 */
+/* src/pages/dashboard/student/screens/StudentWaitingScreen.css */
+
+/* ✅ FONDO MORADO UNIFICADO */
+.sw-bg-purple {
+    --background: #46178F !important; /* El morado oficial */
+    background-color: #46178F;
 }
 
 .sw-container {
@@ -11,31 +14,37 @@
     max-width: 600px;
     margin: 0 auto;
     position: relative;
+    color: white; /* Texto blanco por defecto sobre el morado */
 }
 
-/* BOTÓN ATRÁS */
-.sw-back-button {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 40px;
-    height: 40px;
+/* ✅ HEADER SEGURO (Safe Zones) */
+.sw-safe-header {
+    padding-top: env(safe-area-inset-top); /* Respeta el notch del iPhone/Android */
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    z-index: 100;
+}
+
+.sw-back-circle {
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #64748b;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    font-size: 1.4rem;
+    backdrop-filter: blur(10px);
     cursor: pointer;
-    z-index: 10;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
-.sw-back-button:hover {
-    background: #f1f5f9;
-    transform: scale(1.05);
+
+.sw-back-circle:active {
+    transform: scale(0.9);
+    background: rgba(255, 255, 255, 0.4);
 }
 
 /* MAIN CONTENT */
@@ -44,196 +53,205 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 60px; /* Espacio para el botón atrás */
+    padding-top: 20px;
 }
 
-/* HEADER SECTION */
-.sw-header-section {
+/* ✅ HEADER CARD (Estilo Profesional) */
+.sw-header-card {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     width: 100%;
 }
 
-.sw-icon-wrapper {
-    width: 60px;
-    height: 60px;
-    background: #e0f2fe; /* sky-100 */
-    color: #0284c7; /* sky-600 */
-    border-radius: 20px;
+.sw-icon-badge {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-radius: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    margin: 0 auto 16px auto;
+    font-size: 2.5rem;
+    margin: 0 auto 20px auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .sw-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: #1e293b; /* slate-800 */
-    margin: 0 0 16px 0;
+    color: white;
+    margin: 0 0 20px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.sw-code-pill {
+/* ✅ CÓDIGO HERO (Similar al profesor) */
+.sw-code-hero {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 15px 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.sw-code-hint {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+.sw-code-text {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #FFA602; /* Naranja/Oro para resaltar */
+    margin: 0;
+    letter-spacing: 4px;
+}
+
+.sw-connection-pill {
+    margin-top: 10px;
+}
+
+.sw-status-ready {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #ffffff;
-    border: 2px solid #e2e8f0;
-    padding: 8px 16px;
-    border-radius: 9999px; /* Pill shape */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid rgba(74, 222, 128, 0.3);
 }
 
-.sw-code-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: #64748b;
-    letter-spacing: 0.05em;
-}
-
-.sw-code-value {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #0ea5e9; /* sky-500 */
-}
-
-.sw-status {
-    margin-top: 16px;
-    color: #64748b;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.sw-spinner-small {
-    width: 20px;
-    height: 20px;
-    color: #0ea5e9;
-}
-
-/* PLAYERS SECTION */
-.sw-players-section {
+/* ✅ CONTENEDOR DE JUGADORES */
+.sw-players-container {
     width: 100%;
-    background: white;
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-    border: 1px solid #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 30px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
-.sw-players-header {
+.sw-players-title {
     display: flex;
     align-items: center;
-    gap: 8px;
-    color: #334155; /* slate-700 */
+    gap: 10px;
+    color: white;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.1rem;
     margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid #f1f5f9;
+    opacity: 0.9;
 }
 
-.sw-empty-state {
+.sw-loading-players {
     text-align: center;
-    padding: 40px 0;
-    color: #94a3b8;
+    padding: 30px 0;
+    color: rgba(255, 255, 255, 0.5);
 }
 
-/* GRID DE JUGADORES */
+/* ✅ GRID DE JUGADORES (Tarjetas modernas) */
 .sw-players-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 20px;
 }
 
-.sw-player-card {
+.sw-player-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
+    animation: fadeIn 0.5s ease-out forwards;
 }
 
-.sw-avatar-container {
+.sw-avatar-ring {
     position: relative;
-    margin-bottom: 8px;
+    width: 65px;
+    height: 65px;
+    margin-bottom: 10px;
 }
 
-.sw-avatar-img {
-    width: 64px;
-    height: 64px;
+.sw-player-avatar {
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    object-fit: cover;
+    background: white;
 }
 
-.sw-player-card.is-me .sw-avatar-img {
-    border-color: #0ea5e9; /* Borde azul para ti */
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+.sw-is-me .sw-player-avatar {
+    border-color: #FFA602;
+    box-shadow: 0 0 15px rgba(255, 166, 2, 0.4);
 }
 
-.sw-me-badge {
+.sw-me-check {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    background: #0ea5e9;
+    bottom: -2px;
+    right: -2px;
+    background: #22c55e;
     color: white;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    border: 2px solid white;
+    font-size: 14px;
+    border: 2px solid #46178F;
 }
 
 .sw-player-name {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: #475569;
+    color: rgba(255, 255, 255, 0.9);
     margin: 0;
+    text-align: center;
+    width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
 }
 
-.sw-me-text {
-    font-size: 0.7rem;
-    color: #0ea5e9;
-    font-weight: 700;
-    margin-top: 2px;
+.sw-is-me .sw-player-name {
+    color: #FFA602;
+    font-weight: 800;
 }
 
-/* FOOTER */
-.sw-footer {
+/* FOOTER INFO */
+.sw-footer-info {
     text-align: center;
-    padding-top: 20px;
-    color: #cbd5e1; /* slate-300 */
-    font-size: 0.8rem;
-    font-weight: 500;
+    padding: 20px 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.85rem;
+    font-style: italic;
 }
 
 /* ANIMACIONES */
 .animate-slide-down {
-    animation: slideDown 0.5s ease-out;
+    animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
 }
-.delay-100 { animation-delay: 0.1s; }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
+    from { opacity: 0; transform: translateY(-30px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
 }
+
+/* Respetar el botón en la navegación antigua por si acaso */
+.sw-back-button { display: none; } /* Ocultamos el viejo para usar el sw-back-circle */
