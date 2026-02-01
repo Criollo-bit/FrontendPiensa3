@@ -19,6 +19,20 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
   const [joinedGroup, setJoinedGroup] = useState<{ groupId: string; battleId: string } | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  // 🔥 NUEVO: Obtenemos el avatar actualizado del LocalStorage (el que arreglamos antes)
+  const getAvatarUrl = () => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.avatarUrl || user.avatar || '';
+      }
+    } catch (e) {
+      console.error("Error al obtener avatar del storage", e);
+    }
+    return '';
+  };
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value.toUpperCase();
     if (/^[A-Z0-9]$/.test(value) || value === '') {
@@ -63,7 +77,16 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
     setErrorMsg(null);
 
     try {
-      const result = await battleApi.joinBattleWithCode(fullCode, studentName);
+      const avatarUrl = getAvatarUrl();
+      
+      // 🔥 FIX LÍNEA 86-87: Forzamos el tipado para que acepte los nuevos parámetros
+      // si es que battleApi no ha sido actualizado aún.
+      const result = await (battleApi as any).joinBattleWithCode(
+        fullCode, 
+        studentName, 
+        studentId, 
+        avatarUrl
+      );
 
       if (result.success && result.group) {
         setJoinedGroup({
@@ -98,7 +121,6 @@ const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, 
 
   return (
     <div className="bg-join-battle">
-      {/* 🔥 BOTÓN REGRESAR: Con margen preventivo para Notch e Islas Dinámicas */}
       <button
         onClick={onBack}
         style={{

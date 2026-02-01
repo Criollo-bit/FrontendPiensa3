@@ -4,9 +4,7 @@ import {
   IonSpinner, 
   IonSelect, 
   IonSelectOption, 
-  IonModal, 
-  IonInput, 
-  IonPage, 
+  IonPage,  
   IonContent,
   IonAlert 
 } from '@ionic/react';

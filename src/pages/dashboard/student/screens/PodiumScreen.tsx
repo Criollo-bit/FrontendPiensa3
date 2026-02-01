@@ -5,6 +5,7 @@ interface Winner {
   name: string;
   score: number;
   position: number; // 1, 2, o 3
+  avatarUrl?: string; // 🔥 NUEVO: Recibido desde el socket
   color?: string;
 }
 
@@ -19,7 +20,6 @@ const PodiumScreen: React.FC<PodiumScreenProps> = ({ winners, onContinue }) => {
   useEffect(() => {
     // Iniciar animación al montar
     setTimeout(() => setAnimated(true), 100);
-    // ELIMINADO: Ya no hay temporizador automático
   }, []);
 
   const getPodiumHeight = (position: number) => {
@@ -86,8 +86,17 @@ const PodiumScreen: React.FC<PodiumScreenProps> = ({ winners, onContinue }) => {
                 {getMedalEmoji(winner.position)}
               </div>
               
-              <div className="podium-avatar-circle">
-                {winner.name.substring(0, 2).toUpperCase()}
+              {/* 🔥 AVATAR ACTUALIZADO: Imagen real con fallback de iniciales */}
+              <div className="podium-avatar-circle" style={{ overflow: 'hidden', border: `3px solid ${getBarColor(winner.position)}` }}>
+                {winner.avatarUrl ? (
+                  <img 
+                    src={winner.avatarUrl} 
+                    alt={winner.name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                ) : (
+                  winner.name.substring(0, 2).toUpperCase()
+                )}
               </div>
               
               <div className="info-card">

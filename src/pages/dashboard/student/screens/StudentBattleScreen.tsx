@@ -60,6 +60,21 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
   const [finalRanking, setFinalRanking] = useState<any[]>([]);
   const [amIWinner, setAmIWinner] = useState(false);
 
+  // 🔥 NUEVO: Obtener la foto real del storage para el Lobby
+  const [myAvatar, setMyAvatar] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setMyAvatar(user.avatarUrl || user.avatar || '');
+      }
+    } catch (e) {
+      console.error("Error cargando avatar en lobby", e);
+    }
+  }, []);
+
   // Timer de Feedback (8 segundos)
   useEffect(() => {
     if (viewState === 'FEEDBACK') {
@@ -100,7 +115,11 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
       setShowTransition(false);
       const winners = data.winners || [];
       const podiumWinners = winners.slice(0, 3).map((w: any, index: number) => ({
-          position: index + 1, name: w.name, score: w.score, color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
+          position: index + 1, 
+          name: w.name, 
+          score: w.score, 
+          avatarUrl: w.avatarUrl, // 🔥 Ahora recibimos el avatar del servidor para el podio
+          color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
       }));
       setFinalRanking(podiumWinners);
       const myRankIndex = winners.findIndex((w: any) => w.name === studentName);
@@ -135,18 +154,18 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
 
     switch (viewState) {
       case 'WAITING':
-        // 🔥 RESTAURADO EL ESTILO DE LOBBY QUE QUERÍAS 🔥
         return (
           <div className="lobby-container">
              <button onClick={onBack} className="absolute top-4 left-4 p-2 bg-white rounded-full shadow border">
                 <IonIcon icon={arrowBackOutline} />
              </button>
              
-             {/* Avatar Generado */}
+             {/* 🔥 AVATAR REAL: Muestra la foto del perfil o el fallback de iniciales */}
              <img 
-                src={`https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
+                src={myAvatar || `https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
                 alt="Avatar" 
                 className="lobby-avatar-large"
+                style={{ objectFit: 'cover', border: '5px solid white' }}
              />
              
              <h1 className="lobby-title">¡Hola, {studentName}!</h1>
@@ -197,7 +216,6 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
         return (
           <div className="locked-container">
              <div className="custom-waiting-animation">
-                 {/* Animación personalizada (puedes reemplazar con tu componente si prefieres) */}
                  <div style={{width:100, height:100, borderRadius:'50%', border:'4px solid #e2e8f0', display:'flex', alignItems:'center', justifyContent:'center', animation:'pulse 2s infinite'}}>
                     <IonIcon icon={pause} style={{fontSize: '3rem', color:'#64748b'}} />
                  </div>
@@ -211,7 +229,6 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
         const isCorrect = feedback?.correct;
         const iconClass = isCorrect ? 'checkmark-animation' : 'x-animation';
         return (
-          // 🔥 CLASE IMPORTANTE: sb-feedback-overlay para cubrir todo 🔥
           <div className={`sb-feedback-overlay ${isCorrect ? 'bg-correct' : 'bg-wrong'}`}>
              <div className="feedback-content-centered">
                  <div className={iconClass} style={{fontSize: '8rem', marginBottom: 20}}>

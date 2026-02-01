@@ -13,9 +13,16 @@ interface JoinBattleResponse {
   };
 }
 
+/**
+ * 🔥 ACTUALIZADO: Ahora recibe studentId y avatarUrl
+ * Esto permite la validación de inscripción en el servidor y 
+ * la visualización de fotos en el podio.
+ */
 export const joinBattleWithCode = (
   code: string, 
-  studentName: string
+  studentName: string,
+  studentId: string, // 👈 Nuevo: ID único de la DB
+  avatarUrl: string  // 👈 Nuevo: URL de la foto de perfil
 ): Promise<JoinBattleResponse> => {
   
   return new Promise((resolve, reject) => {
@@ -29,7 +36,7 @@ export const joinBattleWithCode = (
     const timeout = setTimeout(() => {
       cleanup();
       reject(new Error("El servidor tarda en responder. Reintenta en un momento."));
-    }, 10000); // 👈 Subimos a 10s
+    }, 10000); 
 
     const cleanup = () => {
       clearTimeout(timeout);
@@ -38,7 +45,7 @@ export const joinBattleWithCode = (
     };
 
     const onRoomUpdate = (data: any) => {
-      if (data.students) {
+      if (data.success || data.students) {
         cleanup();
         resolve({
           success: true,
@@ -62,9 +69,12 @@ export const joinBattleWithCode = (
     socket.on('room-update', onRoomUpdate);
     socket.on('error', onError);
 
+    // 🔥 ENVIAMOS LOS DATOS COMPLETOS AL BACKEND
     socket.emit('join-room', { 
       roomId: code, 
-      studentName: studentName 
+      studentName: studentName,
+      studentId: studentId,   // 🛡️ Clave para el bloqueo de seguridad
+      avatarUrl: avatarUrl    // 📸 Clave para la identidad visual
     });
   });
 };
