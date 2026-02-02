@@ -168,7 +168,7 @@ const AllForAllControlScreen: React.FC<{ onBack: () => void }> = ({ onBack }) =>
         isOpen={showExit}
         header="¿Salir?"
         buttons={[
-          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Cancelar ', role: 'cancel ' },
           { text: 'Sí', handler: onBack },
         ]}
         onDidDismiss={() => setShowExit(false)}

@@ -122,7 +122,7 @@ const AllForAllStudentGame: React.FC = () => {
       {answered && !gameOver && (
         <div className={`result ${isCorrect ? 'correct' : 'incorrect'}`}>
           <IonIcon icon={isCorrect ? checkmarkCircle : closeCircle} />
-          {isCorrect ? 'Correcto' : 'Incorrecto'}
+          {isCorrect ? 'Correcto ' : 'Incorrecto '}
         </div>
       )}
 
