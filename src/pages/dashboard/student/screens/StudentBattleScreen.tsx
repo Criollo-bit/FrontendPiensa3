@@ -3,9 +3,9 @@ import { IonIcon, IonSpinner } from '@ionic/react';
 import { 
   checkmarkCircle, 
   closeCircle, 
-  pause, 
   arrowBackOutline,
-  hourglassOutline
+  hourglassOutline,
+  gameControllerOutline
 } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket'; 
 import PodiumScreen from './PodiumScreen';
@@ -54,6 +54,7 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
   const [questionData, setQuestionData] = useState<any>(null); 
   const [feedback, setFeedback] = useState<any>(null); 
   const [localTimer, setLocalTimer] = useState(0);
+  const [totalDuration, setTotalDuration] = useState(20); // ✅ Base para la barra
   const [isConnected, setIsConnected] = useState(true);
   const [currentQNum, setCurrentQNum] = useState(1);
   const [totalQCount, setTotalQCount] = useState(0);
@@ -68,7 +69,8 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
       const userStr = localStorage.getItem('user');
       if (userStr) {
         const user = JSON.parse(userStr);
-        setMyAvatar(user.avatarUrl || user.avatar || '');
+        const url = user.avatarUrl || user.avatar || user.avatar_url || '';
+        setMyAvatar(url ? `${url}?t=${new Date().getTime()}` : '');
       }
     } catch (e) {
       console.error("Error cargando avatar en lobby", e);
@@ -92,7 +94,9 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
     socket.on('new-question', (data: any) => {
       setQuestionData(data);
       setFeedback(null);
-      setLocalTimer(data.duration || 20);
+      const qDuration = data.duration || 20;
+      setLocalTimer(qDuration);
+      setTotalDuration(qDuration); // ✅ Guardamos duración total
       if(data.questionNumber) setCurrentQNum(data.questionNumber);
       if(data.totalQuestions) setTotalQCount(data.totalQuestions);
       setShowTransition(true);
@@ -121,6 +125,15 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
           color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : '#CD7F32'
       }));
       setFinalRanking(podiumWinners);
+      
+      const myData = winners.find((w: any) => w.name === studentName);
+      // ✅ Sincronización con puntos reales configurados por el docente
+      if (myData && myData.rewardPoints) {
+          setScore(myData.rewardPoints);
+      } else {
+          setScore(myData ? myData.score : score);
+      }
+
       const myRankIndex = winners.findIndex((w: any) => w.name === studentName);
       setAmIWinner(myRankIndex >= 0 && myRankIndex < 3);
       setViewState('PODIUM');
@@ -130,7 +143,7 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
       socket.off('new-question'); socket.off('answer-received'); socket.off('round-result');
       socket.off('game-over'); socket.off('disconnect'); socket.off('connect');
     };
-  }, [studentName, battleId]);
+  }, [studentName, battleId, score]);
 
   useEffect(() => {
     if (viewState === 'QUESTION' && !showTransition && localTimer > 0) {
@@ -154,27 +167,65 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
     switch (viewState) {
       case 'WAITING':
         return (
-          <div className="lobby-container">
-             <button onClick={onBack} className="absolute top-4 left-4 p-2 bg-white rounded-full shadow border">
-                <IonIcon icon={arrowBackOutline} />
+          <div style={{
+            background: '#46178F', minHeight: '100vh', width: '100%', 
+            display: 'flex', flexDirection: 'column', alignItems: 'center', 
+            padding: 'calc(20px + env(safe-area-inset-top)) 20px 20px', color: 'white'
+          }}>
+             <button onClick={onBack} style={{
+                position: 'absolute', top: 'calc(15px + env(safe-area-inset-top))', left: '20px',
+                width: '45px', height: '45px', borderRadius: '50%', background: 'rgba(255,255,255,0.2)',
+                border: 'none', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10
+             }}>
+                <IonIcon icon={arrowBackOutline} style={{fontSize: '1.5rem'}} />
              </button>
              
-             <img 
-                src={myAvatar || `https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
-                alt="Avatar" 
-                className="lobby-avatar-large"
-                style={{ objectFit: 'cover', border: '5px solid white' }}
-             />
-             
-             <h1 className="lobby-title">¡Hola, {studentName}!</h1>
-             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
-                <p className="text-slate-500 font-bold">CÓDIGO DE SALA</p>
-                <p className="text-3xl font-black text-sky-600">{battleId}</p>
+             <div style={{marginTop: '40px', textAlign: 'center'}}>
+                <div style={{
+                    width: '80px', height: '80px', background: 'rgba(255,255,255,0.1)',
+                    borderRadius: '22px', border: '1px solid rgba(255,255,255,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '3rem', margin: '0 auto 20px'
+                }}>
+                    <IonIcon icon={gameControllerOutline} />
+                </div>
+                <h1 style={{fontSize: '2.2rem', fontWeight: 900, marginBottom: '30px'}}>Lobby de Batalla</h1>
              </div>
 
-             <div className="flex flex-col items-center gap-2">
-                <IonSpinner name="dots" className="text-slate-400"/>
-                <p className="lobby-subtitle">Esperando a que el profesor inicie...</p>
+             <div style={{
+                width: '120px', height: '120px', borderRadius: '50%', 
+                background: 'white', padding: '5px', marginBottom: '20px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.4)', position: 'relative'
+             }}>
+                <img 
+                    src={myAvatar || `https://ui-avatars.com/api/?name=${studentName}&background=random&size=200`} 
+                    alt="Avatar" 
+                    key={myAvatar}
+                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                    onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${studentName}&background=random`; }}
+                />
+                <div style={{
+                    position: 'absolute', bottom: '0', right: '5px', background: '#22c55e',
+                    borderRadius: '50%', width: '30px', height: '30px', border: '3px solid #46178F',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <IonIcon icon={checkmarkCircle} style={{fontSize: '16px'}} />
+                </div>
+             </div>
+             
+             <h2 style={{fontSize: '1.5rem', fontWeight: 700, marginBottom: '40px'}}>{studentName}</h2>
+
+             <div style={{
+                background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.2)',
+                padding: '20px 40px', borderRadius: '25px', textAlign: 'center', backdropFilter: 'blur(10px)'
+             }}>
+                <p style={{margin: 0, fontSize: '0.8rem', fontWeight: 700, opacity: 0.6, letterSpacing: '2px'}}>PIN DEL JUEGO</p>
+                <p style={{margin: 0, fontSize: '3.5rem', fontWeight: 900, color: '#FFA602', letterSpacing: '5px'}}>{battleId}</p>
+             </div>
+
+             <div style={{marginTop: 'auto', marginBottom: '40px', textAlign: 'center'}}>
+                <IonSpinner name="dots" color="success" style={{transform: 'scale(1.5)'}}/>
+                <p style={{marginTop: '15px', fontSize: '1.1rem', opacity: 0.8, fontWeight: 500}}>Esperando al profesor...</p>
              </div>
           </div>
         );
@@ -187,7 +238,8 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
                 <div className="kahoot-header">
                     <div className="kahoot-progress-container">
                         <div className="kahoot-progress-track">
-                            <div className="kahoot-progress-fill" style={{ width: totalQCount > 0 ? `${(currentQNum / totalQCount) * 100}%` : '0%' }}></div>
+                            {/* ✅ BARRA DE TIEMPO DINÁMICA */}
+                            <div className="kahoot-progress-fill" style={{ width: `${(localTimer / totalDuration) * 100}%`, transition: 'width 1s linear' }}></div>
                         </div>
                         <span className="kahoot-counter">{currentQNum} de {totalQCount || '?'}</span>
                     </div>
@@ -229,8 +281,9 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
         const iconClass = isCorrect ? 'checkmark-animation' : 'x-animation';
         return (
           <div className={`sb-feedback-overlay ${isCorrect ? 'bg-correct' : 'bg-wrong'}`}>
-             <div className="feedback-content-centered">
-                 <div className={iconClass} style={{fontSize: '8rem', marginBottom: 20}}>
+             <div className="feedback-content-centered" style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+                 {/* ✅ ICONO CENTRADO USANDO FLEXBOX DIRECTO */}
+                 <div className={iconClass} style={{fontSize: '8rem', marginBottom: 20, display: 'flex', justifyContent: 'center', width:'100%'}}>
                     <IonIcon icon={isCorrect ? checkmarkCircle : closeCircle} />
                  </div>
                  
@@ -262,7 +315,7 @@ const StudentBattleScreen: React.FC<StudentBattleScreenProps> = ({ battleId, stu
 
   if (viewState === 'PODIUM' || viewState === 'FINAL_RESULT') return <div className="student-battle-full">{renderContent()}</div>;
 
-  return <div className="student-battle-container">{renderContent()}</div>;
+  return <div className="student-battle-container" style={{background: viewState === 'WAITING' ? '#46178F' : ''}}>{renderContent()}</div>;
 };
 
 export default StudentBattleScreen;

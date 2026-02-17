@@ -154,12 +154,21 @@ const BattleControlScreen: React.FC = () => {
 
     socket.on('game-over', async (data: { winners: any[] }) => {
         const winners = data.winners || [];
-        try {
-          await api.post('/points/assign-battle-points', {
-            winners: winners.map(w => ({ id: w.id, score: w.score })),
-            roomId: roomId
-          });
-        } catch (e) { console.error("Error asignando puntos:", e); }
+        
+        // ✅ CORRECCIÓN: Asignación de puntos reales uno a uno para evitar el 404
+        // y asegurar que se use el identificador correcto (studentCode)
+        for (const winner of winners.slice(0, 3)) {
+          try {
+            await api.post('/points/assign-battle-points', {
+              studentCode: winner.studentCode || winner.code || winner.name, 
+              subjectId: selectedSubjectId,
+              amount: winner.rewardPoints || 100,
+              reason: `Ganador de Batalla: ${roomName}`
+            });
+          } catch (e) {
+            console.error("Error persistiendo puntos del ganador:", e);
+          }
+        }
 
         const podiumWinners = winners.slice(0, 3).map((w: any, index: number) => ({
             position: index + 1,
@@ -179,7 +188,8 @@ const BattleControlScreen: React.FC = () => {
       socket.off('room-update'); socket.off('new-question'); 
       socket.off('round-finished'); socket.off('game-over'); socket.off('error');
     };
-  }, []); // Array vacío para que solo se ejecute al montar
+  }, [TEACHER_ID, selectedSubjectId, roomName, roomId]); 
+
   useEffect(() => {
     if (phase === 'QUESTION' && timeLeft > 0) {
       const timer = setInterval(() => setTimeLeft(p => p - 1), 1000);
