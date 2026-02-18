@@ -1,56 +1,54 @@
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Animación de entrada estilo "pop" */
+.app-fade-in {
+  animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Estilo Kahoot para todas las cards */
+.card, ion-card, .afa-card {
+  border-radius: 20px !important;
+  border-bottom: 6px solid rgba(0,0,0,0.1) !important; /* Efecto 3D de base */
+  transition: all 0.2s ease;
+  background: white;
 }
 
-.card {
-  padding: 2em;
+/* Botones de Ionic con efecto 3D */
+ion-button {
+  --border-radius: 12px;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  height: 50px;
 }
 
-.read-the-docs {
-  color: #888;
-}
-
-/* Ajuste global para que NADA choque con la cámara o botones del cel */
+/* Ajuste para que el contenido no se pegue a los bordes del móvil */
 ion-content {
   --padding-top: var(--ion-safe-area-top);
   --padding-bottom: var(--ion-safe-area-bottom);
 }
 
-/* Animación de entrada suave */
-.app-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Evitar que el header se pegue al notch */
 .welcome-header {
-  padding-top: calc(10px + var(--ion-safe-area-top)) !important;
+  padding: 30px 20px;
+  padding-top: calc(20px + var(--ion-safe-area-top)) !important;
+  background: var(--ion-color-primary);
+  color: white;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  text-align: center;
+}
+
+/* Logo rotatorio más suave */
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .logo-animated {
+    animation: logo-spin infinite 15s linear;
+  }
 }

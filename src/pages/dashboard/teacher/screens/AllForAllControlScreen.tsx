@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IonIcon, IonAlert } from '@ionic/react';
-import { arrowBack, rocketOutline, people } from 'ionicons/icons';
+import { arrowBack, rocketOutline, people, trophy, medalOutline } from 'ionicons/icons';
 import { socketService } from '../../../../api/socket';
 import './AllForAllControlScreen.css';
 
@@ -69,107 +69,99 @@ const AllForAllControlScreen: React.FC<{ onBack: () => void }> = ({ onBack }) =>
           <IonIcon icon={arrowBack} />
         </button>
         <h1>All For All</h1>
-        <p>{roomId ? `PIN: ${roomId}` : 'Crear sala'}</p>
+        <p>{roomId ? `PIN: ${roomId}` : 'Configuración'}</p>
       </header>
 
-      <div className="afa-card">
-        {!roomId && (
-          <>
-            <h2>Configurar ronda</h2>
+      <div className="afa-scroll-content">
+        <div className="afa-card">
+          {!roomId && (
+            <div className="setup-section">
+              <h2>Nueva Ronda</h2>
+              <select className="afa-select" value={word} onChange={e => setWord(e.target.value)}>
+                {COLORS.map(c => (
+                  <option key={c.value} value={c.name}>{c.name}</option>
+                ))}
+              </select>
 
-            <select value={word} onChange={e => setWord(e.target.value)}>
-              {COLORS.map(c => (
-                <option key={c.value} value={c.name}>{c.name}</option>
-              ))}
-            </select>
+              <div className="color-row">
+                {COLORS.map(c => (
+                  <button
+                    key={c.value}
+                    style={{
+                      backgroundColor: c.hex,
+                      border: color === c.value ? '4px solid #1e293b' : 'none',
+                    }}
+                    onClick={() => setColor(c.value)}
+                  />
+                ))}
+              </div>
 
-            <div className="color-row">
-              {COLORS.map(c => (
+              <div className="mode-row">
                 <button
-                  key={c.value}
-                  style={{
-                    backgroundColor: c.hex,
-                    outline: color === c.value ? '3px solid black' : 'none',
-                  }}
-                  onClick={() => setColor(c.value)}
-                />
-              ))}
-            </div>
+                  onClick={() => setMode('text')}
+                  className={mode === 'text' ? 'active' : ''}
+                >
+                  Texto
+                </button>
+                <button
+                  onClick={() => setMode('color')}
+                  className={mode === 'color' ? 'active' : ''}
+                >
+                  Color
+                </button>
+              </div>
 
-            <div className="mode-row">
-              <button
-                onClick={() => setMode('text')}
-                style={{
-                  backgroundColor: mode === 'text' ? '#3b82f6' : '#f0f0f0',
-                  color: mode === 'text' ? 'white' : 'black',
-                }}
-              >
-                Texto
-              </button>
-              <button
-                onClick={() => setMode('color')}
-                style={{
-                  backgroundColor: mode === 'color' ? '#3b82f6' : '#f0f0f0',
-                  color: mode === 'color' ? 'white' : 'black',
-                }}
-              >
-                Color
+              <button className="primary-btn" onClick={createRoom}>
+                GENERAR PIN
               </button>
             </div>
+          )}
 
-            <button className="primary" onClick={createRoom}>
-              MOSTRAR PIN
-            </button>
-          </>
-        )}
-
-        {roomId && !started && (
-          <>
-            <h2>Código: {roomId}</h2>
-            <p><IonIcon icon={people} /> {students.length} estudiantes</p>
-            <button className="start" onClick={startGame}>
-              <IonIcon icon={rocketOutline} /> EMPEZAR
-            </button>
-          </>
-        )}
-
-        {started && ranking.length > 0 && (
-          <>
-            <h2>🏆 Ranking en vivo</h2>
-
-            {/* Podio para los 3 primeros */}
-            <div className="podium-container">
-              {ranking.slice(0,3).map((r, i) => (
-                <div key={i} className="podium-item">
-                  <div className={`podium-bar ${i === 0 ? 'first' : i === 1 ? 'second' : 'third'}`}>
-                    {r.name}
-                  </div>
-                  <div className="podium-name">{i + 1}°</div>
-                </div>
-              ))}
+          {roomId && !started && (
+            <div className="waiting-room">
+              <div className="pin-display">
+                <span className="label">PIN DE ACCESO</span>
+                <span className="number">{roomId}</span>
+              </div>
+              <p className="student-count">
+                <IonIcon icon={people} /> <b>{students.length}</b> listos para jugar
+              </p>
+              <button className="start-btn" onClick={startGame}>
+                <IonIcon icon={rocketOutline} /> EMPEZAR AHORA
+              </button>
             </div>
+          )}
 
-            {/* Resto del ranking */}
-            {ranking.length > 3 && (
+          {started && ranking.length > 0 && (
+            <div className="ranking-section">
+              <div className="ranking-header">
+                <IonIcon icon={trophy} className="trophy-icon" />
+                <h2>Posiciones</h2>
+              </div>
+
               <div className="ranking-list">
-                {ranking.slice(3).map((r, i) => (
-                  <div key={i} className="rank-item">
-                    <span>{i + 4}. {r.name}</span>
-                    <span>{r.score || ''}</span>
+                {ranking.map((r, i) => (
+                  <div key={i} className={`rank-card pos-${i + 1}`}>
+                    <div className="rank-badge">
+                      {i < 3 ? <IonIcon icon={medalOutline} /> : i + 1}
+                    </div>
+                    <span className="rank-name">{r.name}</span>
+                    <span className="rank-score">{r.score || 0} <small>pts</small></span>
                   </div>
                 ))}
               </div>
-            )}
-          </>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       <IonAlert
         isOpen={showExit}
-        header="¿Salir?"
+        header="¿Finalizar sesión?"
+        message="Se cerrará la sala actual."
         buttons={[
-          { text: 'Cancelar ', role: 'cancel ' },
-          { text: 'Sí', handler: onBack },
+          { text: 'Cancelar', role: 'cancel' },
+          { text: 'Salir', handler: onBack, cssClass: 'alert-danger' },
         ]}
         onDidDismiss={() => setShowExit(false)}
       />

@@ -1,4 +1,7 @@
 /* WinnerScreen.css */
+.ion-page {
+  transform: none !important;
+}
 
 .winner-page-container {
   height: 100vh;
