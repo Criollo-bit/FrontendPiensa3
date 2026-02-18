@@ -1,159 +1,239 @@
-import React, { useState, useRef, ChangeEvent, KeyboardEvent, useMemo } from 'react';
-import { IonIcon, IonSpinner, IonToast, IonContent, IonPage } from '@ionic/react';
-import { arrowBack, personCircleOutline } from 'ionicons/icons';
-import * as battleApi from '../../../../lib/battleApi'; 
-import StudentBattleScreen from './StudentBattleScreen'; 
-import './JoinBattleScreen.css'; 
+import React, { useEffect, useState, useMemo } from 'react';
+import { 
+  IonIcon, 
+  IonSpinner, 
+  IonPage, 
+  IonContent 
+} from '@ionic/react';
+import { 
+  arrowBackOutline, 
+  peopleOutline, 
+  gameControllerOutline,
+  checkmarkCircle
+} from 'ionicons/icons';
+import { socketService } from '../../../../api/socket'; 
 
-interface JoinBattleScreenProps {
-  onBack: () => void;
-  studentId: string;
-  studentName: string;
+interface Player {
+  id: string;
+  name: string;
+  avatar?: string;
+  isMe?: boolean;
 }
 
-const JoinBattleScreen: React.FC<JoinBattleScreenProps> = ({ onBack, studentId, studentName }) => {
-  const [code, setCode] = useState<string[]>(Array(4).fill(''));
-  const [isJoining, setIsJoining] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  
-  const [joinedGroup, setJoinedGroup] = useState<{ groupId: string; battleId: string } | null>(null);
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+interface StudentWaitingScreenProps {
+  joinCode: string;
+  studentName: string;
+  onBack: () => void;
+}
 
-  // ✅ RECUPERACIÓN RADICAL: Obtenemos el avatar real del storage local
-  const displayImage = useMemo(() => {
+const StudentWaitingScreen: React.FC<StudentWaitingScreenProps> = ({ joinCode, studentName, onBack }) => {
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [statusText, setStatusText] = useState('Conectando a la sala...');
+
+  // ✅ RECUPERACIÓN REAL DEL AVATAR (Lógica de tu Perfil)
+  const myAvatarUrl = useMemo(() => {
     try {
       const userStr = localStorage.getItem('user');
       if (userStr) {
         const user = JSON.parse(userStr);
         const url = user.avatarUrl || user.avatar || user.avatar_url || '';
+        // Timestamp para evitar que el navegador use una imagen vieja
         return url ? `${url}${url.includes('?') ? '&' : '?'}t=${new Date().getTime()}` : '';
       }
     } catch (e) { console.error(e); }
     return '';
   }, []);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
-    const value = e.target.value.toUpperCase();
-    if (/^[A-Z0-9]$/.test(value) || value === '') {
-      const newCode = [...code];
-      newCode[index] = value;
-      setCode(newCode);
-      if (value !== '' && index < 3) inputRefs.current[index + 1]?.focus();
-    }
-  };
+  useEffect(() => {
+    const socket = socketService.connectToBattle();
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === 'Backspace' && code[index] === '' && index > 0) inputRefs.current[index - 1]?.focus();
-  };
+    socket.emit('join-room', { 
+        roomId: joinCode, 
+        studentName: studentName,
+        avatarUrl: myAvatarUrl // ✅ Enviamos tu foto real al servidor
+    });
 
-  const handleJoinWithCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const fullCode = code.join('');
-    if (fullCode.length !== 4) {
-      setErrorMsg('El código debe tener 4 caracteres.');
-      return;
-    }
-    setIsJoining(true);
-    try {
-      const result = await (battleApi as any).joinBattleWithCode(fullCode, studentName, studentId, displayImage);
-      if (result.success && result.group) {
-        setJoinedGroup({ groupId: result.group.id, battleId: result.group.battle_id });
-      } else {
-        setErrorMsg(result.message || 'Error al unirse.');
-      }
-    } catch (error: any) {
-      setErrorMsg(error.message || 'Error de conexión.');
-    } finally { setIsJoining(false); }
-  };
+    socket.on('connect', () => {
+        setIsConnected(true);
+        setStatusText('Esperando al profesor...');
+    });
 
-  if (joinedGroup) {
-    return (
-      <StudentBattleScreen
-        groupId={joinedGroup.groupId}
-        battleId={joinedGroup.battleId}
-        studentId={studentId}
-        studentName={studentName}
-        onBack={() => { setJoinedGroup(null); setCode(Array(4).fill('')); }}
-      />
-    );
-  }
+    socket.on('room-update', (data: any) => {
+        if (data.students) {
+            const mappedPlayers = data.students.map((s: any) => ({
+                id: s.id || s.socketId,
+                name: s.name,
+                // Priorizamos avatarUrl que viene del socket o generamos fallback
+                avatar: s.avatarUrl || s.avatar || `https://ui-avatars.com/api/?name=${s.name}&background=random&color=fff&size=128`,
+                isMe: s.name === studentName
+            }));
+            setPlayers(mappedPlayers);
+        }
+        
+        if (data.status === 'active') {
+            setStatusText('¡La batalla ha comenzado!');
+        }
+    });
 
-  // ✅ SOLUCIÓN AL FONDO BLANCO: Envolvemos en IonPage e IonContent propios con estilos inline
+    socket.on('error', (msg: string) => {
+        alert(msg);
+        onBack();
+    });
+
+    return () => {
+        socket.off('connect');
+        socket.off('room-update');
+        socket.off('error');
+    };
+  }, [joinCode, studentName, onBack, myAvatarUrl]);
+
   return (
-    <IonPage style={{ zIndex: 1000 }}>
-      <IonContent fullscreen style={{ '--background': '#f1f5f9' }}>
-        <div className="bg-join-battle" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
-          <button
-            onClick={onBack}
-            style={{
-                position: 'absolute', 
-                top: 'calc(20px + env(safe-area-inset-top))', 
-                left: '20px', 
-                zIndex: 50,
-                background: 'white', border: 'none', borderRadius: '50%',
-                width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-            }}
-          >
-            <IonIcon icon={arrowBack} style={{ fontSize: '1.6rem', color: '#334155' }} />
-          </button>
+    <IonPage>
+      {/* ✅ FUERZA BRUTA: Estilos inyectados para asegurar el morado y layout Kahoot */}
+      <style>{`
+        .sw-force-purple {
+            --background: #46178F !important;
+            background: #46178F !important;
+        }
+        .sw-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: calc(20px + env(safe-area-inset-top)) 20px 20px;
+            color: white;
+            background: #46178F;
+        }
+        .sw-back-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        .sw-code-badge {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 30px;
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            margin: 20px 0;
+        }
+        .sw-player-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .sw-avatar-frame {
+            position: relative;
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: white;
+            padding: 3px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border: 3px solid transparent;
+        }
+        .sw-avatar-frame.is-me { border-color: #FFA602; }
+        .sw-avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .sw-me-check {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: #22c55e;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #46178F;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
 
-          <div className="join-battle-content-wrapper" style={{ flex: 1, paddingTop: '80px' }}>
-              <div className="battle-portal">
-                <div className="avatar-preview-container" style={{ marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{
-                        width: '100px', height: '100px', borderRadius: '50%', border: '4px solid white',
-                        overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,0.15)', background: 'white'
-                    }}>
-                        <img 
-                          src={displayImage || `https://ui-avatars.com/api/?name=${studentName}&background=random`} 
-                          alt="Tu perfil" 
-                          key={displayImage} // 🔥 Fuerza el refresco visual para ver el auto
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                          onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${studentName}&background=random`; }}
-                        />
+      <IonContent fullscreen className="sw-force-purple">
+        <div className="sw-wrapper">
+            
+            <button onClick={onBack} className="sw-back-btn">
+                <IonIcon icon={arrowBackOutline} />
+            </button>
+
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                
+                <div style={{ textAlign: 'center' }}>
+                    <IonIcon icon={gameControllerOutline} style={{ fontSize: '4rem', marginBottom: '10px' }} />
+                    <h1 style={{ fontSize: '2rem', fontWeight: 900, margin: 0 }}>Sala de Espera</h1>
+                    
+                    <div className="sw-code-badge">
+                        <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.7, fontWeight: 700, letterSpacing: '2px' }}>CÓDIGO DE SALA</p>
+                        <h2 style={{ margin: 0, fontSize: '3rem', fontWeight: 900, color: '#FFA602' }}>{joinCode}</h2>
                     </div>
-                    <span style={{ fontSize: '1rem', color: '#334155', marginTop: '0.8rem', fontWeight: '700' }}>{studentName}</span>
-                </div>
-                <h1 style={{ fontSize: '2rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.5rem' }}>Unirse a Batalla</h1>
-                <p style={{ color: '#64748b' }}>Introduce el PIN de 4 dígitos</p>
-              </div>
 
-              <form onSubmit={handleJoinWithCode} style={{ width: '100%', maxWidth: '400px', padding: '0 20px', margin: '0 auto' }}>
-                <div className="code-inputs-container">
-                  {code.map((digit, index) => (
-                    <input
-                      key={index}
-                      ref={(el) => { inputRefs.current[index] = el; }}
-                      type="text"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleInputChange(e, index)}
-                      onKeyDown={(e) => handleKeyDown(e, index)}
-                      className="code-input-glass"
-                      disabled={isJoining}
-                    />
-                  ))}
+                    <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                        {isConnected ? <><IonSpinner name="dots" color="success" /> {statusText}</> : 'Conectando...'}
+                    </p>
                 </div>
-                <button
-                    type="submit"
-                    disabled={isJoining || code.join('').length < 4}
-                    style={{
-                        width: '100%', padding: '18px', borderRadius: '14px', border: 'none',
-                        background: '#0f172a', color: 'white', fontWeight: 'bold', fontSize: '1.1rem',
-                        marginTop: '2.5rem', boxShadow: '0 10px 15px rgba(0,0,0,0.1)',
-                        opacity: (isJoining || code.join('').length < 4) ? 0.7 : 1
-                    }}
-                >
-                    {isJoining ? 'Conectando...' : 'Entrar al Grupo'}
-                </button>
-              </form>
-          </div>
+
+                {/* Grid de Jugadores */}
+                <div style={{ width: '100%', marginTop: '30px', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '30px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', fontWeight: 700 }}>
+                        <IonIcon icon={peopleOutline} /> Jugadores ({players.length})
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(85px, 1fr))', gap: '25px' }}>
+                        {players.map((player, index) => (
+                            <div key={index} className="sw-player-card">
+                                <div className={`sw-avatar-frame ${player.isMe ? 'is-me' : ''}`}>
+                                    <img 
+                                        src={player.avatar} 
+                                        alt={player.name} 
+                                        key={player.avatar} // 🔥 Fuerza el refresco visual para ver la foto del auto
+                                        className="sw-avatar-img"
+                                        onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${player.name}&background=random&color=fff`; }}
+                                    />
+                                    {player.isMe && (
+                                        <div className="sw-me-check">
+                                            <IonIcon icon={checkmarkCircle} style={{ fontSize: '14px' }} />
+                                        </div>
+                                    )}
+                                </div>
+                                <p style={{ 
+                                    fontSize: '0.8rem', fontWeight: 600, marginTop: '8px', textAlign: 'center', 
+                                    width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    color: player.isMe ? '#FFA602' : 'white'
+                                }}>
+                                    {player.isMe ? 'Tú' : player.name}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <footer style={{ textAlign: 'center', padding: '20px 0', opacity: 0.5, fontSize: '0.8rem' }}>
+                Prepárate, la batalla está por comenzar.
+            </footer>
         </div>
       </IonContent>
-      <IonToast isOpen={!!errorMsg} message={errorMsg || ''} duration={3000} color="danger" position="top" />
     </IonPage>
   );
 };
 
-export default JoinBattleScreen;
+export default StudentWaitingScreen;

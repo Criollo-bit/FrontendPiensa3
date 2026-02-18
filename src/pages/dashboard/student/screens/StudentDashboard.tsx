@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { 
   IonContent, IonPage, IonIcon, IonLoading, IonAlert, IonToast, useIonViewWillEnter,
-  IonRefresher, IonRefresherContent, IonModal, IonList, IonItem, IonLabel, IonButton
+  IonRefresher, IonRefresherContent, IonModal, IonList, IonItem, IonLabel
 } from '@ionic/react';
-import { enterOutline, bookOutline, notificationsOutline, checkmarkCircleOutline, closeOutline, trashOutline } from 'ionicons/icons'; 
+import { enterOutline, bookOutline, notificationsOutline, checkmarkCircleOutline, closeOutline } from 'ionicons/icons'; 
 import { useHistory } from 'react-router-dom'; 
 import { User } from '../../../../AppTypes';
 import { api } from '../../../../api/axios'; 
