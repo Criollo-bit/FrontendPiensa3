@@ -42,7 +42,10 @@ const StudentBattleScreen: React.FC<any> = ({ battleId, studentName, onBack }) =
   const [score, setScore] = useState(0);
   const [questionData, setQuestionData] = useState<any>(null); 
   const [feedback, setFeedback] = useState<any>(null); 
+  
+  // @ts-ignore
   const [localTimer, setLocalTimer] = useState(0);
+  
   const [isConnected, setIsConnected] = useState(true);
   const [currentQNum, setCurrentQNum] = useState(1);
   const [totalQCount, setTotalQCount] = useState(0);
@@ -135,8 +138,7 @@ const StudentBattleScreen: React.FC<any> = ({ battleId, studentName, onBack }) =
               <span className="sb-card-label">CÓDIGO DE SALA</span>
               <h2 className="sb-card-number">{battleId}</h2>
             </div>
-            <div className="sb-waiting-footer">
-              <IonSpinner name="dots" color="primary" />
+            <div className="sb-waiting-footer"> 
               <p>Esperando a que el profesor inicie...</p>
             </div>
           </div>
